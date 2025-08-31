@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { toast } from "react-hot-toast";
+import { navigate } from 'astro:transitions/client';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -53,8 +54,8 @@ export default function RegisterForm() {
       return;
     }
 
-    toast.success("Registrazione effettuata! Controlla la tua email.");
-    window.location.href = "/ImparareFacile/login";
+    toast.success("Registrazione effettuata! Controlla la tua email per attivare l'account.");
+    navigate("/ImparareFacile/login");
   };
 
   return (

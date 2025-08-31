@@ -4,6 +4,7 @@ import Footer from "@/components/footer.astro";
 import Navbar from "@/components/navbar/navbar.astro";
 import "@fontsource-variable/inter/index.css";
 import "@fontsource-variable/bricolage-grotesque";
+import { ViewTransitions } from 'astro:transitions';
 import ToasterProvider from "@/components/ToasterProvider.jsx";
 import "../styles/global.css";
 
@@ -126,6 +127,7 @@ const makeTitle = title
     <ToasterProvider client:load>
     <slot />
     </ToasterProvider>
+    <ViewTransitions />
     <Footer />
     <style is:global>
       /* Improve Page speed */

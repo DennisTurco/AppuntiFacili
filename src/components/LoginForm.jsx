@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { toast } from "react-hot-toast";
+import { navigate } from 'astro:transitions/client';
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -33,7 +34,7 @@ export default function LoginForm() {
     }
 
     toast.success("Login riuscito 🎉");
-    window.location.href = "/ImparareFacile/videolezioni"; // pagina protetta
+    navigate("/ImparareFacile/videolezioni");
   };
 
   return (
@@ -70,6 +71,16 @@ export default function LoginForm() {
           className="text-green-600 font-semibold underline hover:text-green-800"
         >
           Registrati
+        </a>
+      </div>
+
+      <div className="mt-4 text-center">
+        Problemi con l'accesso?{" "}
+        <a
+          href="/ImparareFacile/contact"
+          className="text-green-600 font-semibold underline hover:text-red-400"
+        >
+          Contattami
         </a>
       </div>
     </div>
