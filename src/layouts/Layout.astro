@@ -4,6 +4,7 @@ import Footer from "@/components/footer.astro";
 import Navbar from "@/components/navbar/navbar.astro";
 import "@fontsource-variable/inter/index.css";
 import "@fontsource-variable/bricolage-grotesque";
+import ToasterProvider from "@/components/ToasterProvider.jsx";
 import "../styles/global.css";
 
 export interface Props {
@@ -122,7 +123,9 @@ const makeTitle = title
   </head>
   <body>
     <Navbar />
+    <ToasterProvider client:load>
     <slot />
+    </ToasterProvider>
     <Footer />
     <style is:global>
       /* Improve Page speed */
