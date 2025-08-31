@@ -42,6 +42,7 @@ export default function RegisterForm() {
     });
 
     if (error) {
+      console.error(error.message);
       if (error.message.includes("already registered")) {
         setErrors(prev => ({ ...prev, general: "Questa email è già in uso." }));
         toast.error("Questa email è già in uso.");
