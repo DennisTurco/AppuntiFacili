@@ -11,8 +11,7 @@ import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#op
 import react from '@astrojs/react';
 
 export default defineConfig({
-  site: "https://DennisTurco.github.io",
-  base: "/ImparareFacile/",
+  site: "https://appuntifacili.it",
   integrations: [
     react(),
     mdx({

@@ -9,7 +9,7 @@ import Quiz from '../../components/Quiz.jsx';
 export async function getStaticPaths() {
   const entries = await getCollection("informatica");
   return entries.map(e => ({
-    params: { slug: e.slug }, // normale stringa
+    params: { slug: e.slug },
     props: { entry: e },
   }));
 }
@@ -25,7 +25,7 @@ const frontmatter = {
   author: entry.data.author,
   tags: entry.data.tags,
   videoLesson: entry.data.videoLesson,
-  url: `/ImparareFacile/informatica/${entry.slug}`,
+  url: `/informatica/${entry.slug}`,
 };
 ---
 

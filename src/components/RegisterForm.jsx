@@ -49,7 +49,7 @@ export default function RegisterForm() {
     }
 
     alert("Registrazione effettuata! Controlla la tua email.");
-    window.location.href = "/ImparareFacile/login";
+    window.location.href = "/login";
   };
 
   return (
@@ -100,7 +100,7 @@ export default function RegisterForm() {
       <div className="mt-4 text-center">
         Hai già un account?{" "}
         <a
-          href="/ImparareFacile/login"
+          href="/login"
           className="text-blue-600 font-semibold underline hover:text-blue-800"
         >
           Login

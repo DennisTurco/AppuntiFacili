@@ -11,12 +11,16 @@ type LessonsType = Record<string, LessonItem[]>;
 const lessons = rawLessons as LessonsType;
 ---
 
-<Layout title={frontmatter.title}>
-  <div
-    class="flex flex-col lg:flex-row max-w-[1200px] mx-auto mt-14 px-4 lg:px-0 gap-8">
+<Layout
+  title={frontmatter.title}
+  description={frontmatter.description}
+  url={frontmatter.url}
+  image={frontmatter.image}
+>
+  <div class="flex flex-col lg:flex-row max-w-[1200px] mx-auto mt-14 px-4 lg:px-0 gap-8">
+
     <!-- Sidebar lezioni -->
-    <aside
-      class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 pr-4">
+    <aside class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 pr-4">
       <h2 class="text-xl font-bold mb-4">Lezioni</h2>
 
       <!-- Search bar -->
@@ -53,13 +57,15 @@ const lessons = rawLessons as LessonsType;
 
     <!-- Contenuto centrale + TOC -->
     <div class="flex-1 flex gap-8">
+
       <!-- Contenuto principale -->
       <div class="prose prose-lg mt-0 flex-1" id="lesson-content">
+
         <div class="mb-6">
           <!-- Pulsanti azioni -->
           <div class="flex justify-start gap-3 mt-4">
             <a
-              href="/ImparareFacile/informatica"
+              href="/informatica"
               class="inline-flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm no-underline">
               <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
               Torna Indietro
@@ -77,7 +83,7 @@ const lessons = rawLessons as LessonsType;
             <script type="module">
               const link = document.getElementById("report-link");
               const currentURL = window.location.href;
-              const githubURL = `https://github.com/DennisTurco/ImparareFacile/issues/new?title=Errore+nella+pagina&body=Pagina+${encodeURIComponent(currentURL)}`;
+              const githubURL = `https://github.com/DennisTurco/AppuntiFacili/issues/new?title=Errore+nella+pagina&body=Pagina+${encodeURIComponent(currentURL)}`;
               link.href = githubURL;
             </script>
           </div>
@@ -127,7 +133,7 @@ const lessons = rawLessons as LessonsType;
         {frontmatter.videoLesson && (
           <div class="mt-6">
             <a
-              href="/ImparareFacile/videolezioni"
+              href="/videolezioni"
               class="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-sky-600 no-underline"
             >
               🎥 Guarda la videolezione
@@ -135,12 +141,11 @@ const lessons = rawLessons as LessonsType;
           </div>
         )}
 
-
         <slot />
 
         <div class="text-center mt-8">
           <a
-            href="/ImparareFacile/informatica"
+            href="/informatica"
             class="inline-flex items-center gap-2 bg-gray-200 px-5 py-3 rounded-md hover:bg-gray-300 transition no-underline">
             <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
             Torna Indietro
@@ -159,7 +164,7 @@ const lessons = rawLessons as LessonsType;
 
       <!-- Bottone Prenota una lezione -->
       <a
-        href="/ImparareFacile/insegnanti"
+        href="/insegnanti"
         class="group fixed bottom-6 left-6 z-50 flex items-center justify-center w-12 h-12 overflow-hidden rounded-full bg-green-600 text-white shadow-lg hover:w-auto hover:px-4 hover:bg-green-700"
         aria-label="Prenota una lezione"
       >
@@ -172,85 +177,89 @@ const lessons = rawLessons as LessonsType;
       </a>
 
       <!-- Table of Contents -->
-      <aside
-        class="hidden xl:block w-64 sticky h-[calc(100vh-80px)] overflow-y-auto border-l border-gray-200 pl-4">
+      <aside class="hidden xl:block w-64 sticky h-[calc(100vh-80px)] overflow-y-auto border-l border-gray-200 pl-4">
         <h2 class="font-bold mb-4">Indice</h2>
         <ul id="toc" class="space-y-2 text-sm"></ul>
       </aside>
     </div>
   </div>
-</Layout>
 
-<!-- Script ricerca lezioni -->
-<script>
-  const searchInput = document.getElementById(
-    "lesson-search"
-  ) as HTMLInputElement | null;
-  const lessonContainers = Array.from(
-    document.querySelectorAll<HTMLDivElement>("#lessons-list > div")
-  );
+  <!-- Script ricerca lezioni -->
+  <script>
+  const searchInput = document.getElementById("lesson-search") as HTMLInputElement | null;
+  const lessonContainers = Array.from(document.querySelectorAll<HTMLDivElement>("#lessons-list > div"));
+
   searchInput?.addEventListener("input", () => {
     const query = searchInput.value.toLowerCase();
+
     lessonContainers.forEach((container) => {
       let anyVisible = false;
       const items = Array.from(container.querySelectorAll<HTMLLIElement>("li"));
+
       items.forEach((item) => {
         const title = item.dataset.title || "";
         const match = title.includes(query);
-        item.style.display = match ? "block" : "none";
+
+        // Cast item a HTMLElement per usare style
+        const htmlItem = item as HTMLElement;
+        htmlItem.style.display = match ? "block" : "none";
+
         if (match) anyVisible = true;
       });
-      container.style.display = anyVisible ? "block" : "none";
+
+      // Mostra/nascondi il container se ci sono elementi visibili
+      const htmlContainer = container as HTMLElement;
+      htmlContainer.style.display = anyVisible ? "block" : "none";
     });
   });
 </script>
 
-<!-- Script Table of Contents -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const content = document.getElementById("lesson-content");
-    const toc = document.getElementById("toc");
-    if (!content || !toc) return;
+  <!-- Script Table of Contents -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const content = document.getElementById("lesson-content");
+      const toc = document.getElementById("toc");
+      if (!content || !toc) return;
 
-    const headers = Array.from(content.querySelectorAll("h2, h3, h4"));
-    headers.forEach((header) => {
-      const id =
-        header.id ||
-        header.textContent?.trim().toLowerCase().replace(/\s+/g, "-");
-      if (!id) return;
-      header.id = id;
+      const headers = Array.from(content.querySelectorAll("h2, h3, h4"));
+      headers.forEach((header) => {
+        const id =
+          header.id ||
+          header.textContent?.trim().toLowerCase().replace(/\s+/g, "-");
+        if (!id) return;
+        header.id = id;
 
-      const li = document.createElement("li");
-      li.className =
-        header.tagName.toLowerCase() === "h3"
-          ? "ml-4"
-          : header.tagName.toLowerCase() === "h4"
-            ? "ml-8"
-            : "";
-      const a = document.createElement("a");
-      a.href = `#${id}`;
-      a.innerText = header.textContent || "";
-      a.className = "hover:text-blue-600 transition";
-      li.appendChild(a);
-      toc.appendChild(li);
+        const li = document.createElement("li");
+        li.className =
+          header.tagName.toLowerCase() === "h3"
+            ? "ml-4"
+            : header.tagName.toLowerCase() === "h4"
+              ? "ml-8"
+              : "";
+        const a = document.createElement("a");
+        a.href = `#${id}`;
+        a.innerText = header.textContent || "";
+        a.className = "hover:text-blue-600 transition";
+        li.appendChild(a);
+        toc.appendChild(li);
+      });
     });
-  });
-</script>
+  </script>
 
+  <!-- Script scroll-top -->
+  <script>
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
 
-<script>
-  const scrollTopBtn = document.getElementById("scrollTopBtn");
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 300) {
+        scrollTopBtn?.classList.remove("hidden");
+      } else {
+        scrollTopBtn?.classList.add("hidden");
+      }
+    });
 
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-      scrollTopBtn?.classList.remove("hidden");
-    } else {
-      scrollTopBtn?.classList.add("hidden");
-    }
-  });
-
-  scrollTopBtn?.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-</script>
-
+    scrollTopBtn?.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</Layout>

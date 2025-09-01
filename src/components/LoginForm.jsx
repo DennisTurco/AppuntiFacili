@@ -33,7 +33,7 @@ export default function LoginForm() {
     }
 
     alert("Login riuscito!");
-    window.location.href = "/ImparareFacile/videolezioni"; // pagina protetta
+    window.location.href = "/videolezioni"; // pagina protetta
   };
 
   return (
@@ -72,7 +72,7 @@ export default function LoginForm() {
       <div className="mt-4 text-center">
         Non hai un account?{" "}
         <a
-          href="/ImparareFacile/register"
+          href="/register"
           className="text-green-600 font-semibold underline hover:text-green-800"
         >
           Registrati

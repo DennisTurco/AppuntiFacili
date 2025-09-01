@@ -39,13 +39,13 @@ export default function UserMenu() {
   return (
     <>
       <a
-        href="/ImparareFacile/login"
+        href="/login"
         className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
       >
         Login
       </a>
       <a
-        href="/ImparareFacile/register"
+        href="/register"
         className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600"
       >
         Register

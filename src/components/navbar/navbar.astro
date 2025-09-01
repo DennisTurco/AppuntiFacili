@@ -5,7 +5,7 @@ import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 import { Icon } from "astro-icon/components";
 import { supabase } from "../../lib/supabaseClient.js";
 import UserMenu from "@/components/UserMenu.jsx";
-
+import type { User } from '@supabase/supabase-js';
 
 // menuitems definiti qui
 const menuitems = [
@@ -13,17 +13,17 @@ const menuitems = [
     title: "Materie",
     path: "#",
     children: [
-      { title: "Informatica", path: "/ImparareFacile/informatica" },
-      { title: "Matematica", path: "/ImparareFacile/matematica" },
+      { title: "Informatica", path: "/informatica" },
+      { title: "Matematica", path: "/matematica" },
     ],
   },
-  { title: "Insegnanti", path: "/ImparareFacile/insegnanti" },
-  { title: "Contattami", path: "/ImparareFacile/contact" },
-  { title: "Video Lezioni", badge: true, path: "/ImparareFacile/videolezioni" },
+  { title: "Insegnanti", path: "/insegnanti" },
+  { title: "Contattami", path: "/contact" },
+  { title: "Video Lezioni", badge: true, path: "/videolezioni" },
   { title: "Portfolio", path: "https://dennisturco.com/" },
 ];
 
-let user = null;
+let user: User | null = null;
 
 // controlla se l’utente è loggato
 const checkUser = async () => {
@@ -45,8 +45,8 @@ const logout = async () => {
   <header class="flex flex-col lg:flex-row justify-between items-center my-5">
     <Astronav>
       <div class="flex w-full lg:w-auto items-center justify-between">
-        <a href="/ImparareFacile/" class="text-lg">
-          <span class="font-bold text-slate-800">Imparare</span><span class="text-slate-500">Facile</span>
+        <a href="/" class="text-lg">
+          <span class="font-bold text-slate-800">Appunti</span><span class="text-slate-500">Facili</span>
         </a>
         <div class="block lg:hidden">
           <MenuIcon class="w-4 h-4 text-gray-800" />

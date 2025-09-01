@@ -20,7 +20,6 @@ Le strutture (chiamate anche struct) sono un modo per raggruppare diverse variab
 A differenza di un array , una struttura può contenere molti tipi di dati diversi (int, float, char, ecc.).
 
 > Nota: possibile anche creare array (vettori) di strutture, come vedremo più avanti.
-> 
 
 ```c
 struct libro { // dichiarazione della struct
