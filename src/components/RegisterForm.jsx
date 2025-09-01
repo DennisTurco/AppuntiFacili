@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { toast } from "react-hot-toast";
+import { navigate } from 'astro:transitions/client';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -35,21 +37,25 @@ export default function RegisterForm() {
       email,
       password,
       options: {
-        data: { phone, full_name: name } // salva nome e telefono in user_metadata
+        data: { phone, full_name: name }, // salva nome e telefono in user_metadata
+        emailRedirectTo: `${window.location.origin}/ImparareFacile/auth/callback`
       }
     });
 
     if (error) {
+      console.error(error.message);
       if (error.message.includes("already registered")) {
         setErrors(prev => ({ ...prev, general: "Questa email è già in uso." }));
+        toast.error("Questa email è già in uso.");
       } else {
         setErrors(prev => ({ ...prev, general: error.message }));
+        toast.error(error.message);
       }
       return;
     }
 
-    alert("Registrazione effettuata! Controlla la tua email.");
-    window.location.href = "/login";
+    toast.success("Registrazione effettuata! Controlla la tua email per attivare l'account.");
+    navigate("/ImparareFacile/login");
   };
 
   return (

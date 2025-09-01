@@ -1,39 +1,40 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { toast } from "react-hot-toast";
+import { navigate } from 'astro:transitions/client';
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [errors, setErrors] = useState({ email: "", password: "", general: "" });
-
   const handleLogin = async () => {
-    const newErrors = { email: "", password: "", general: "" };
     let hasError = false;
 
     // validazioni base
     if (!email) {
-      newErrors.email = "Email richiesta.";
+      toast.warning("Inserisci la tua email");
       hasError = true;
     }
     if (!password) {
-      newErrors.password = "Password richiesta.";
+      toast.warning("Inserisci la password");
       hasError = true;
     }
 
-    setErrors(newErrors);
     if (hasError) return;
 
     // tenta login con Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
-      setErrors(prev => ({ ...prev, general: "Email o password non corretti." }));
+      toast.error("Email o password non corretti.");
       return;
     }
 
-    alert("Login riuscito!");
-    window.location.href = "/videolezioni"; // pagina protetta
+    toast.success("Login riuscito 🎉");
+    navigate("/ImparareFacile/videolezioni");
   };
 
   return (
@@ -44,19 +45,17 @@ export default function LoginForm() {
         type="email"
         placeholder="Email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full max-w-md mb-1 p-4 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
-      {errors.email && <div className="text-red-400 text-sm mb-2">{errors.email}</div>}
 
       <input
         type="password"
         placeholder="Password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full max-w-md mb-4 p-4 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
-      {errors.password && <div className="text-red-400 text-sm mb-2">{errors.password}</div>}
 
       <button
         onClick={handleLogin}
@@ -65,10 +64,6 @@ export default function LoginForm() {
         Accedi
       </button>
 
-      {errors.general && (
-        <div className="text-red-500 text-sm mt-2">{errors.general}</div>
-      )}
-
       <div className="mt-4 text-center">
         Non hai un account?{" "}
         <a
@@ -76,6 +71,16 @@ export default function LoginForm() {
           className="text-green-600 font-semibold underline hover:text-green-800"
         >
           Registrati
+        </a>
+      </div>
+
+      <div className="mt-4 text-center">
+        Problemi con l'accesso?{" "}
+        <a
+          href="/ImparareFacile/contact"
+          className="text-green-600 font-semibold underline hover:text-red-400"
+        >
+          Contattami
         </a>
       </div>
     </div>
