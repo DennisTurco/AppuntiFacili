@@ -21,7 +21,7 @@ export default function AuthorizedVideos() {
   if (!user) {
     return (
       <p className="col-span-full text-center text-red-500">
-        Devi essere loggato per vedere i video. <a href="/ImparareFacile/login" class="text-blue-600 font-semibold underline hover:text-blue-800">Login</a>
+        Devi essere loggato per vedere i video. <a href="/login" class="text-blue-600 font-semibold underline hover:text-blue-800">Login</a>
       </p>
     );
   }

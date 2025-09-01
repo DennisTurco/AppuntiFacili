@@ -34,7 +34,7 @@ export default function LoginForm() {
     }
 
     toast.success("Login riuscito 🎉");
-    navigate("/ImparareFacile/videolezioni");
+    navigate("/videolezioni");
   };
 
   return (

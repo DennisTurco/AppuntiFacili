@@ -38,7 +38,7 @@ export default function RegisterForm() {
       password,
       options: {
         data: { phone, full_name: name }, // salva nome e telefono in user_metadata
-        emailRedirectTo: `${window.location.origin}/ImparareFacile/auth/callback`
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     });
 
@@ -55,7 +55,7 @@ export default function RegisterForm() {
     }
 
     toast.success("Registrazione effettuata! Controlla la tua email per attivare l'account.");
-    navigate("/ImparareFacile/login");
+    navigate("/login");
   };
 
   return (
