@@ -162,7 +162,7 @@ int main() {
         printf("%s", riga);
     }
 
-    rewind(fp); // torna all’inizio
+    rewind(fp); // torna all'inizio
     fseek(fp, 6, SEEK_SET); // sposta dopo "Ciao "
     fgets(riga, 100, fp);
     printf("\nDopo fseek: %s\n", riga);

@@ -72,7 +72,7 @@ visibilità campi (dati/record) di una classe
 | nella classe in cui dichiarati | ✅ | ✅ | ✅ | ✅ |
 | nello stesso package | ✅ | ✅ | ✅ | ❌ |
 | nelle sottoclassi (anche se in package diversi) | ✅ | ✅ | ❌ | ❌ |
-| all’esterno | ✅ | ❌ | ❌ | ❌ |
+| all'esterno | ✅ | ❌ | ❌ | ❌ |
 
 ## 3. Classe Object
 
@@ -91,15 +91,15 @@ Object contiene l'mplementazione di default di alcuni metodi, per esempio:
 - `equals(Object)` → boolean
   - confronta i reference dei due oggetti (come ==).
 - `toString()` → String
-  - restituisce la stringa corrente al reference dell’oggetto di invocazione.
+  - restituisce la stringa corrente al reference dell'oggetto di invocazione.
 - `cone()` → Object
-  - effettua una copia (superficiale) dell’oggetto di invocazione.
+  - effettua una copia (superficiale) dell'oggetto di invocazione.
 
 Questi attributi sono ereditati da tutte le classi, ma possono essere ridefinite.
 
 ## 4. Instanceof
 
-In java è possibile determinare se un oggetto $o$ appartiene o no ad una classe $c$ con l’operatore `instanceof`
+In java è possibile determinare se un oggetto $o$ appartiene o no ad una classe $c$ con l'operatore `instanceof`
 
 $$
 o \ \ instanceof \ \ c
@@ -112,7 +112,7 @@ dovre:
 
 restituisce:
 
-- true → se l’oggetto $o$ è di tipo $c$.
+- true → se l'oggetto $o$ è di tipo $c$.
 - false → altrimenti.
 
 ## 5. Esempio Completo

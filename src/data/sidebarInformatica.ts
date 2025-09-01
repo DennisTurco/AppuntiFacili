@@ -19,7 +19,7 @@ export const sidebar = {
   ],
   "C++": [
     { title: "Hello World", url: "/informatica/cpp/helloworld" },
-    { title: "Controlli Condizionali: if-else", url: "/informatica/cpp/ControlliCondizionali" },
+    { title: "Controlli Condizionali: if-else", url: "/informatica/cpp/controlli-condizionali" },
     // { title: "Cicli", url: "/informatica/cpp/Cicli" },
     // { title: "Array Monodimensionali", url: "/informatica/cpp/ArrayMonodimensionali" },
     // { title: "Array Bidimensionali", url: "/informatica/cpp/ArrayBidimensionali" },

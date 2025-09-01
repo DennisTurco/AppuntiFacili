@@ -48,7 +48,8 @@
   <!-- Tipo di richiesta (dropdown) -->
   <div class="mb-5">
     <select
-      name="request_type"
+      id="request_type"
+      name="Tipo di richiesta"
       required
       class="w-full px-4 py-3 border-2 rounded-md outline-hidden focus:ring-4 border-gray-300 focus:border-gray-600 ring-gray-100"
     >
@@ -115,10 +116,21 @@
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     form.classList.add("was-validated");
-    if (!form.checkValidity()) {
-      form.querySelectorAll(":invalid")[0].focus();
-      return;
-    }
+
+    // validazione manuale
+    const requiredFields = form.querySelectorAll("[required]");
+    let valid = true;
+
+    requiredFields.forEach((field) => {
+      if (!field.value.trim()) {
+        field.classList.add("is-invalid");
+        valid = false;
+      } else {
+        field.classList.remove("is-invalid");
+      }
+    });
+
+    if (!valid) return; // blocca invio se i campi sono vuoti
     const formData = new FormData(form);
     const object = Object.fromEntries(formData);
     const json = JSON.stringify(object);

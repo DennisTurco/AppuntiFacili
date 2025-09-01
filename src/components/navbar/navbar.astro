@@ -25,7 +25,7 @@ const menuitems = [
 
 let user: User | null = null;
 
-// controlla se l’utente è loggato
+// controlla se l'utente è loggato
 const checkUser = async () => {
   const { data } = await supabase.auth.getUser();
   user = data.user;

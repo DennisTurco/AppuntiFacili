@@ -33,7 +33,7 @@ export default function LoginForm() {
       return;
     }
 
-    toast.success("Login riuscito 🎉");
+    toast.success("Login riuscito!");
     navigate("/videolezioni");
   };
 
