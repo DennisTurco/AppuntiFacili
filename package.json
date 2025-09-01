@@ -33,6 +33,7 @@
     "astro-mermaid": "^1.0.4",
     "astro-navbar": "^2.3.9",
     "astro-seo": "^0.8.4",
+    "astro-sitemap": "^1.0.0",
     "katex": "^0.16.22",
     "mermaid": "^11.10.1",
     "notivue": "^2.4.5",

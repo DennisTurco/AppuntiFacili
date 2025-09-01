@@ -9,6 +9,7 @@ import rehypeKatex from "rehype-katex";
 import remarkCollapse from "remark-collapse"; // https://www.npmjs.com/package/remark-collapse
 import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#options
 import react from '@astrojs/react';
+import sitemap from 'astro-sitemap';
 
 export default defineConfig({
   site: "https://appuntifacili.it",
@@ -18,7 +19,11 @@ export default defineConfig({
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeKatex],
     }),
-    sitemap(),
+    sitemap({
+      filter: (page) => !page.includes('draft'), // opzione per escludere draft
+      changefreq: 'weekly',
+      priority: 0.7,
+    }),
     icon({ include: ["fa6-solid", "fa6-brands"] }),
     mermaid({
       theme: 'forest',
