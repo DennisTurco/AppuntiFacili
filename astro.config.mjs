@@ -10,6 +10,7 @@ import remarkCollapse from "remark-collapse"; // https://www.npmjs.com/package/r
 import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#options
 import react from '@astrojs/react';
 import sitemap from 'astro-sitemap';
+import partytown from '@astrojs/partytown'
 
 export default defineConfig({
   site: "https://appuntifacili.it",
@@ -23,6 +24,11 @@ export default defineConfig({
       filter: (page) => !page.includes('draft'), // opzione per escludere draft
       changefreq: 'weekly',
       priority: 0.7,
+    }),
+    partytown({ // for google analytics
+        config: {
+          forward: ["dataLayer.push"],
+        },
     }),
     icon({ include: ["fa6-solid", "fa6-brands"] }),
     mermaid({
