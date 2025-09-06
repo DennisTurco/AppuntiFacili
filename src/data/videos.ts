@@ -17,7 +17,7 @@ export const videos = [
   },
   {
     title: "C - Strings: Funzioni Numeriche",
-    url: "https://www.youtube.com/embed/VIDEO_ID_3",
+    url: "https://www.youtube.com/embed/hfcVGzdqbaM",
     allowed: ["dennisturco@gmail.com", "dennoturco@gmail.com",  "gabrielefabbri2005@gmail.com"]
   },
   {
