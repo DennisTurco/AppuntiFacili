@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://appuntifacili.it/
+Sitemap: https://appuntifacili.it/sitemap.xml

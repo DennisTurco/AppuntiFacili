@@ -10,10 +10,7 @@ import "../styles/global.css";
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
 
-const resolvedImageWithDomain = new URL(
-  "/flavicon.png",
-  Astro.site
-).toString();
+const resolvedImageWithDomain = "https://appuntifacili.it/_astro/logo.C8GkM4Tb_Z2tB72M.webp";
 
 const { title, description, url, image } = Astro.props as Props;
 
@@ -39,7 +36,7 @@ export interface Props {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"/>
     <SEO
       title={makeTitle}
-      description="AppuntiFacili è un sito dove vengono caricati gli appunti per gli studenti delle superiori e dell'università"
+      description = "Appunti facili di matematica e programmazione: videolezioni, riassunti e risorse per studenti delle superiori e università.";
       canonical={canonicalURL}
       twitter={{
         creator: "@surjithctly",

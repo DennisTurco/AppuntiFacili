@@ -9,7 +9,6 @@ import rehypeKatex from "rehype-katex";
 import remarkCollapse from "remark-collapse"; // https://www.npmjs.com/package/remark-collapse
 import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#options
 import react from '@astrojs/react';
-import sitemap from 'astro-sitemap';
 import partytown from '@astrojs/partytown'
 
 export default defineConfig({
