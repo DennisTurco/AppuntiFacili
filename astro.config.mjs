@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
-import sitemap from "@astrojs/sitemap";
+import sitemap from '@astrojs/sitemap';
 import icon from "astro-icon";
 import mermaid from 'astro-mermaid';
 import remarkMath from "remark-math";
