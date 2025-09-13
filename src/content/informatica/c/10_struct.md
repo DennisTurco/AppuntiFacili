@@ -1,7 +1,7 @@
 ---
 title: "Struct"
 draft: false
-lastUpdateDate: "2025-08-27"
+lastUpdateDate: "2025-09-13"
 subject: "C"
 category: "Informatica"
 tags: ["c", "programmazione", "struct", "medio"]
@@ -9,15 +9,15 @@ author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 0️⃣ Link utili
+## 0. Link utili
 
 [C Structures (structs)](https://www.w3schools.com/c/c_structs.php#)
 
-## 1️⃣ Struct
+## 1. Struct
 
-Le strutture (chiamate anche struct) sono un modo per raggruppare diverse variabili correlate in un unico posto. Ogni variabile nella struttura è nota come **membro** della struttura.
+Le strutture (struct) sono un modo per raggruppare diverse variabili correlate in un unico posto. Ogni variabile nella struttura è nota come **membro** della struttura.
 
-A differenza di un array , una struttura può contenere molti tipi di dati diversi (int, float, char, ecc.).
+A differenza di un array, una struttura può contenere molti tipi di dati diversi (int, float, char, ecc.).
 
 > Nota: possibile anche creare array (vettori) di strutture, come vedremo più avanti.
 
@@ -32,7 +32,7 @@ struct libro { // dichiarazione della struct
 
 Per accedere alla struttura è necessario crearne una variabile.
 
-Utilizzare la `struct`parola chiave all'interno del `main()`metodo, seguita dal nome della struttura e quindi dal nome della variabile di struttura:
+Utilizzare la `struct` parola chiave all'interno del `main()` metodo, seguita dal nome della struttura e quindi dal nome della variabile di struttura:
 
 `struct nome_struct nome_variabile;`
 
@@ -54,7 +54,7 @@ int main() {
 }
 ```
 
-## 2️⃣ Accedere ai campi
+## 2. Accedere ai campi
 
 per accedere ai campi (variabili) interne si usa il simbolo `.`
 
@@ -81,7 +81,7 @@ int main() {
 }
 ```
 
-## 3️⃣ Passare una struct ad una funzione
+## 3. Passare una struct ad una funzione
 
 In questo esempio la funzione “func” stampa gli elementi di una struct attraverso un puntatore alla struttura presa come paramentro.
 
@@ -113,11 +113,11 @@ int main() {
 }
 ```
 
-## 📑 Esercizi
+## 4. Esercizi
 
-### Esercizio 1
+### 4.1 Esercizio 1
 
-realizzare una struct “classe” con 2 metodi:
+realizzare una struct "classe" con 2 attributi:
 
 - char nome[2];
 - int alunni;
@@ -157,9 +157,9 @@ int main() {
 
 </details>
 
-## Esercizio 2
+### 4.2 Esercizio 2
 
-realizzare una struct “classe” con 2 metodi:
+realizzare una struct “classe” con 2 attributi:
 
 - char nome[2];
 - int alunni;
@@ -206,7 +206,7 @@ int main() {
 
 </details>
 
-## Esercizio 3
+### 4.3 Esercizio 3
 
 come l'esercizio presedente, ma in più aggiungere la funzione “ordinamento” che ordina gli elementi della struct in base al campo “alunni”, l'obbiettivo è quello di ottenere la stampa ordinata in ordine crescente
 

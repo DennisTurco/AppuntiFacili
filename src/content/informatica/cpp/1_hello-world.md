@@ -1,7 +1,7 @@
 ---
 title: "Hello World"
 draft: false
-lastUpdateDate: "2025-08-27"
+lastUpdateDate: "2025-09-13"
 subject: "C"
 category: "Informatica"
 tags: ["c++", "programmazione", "introduzione", "facile"]
@@ -10,7 +10,7 @@ videoLesson: false
 ---
 
 
-# 1️⃣ Hello World
+## 1. Hello World
 
 Il **primo programma in C++**
 il più semplice in assoluto è il famoso “Hello World!” (Ciao Mondo) che ha soltanto lo scopo di stampare a video la scritta per spiegare la sintassi basilare del linguaggio.
@@ -20,15 +20,15 @@ il più semplice in assoluto è il famoso “Hello World!” (Ciao Mondo) che ha
 using namespace std; // pazio dei nomi
 
 int main (){ //inizio del main
-	//corpo del main
-	cout<< "Hello World!";
-	return 0;
+    //corpo del main
+    cout<< "Hello World!";
+    return 0;
 } //fine del main
 ```
 
 Elementi Fondamentali:
 
-- **`#include`** è una direttiva del preprocessore, un comando, che permette di richiamare le librerie standard del C++. 
+- **`#include`** è una direttiva del preprocessore, un comando, che permette di richiamare le librerie standard del C++.
 Senza librerie un programma non avrebbe a disposizione i comandi per eseguire anche le operazioni più semplici, come leggere un file o stampare a video una scritta.
 - La funzione principale in un qualsiasi programma in C++ è il **`main()`** che, in questo caso, non ha parametri, ma può ricevere anche degli input da riga di comando. Il main è indispensabile ed unico e deve esserci sempre;
 - Le **parentesi graffe `{}`** servono, invece, per delimitare blocchi di istruzioni, o come vengono abitualmente chiamate “statement”, che sono eseguite in ordine, da quella più in alto, giù fino all'ultima;
@@ -40,19 +40,19 @@ All'interno di un ftprogramma C++ possono essere inseriti dei **commenti**, bast
 - `//` – Tutto quello che sta a destra sulla medesima riga viene considerato commento e viene ignorato (ai fini dell'interpretazione del linguaggio) dal compilatore;
 - `/* … */` – Tutto quello che è compreso tra i due asterischi viene considerato commento; questa forma viene utilizzata per commenti su più righe.
 
-# 2️⃣ Variabili
+## 2. Variabili
 
 Le variabili vengono definite da un **tipo** e da un **nome**.
 
 *esempio:*
 
-```c
+```cpp
 #include <iostream>
 using namespace std;
 
 int main (){
-	int x;  //int (valore intero) indica il tipo, 
-					//mentre x indica il nome della variabile
+    int x;  //int (valore intero) indica il tipo,
+            //mentre x indica il nome della variabile
 }
 ```
 
@@ -62,14 +62,14 @@ Un **identificatore** è costituito da una o più lettere, cifre o caratteri e d
 
 il C++ è **case-sensitive**, quindi si fa distinzione tra lettere maiuscole e lettere minuscole:
 
-```c
+```cpp
 #include <iostream>
 using namespace std;
 
 int main (){
-	//sono due variabili diverse
-	int x;
-	int X;
+    //sono due variabili diverse
+    int x;
+    int X;
 }
 ```
 
@@ -77,12 +77,13 @@ Il **tipo** della variabile indica quale tipo di valori può assumere il contenu
 
 *esempio:*
 
-```c
+```cpp
 #include <stdlib.h>
+using namespace std;
 
 int main (){
-	int valore = 10;
-	char carattere = 'c';
+    int valore = 10;
+    char carattere = 'c';
 }
 ```
 
@@ -90,29 +91,29 @@ int main (){
 
 *esempio:*
 
-```c
+```cpp
 #include <iostream>
 using namespace std;
 
 int main (){
-	x = 5; //errore!! -> la variabile x non e' stata dichiarata!
-	
-	int x;
-	x = 5; //OK
+    x = 5; //errore!! -> la variabile x non e' stata dichiarata!
+
+    int x;
+    x = 5; //OK
 }
 ```
 
 Successivamente **la variabile deve essere inizializzata**, cioè le deve essere assegnato un valore, operazione che generalmente viene fatta contemporaneamente alla dichiarazione.
 
-```c
+```cpp
 // solo dichiarazione int x; // inizializzazione x = 10;
 ```
 
-```c
+```cpp
 // dichiarazione ed inizializzazione int y = 15;
 ```
 
-## Variabili - tipi
+### 2.1 Variabili - tipi
 
 Nella tabella seguente sono mostrati i vari tipi (principali), la parola chiave C++ che li identifica (`char` per carattere, `int` per intero, etc.), la tipologia di informazioni che rappresentano ed il numero di byte necessari per la loro rappresentazione in C++:
 
@@ -126,13 +127,13 @@ Nella tabella seguente sono mostrati i vari tipi (principali), la parola chiave 
 | `double` | Numero reale “lungo” | 8 (64 bit) |
 | `bool` | Confronto | 1 (8 bit) |
 
-### int
+#### 2.1.1 int
 
 Il tipo **int** permette di rappresentare numeri interi. Possiamo dichiarare un `int` con due varianti: **short e long**, anche se in realtà un tipo `int` è già di per se' un tipo `short`, mentre il la keyword `long` permette di estendere (utilizzando due byte in più) il range dei valori che il tipo int può assumere, consentendoci di lavorare con grandi numeri. (attenzione ad usare operazione di divisione `/`).
 
 I numeri interi, rappresentati da `int`, sono quelli “senza la virgola” o parti frazionate.
 
-```c
+```cpp
 int x = 7;
 int y = 3;
 int z;
@@ -141,7 +142,7 @@ z = x / y; // z vale 2, cioè la parte intera della divisione tra 7 e 3
 
 ---
 
-### char
+#### 2.1.2 char
 
 Il tipo **`char`** può contenere qualsiasi carattere definito secondo lo [standard ASCII](https://www.asciitable.com/), quindi qualsiasi lettera (maiuscola o minuscola), cifra (da 0 a 9) e simbolo previsto dalla codifica.
 
@@ -149,19 +150,19 @@ Il tipo **`char`** può contenere qualsiasi carattere definito secondo lo [stan
 
 Per **dichiarare una variabile char**, ad esempio inizializzandola con la lettera ‘`r`‘, basta scrivere:
 
-```c
+```cpp
 char a = 'r';
 ```
 
 ---
 
-### float e double
+#### 2.1.3 float e double
 
 I tipi **`float`** e **`double`** sono i cosiddetti numeri in virgola mobile, che rappresentano l'insieme dei numeri reali: con essi possiamo rappresentare numeri molto piccoli o numeri molto grandi, positivi e negativi e naturalmente con e senza decimali.
 
 La differenza tra i due sta nel numero di bit riservati alla rappresentazione dei numeri, che si va a riflettere sul range di numeri e sul numero di cifre dopo la virgola che possiamo memorizzare. Quindi se abbiamo bisogno di particolare accuratezza, utilizziamo il tipo `double`.
 
-```c
+```cpp
 double x = 7.0;
 double y = 2.0;
 double z;
@@ -170,7 +171,7 @@ z = x / y; // z vale 3.5
 
 ---
 
-### bool
+#### 2.1.4 bool
 
 i tipi `bool` sono valori che possono essere `true` oppure `false`.
 
@@ -182,6 +183,7 @@ bool y = false;
 ```cpp
 #include <iostream>
 using namespace std;
+
 int main() {
     bool a = true;
     bool b = false;
@@ -199,7 +201,7 @@ int main() {
 }
 ```
 
-# 3️⃣ Operatori
+## 3. Operatori
 
 Gli **operatori** si suddividono in:
 
@@ -207,7 +209,7 @@ Gli **operatori** si suddividono in:
 - Operatori di confronto;
 - Operatori logici;
 
-## **Operatori aritmetici**
+### 3.1 Operatori aritmetici
 
 Comprendono somma, sottrazione, moltiplicazione, divisione intera, divisione con modulo ecc. (in ordine `+`, `-`, `*`, `/`, `%`).
 
@@ -231,14 +233,14 @@ Esistono poi degli operatori ai quali bisogna porre particolare attenzione, ques
 
 *esempio*:
 
-```c
+```cpp
 int x = 2;
 x++; //equivale a scrivere x = x + 1;
 ```
 
 Inoltre esistono metodi alternativi (e più veloci) rispetto alle banali (ma chiare) operazioni:
 
-```c
+```cpp
 int x = 2;
 int y = 3;
 x += y;  //equivale a scrivere x = x + y;
@@ -246,17 +248,17 @@ x += y;  //equivale a scrivere x = x + y;
 
 Questa forma risulta essere più concisa, e per questo più facile da usare, ma bisogna porre attenzione nel suo uso perché potrebbe indurre in errori dovuti alla poca chiarezza del codice:
 
-```c
-int y = 4; 
+```cpp
+int y = 4;
 y += 2; // j adesso vale 6
 
-int x = 3; x *= y + 3; 
-// x adesso vale 27 
+int x = 3; x *= y + 3;
+// x adesso vale 27
 // questo perché equivale a x=x*(y+3) e non x=(x*y)+3
 
 ```
 
-## **Operatori di confronto**
+### 3.2 Operatori di confronto
 
 Operatori che permettono di verificare determinate condizioni, come ad esempio l'uguaglianza(`==`), la disuguaglianza(`!=`) oppure `>`, `<`, `>=`, `<=`;
 
@@ -277,9 +279,9 @@ Operatori che permettono di verificare determinate condizioni, come ad esempio l
 `a > b`    VERO $\Leftrightarrow$ a è maggiore strettamente di b.
                 FALSO altrimenti.
 
-## **Operatori logici**
+### 3.3 Operatori logici
 
-Da utilizzare con le istruzioni condizionali ed iterative, come ad esempio l'operatore e/allo stesso tempo (`&&`),  o/oppure(`||`) 
+Da utilizzare con le istruzioni condizionali ed iterative, come ad esempio l'operatore e/allo stesso tempo (`&&`),  o/oppure(`||`)
 
 | Simbolo | Significato | Utilizzo |
 | --- | --- | --- |
@@ -294,20 +296,20 @@ Da utilizzare con le istruzioni condizionali ed iterative, come ad esempio l'ope
 `a || b`   VERO $\Leftrightarrow$ a è vero e/o b è vero. 
                 FALSO altrimenti
 
-# 4️⃣ Input - Output
+## 4. Input - Output
 
 In questa lezione esaminiamo gli strumenti che il **linguaggio C++**
 ci offre per operare su input e output. In particolare vediamo come effettuare semplici stampe a video a partire dalle informazioni inserite con la tastiera.
 
-Per fare questo dobbiamo includere il file **<iostream>**
+Per fare questo dobbiamo includere il file `<iostream>`
 che mette a disposizione alcune funzioni predefinite per eseguire la lettura da un dispositivo di input (es. tastiera) o scrittura su un dispositivo di output (es. video);
 
-i costrutti cui parleremo sono: 
+i costrutti cui parleremo sono:
 
 1. **cout <<**
 2. **cin >>**
 
-## cout
+### 4.1 cout
 
 L'istruzione per stampare a video più usata è la **cout**, che ci permette di controllare ciò che viene stampato, nel senso che permette di decidere cosa stampare ed in quale forma. La struttura di cout è la seguente:
 
@@ -315,7 +317,7 @@ L'istruzione per stampare a video più usata è la **cout**, che ci permette di
 cout << /*lista informazioni da stampare*/
 ```
 
-Stampa sullo **stdout** (il video o la console in questo caso) la lista di argomenti conformemente alla stringa di formato specificata. 
+Stampa sullo **stdout** (il video o la console in questo caso) la lista di argomenti conformemente alla stringa di formato specificata.
 
 *esempio*:
 
@@ -339,31 +341,32 @@ Le **sequenze di escape** servono per rappresentare quei caratteri “speciali�
 | `\a` | Torna indietro di uno spazio |
 | `\f` | Salto pagina |
 
-## **cin**
+### 4.2 cin
 
 L'istruzione **cin** serve per leggere dallo **stdin** (generalmente la tastiera) una sequenza di caratteri (lettere o cifre) che verranno memorizzate all'interno di opportune variabili. Cin è, quindi, definita come segue:
 
-```c
+```cpp
 cin >> /*lista informazioni da leggere*/
 ```
 
 *esempio*:
 
-```c
-#include <stdio.h>
+```cpp
+#include <iostream>
+using namespace std;
 
 int main(){
-	int i;
-	cin >> i;
-	cout << i << endl;
+    int i;
+    cin >> i;
+    cout << i << endl;
 }
 ```
 
 **Questo semplice programma sopra esposto serve solamente per leggere un numero da tastiera e ristamparlo a video;**
 
-# 📑 Esercizi
+## 5. Esercizi
 
-## Esercizio 1
+### 5.1 Esercizio 1
 
 realizzare un programma che chiede all'utente 2 valori interi e ne restituisce la somma. 
 
@@ -377,42 +380,42 @@ la somma è: 8
 ```cpp
     #include <iostream>
     using namespace std;
-    
-    int main() { 
+
+    int main() {
         // dichiarazione variabili intere
         int x;
         int y;
-        
+
         // lettura variabili
         cout << "inserisci primo valore: ";
         cin >> x;
         cout << "inserisci secondo valore: ";
         cin >> y;
-        
-    		// operazioni
+
+        // operazioni
         int somma = x+y;
-        
+
         // stampa somma
         cout << "la somma è: " << somma;
-        
+
         return 0;
     }
 ```
 
 </details>
 
-## Esercizio 2
+### 5.2 Esercizio 2
 
 realizzare un programma che chiede all'utente un valore intero e ne restituisce il valore successivo (+1) e quello precedente (-1). 
 
 > Esempio Output:
 inserisci valore: 4
 valore: 4
-valore + 1: 5 
+valore + 1: 5
 valore - 1: 3
 <details>
 <summary>💡 Mostra soluzione</summary>
-    
+
 ```cpp
 #include <iostream>
 using namespace std;
@@ -420,36 +423,37 @@ using namespace std;
 int main(){
     // dichiarazione variabili
     int x;
-    
+
     // lettura variabili
     cout << "inserisci valore: ";
     cin >> x;
-    
+
     // operazioni
     int somma = x+1;
     int sottrazione = x-1;
-    
+
     //stampa
     cout << "valore: " << x << endl;
         cout << "valore + 1: " << somma << endl;
         cout << "valore - 1: " << sottrazione << endl;
-    
+
     return 0;
 }
 ```
+
 </details>
 
-## Esercizio 3
+### 5.3 Esercizio 3
 
 realizzare un programma che chiede all'utente 2 valori reali e ne restituisce la media.
 
 > Esempio Output:
 inserisci primo valore: 6
-inserisci secondo valore: 5 
+inserisci secondo valore: 5
 la media è: 5.5
 <details>
 <summary>💡 Mostra soluzione</summary>
-    
+
 ```cpp
 #include <iostream>
 using namespace std;
