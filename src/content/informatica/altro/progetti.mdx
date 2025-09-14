@@ -1,0 +1,515 @@
+---
+title: "Progetti"
+draft: true
+lastUpdateDate: "2025-08-28"
+subject: "Progetti"
+category: "Informatica"
+tags: ["progetti", "programmazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+I progetti elencati qui sotto sono alla portata di tutti! Se non sapete fare qualcosa, è del tutto normale, li ho resi apposta così, altrimenti dove sarebbe il bello? 😉 L'obiettivo è anche quello di mettersi alla prova. Non abbiate paura di sbagliare; ricordatevi che il mondo del web è ricco di informazioni e tutorial su come fare qualsiasi cosa. Per ogni dubbio e/o perplessità potete sempre contare su di me 😀.
+
+Le consegne dei vari progetti non devono essere seguite alla lettera. Sentitevi liberi di modificare, aggiungere e rivedere i punti elencati. Siate curiosi e cercate di divertirvi. Fateli anche in gruppo!
+
+Ricordate che per un informatico avere dei progetti personali è fondamentale per fare curriculum per le aziende, oltre che servire a voi stessi per sperimentare, imparando ed avere una marcia in più degli altri! 🚀
+
+Poiché sono elencati diversi tipi di linguaggi e progetti, potreste sentirvi un po' persi su cosa scegliere. In tal caso, **non esitate a contattarmi su Discord**: vi guiderò nella scelta più adatta a ciascuno di voi. 💯
+
+La chat Discord dedicata al progetto è [#🎎general](https://discord.com/channels/1126217537080803430/1242935170319913031). Preferirei che tutte le domande, sia generali che personali, venissero poste lì.
+
+## 2. Lavoro di gruppo
+
+Se scegliete di lavorare in gruppo, è consigliabile utilizzare un sistema come Google Drive per condividere il progetto con tutti i componenti del team. Tuttavia, per il mondo della programmazione, è preferibile utilizzare GitHub. GitHub è un'applicazione gratuita che i programmatori usano sia come bacheca personale per i progetti, sia per organizzare il lavoro di squadra.
+
+## 3. Tabella dei progetti
+
+| Titolo Progetto | Linguaggio | Difficoltà (1-5) | Progetto TOP | Descrizione Sintetica | Suggerimenti Didattici |
+| --- | --- | --- | --- | --- | --- |
+| Analisi Dati Meteo | Python | 🟢 2 | ✅ | Analizza dati climatici da file, calcola medie, visualizza grafici. | Ottimo per introdurre `pandas`, `matplotlib`, e GUI semplici. |
+| Analisi Social Media (tweet/post) | Python | 🟠 3 | ✅ | Usa API per scaricare post e analizzarli (sentiment, parole chiave, frequenze). | Introduzione alle API e al text mining con GUI interattiva. |
+| Dama (Checkers) | Python (pygame) | 🟠 3 |  | Gioco da tavolo con logica di movimento, catture e promozioni. | Rafforza la logica, il disegno della GUI e la gestione degli eventi. |
+| Gioco dell'Oca | Python (pygame) | 🟢 2 |  | Simulazione di gioco da tavolo classico con dado e percorsi. | Buon progetto introduttivo con struttura base. |
+| Risiko | Python (pygame) | 🔴 5 | ✅ | Strategico con mappe, turni, truppe, battaglie e obiettivi. | Richiede struttura dati complesse e gestione grafica avanzata. |
+| Previsioni Finanziarie Personali | Python | 🔴 5 | ✅ | Inserisci spese, investimenti e ottieni 30 simulazioni patrimoniali con inflazione e rendimento stimato. | Unisce matematica, statistica, modelli predittivi e visualizzazioni interattive. |
+| Installer Automatico con Chocolatey | C++ (o C#) | 🟢 2 | ✅ | App che installa/rimuove software leggendo un file, integrando Chocolatey e il sistema. | Ottimo per imparare automazione, scripting, gestione file e chiamate a processo. |
+| Gestione Password con generatore sicuro | Java / C# | 🟠 3 |  | Generatore e archivio sicuro di password con GUI, salvataggio criptato. | Utile per esercitarsi su GUI, file JSON e crittografia base. |
+| Gestione Finanze Personali | Java / C# | 🟠 3 | ✅ | CRUD di entrate/uscite con categorizzazione e statistiche mensili in grafico. |  |
+
+## 4. Python
+
+<Aside variant="info">
+### Descrizione
+
+Questi progetti sono pensati per chi desidera sviluppare applicazioni di data analysis per la creazione di report, lo studio dei dati e la generazione di grafici, oppure per chi vuole divertirsi a sviluppare qualche gioco da tavolo con interfaccia grafica.
+
+I progetti qui sotto elencati possono essere sviluppati come applicazione desktop oppure come applicazioni web.
+
+N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai programmato in python.*
+
+### Prerequisiti consigliati
+
+- conoscenza base della programmazione;
+
+### Topics
+
+- GUI (interfaccia grafica);
+- data analisys;
+- lettura e scrittura su file;
+- plotting in grafici dei dati;
+- strutture dati di base;
+- API;
+</Aside>
+
+### 4.1 Tutorials
+
+- programmare in **python:** https://www.youtube.com/watch?v=kqtD5dpn9C8&ab_channel=ProgrammingwithMosh
+- matplotlib per **analisi dei dati:** https://www.youtube.com/watch?v=OZOOLe2imFo&ab_channel=NeuralNine
+- pygame per **giochi:** https://www.youtube.com/watch?v=y9VG3Pztok8&ab_channel=CodingWithRuss
+- piattaforma (scegletene una):
+    - Desktop: tkinter / **customtkinter**
+    - Web: **Streamlit**
+
+### 4.2 Applicazioni di analisi dei dati
+
+Questi progetti forniranno una buona introduzione all'analisi dei dati e allo sviluppo di interfacce grafiche, oltre a essere divertenti e istruttivi.
+
+### 4.2.1 Analisi dei Dati Meteo
+
+- **Difficoltà:** 🟢 **2/5**
+- Motivo: Ottimo per principianti, utilizza dataset semplici e librerie standard.
+
+**Descrizione:**
+Scarica un dataset di dati meteorologici (ad esempio, temperature giornaliere, precipitazioni, umidità) e analizza i dati per trovare tendenze e modelli.
+
+**Componenti:**
+
+- **Raccolta dati:** Utilizzare librerie come **`pandas`** per caricare e gestire i dati.
+- **Analisi:** Calcolare medie, massimi, minimi, e altri statistiche.
+- **Visualizzazione:** Utilizzare **`matplotlib`** o **`seaborn`** per creare grafici di tendenza, istogrammi, ecc.
+- **Interfaccia grafica:** Creare una semplice GUI con **`tkinter` / `customtkinter` / `streamlit`** che permetta di selezionare il tipo di grafico e il periodo di tempo da analizzare. Dovrà comprendere:
+    - Componenti della GUI:
+        - Finestra Principale;
+        - Sezione Caricamento Dati → Pulsante "Carica File";
+        - Selezione dei Parametri → Menu a Tendina "Seleziona Parametro" (es. temperatura, precipitazioni, umidità);
+        - Selezione del Periodo di Tempo → calendario;
+        - Selezione del Tipo di Grafico;
+        - Pulsante "Genera Grafico";
+        - Area di Visualizzazione del Grafico;
+        - Pulsante "Salva Grafico";
+        - Sezione di Output Testuale → medie, massimi, minimi, ecc…;
+    - Funzionalità della GUI:
+        - Caricamento del Dataset;
+        - Selezione del Parametro e Periodo di Tempo;
+        - Generazione e Visualizzazione del Grafico;
+        - Salvataggio del Grafico;
+
+### 4.3 Analisi dei Dati sui Social Media
+
+- **Difficoltà:** 🟠 **3/5**
+- Motivo: Integrazione con API, analisi testuale, GUI intermedia.
+
+**Descrizione:**
+Scaricare ed analizzare i dati relativi a tweet o post su un certo argomento per vedere tendenze, sentimenti e parole chiave.
+
+**Componenti:**
+
+- **Raccolta dati:** Utilizzare API come quella di Twitter per scaricare i dati.
+- **Analisi:** Usare librerie come **`textblob`** per l'analisi del sentiment, **`wordcloud`** per creare nuvole di parole, ecc.
+- **Visualizzazione:** Grafici a torta per la distribuzione dei sentimenti, nuvole di parole per le parole più frequenti, grafici a linee per il numero di tweet/post nel tempo.
+- **Interfaccia grafica:** Una GUI con **`tkinter` / `customtkinter` / `streamlit`** per inserire l'argomento di interesse e visualizzare i risultati dell'analisi.
+    - Componenti della GUI:
+        - Finestra Principale;
+        - Sezione di Input dell'Argomento:
+            - Label "Inserisci Argomento";
+            - Campo di Testo;
+            - Pulsante "Cerca";
+            - Spunta per opzioni avanzate (Opzionale);
+        - Sezione di Analisi dei Dati:
+            - Pulsante "Analizza Dati";
+            - Progresso dell'Analisi;
+        - Visualizzazione dei Risultati:
+            - Grafico a Torta per la Distribuzione dei Sentimenti (positivo, negativo, neutro).
+            - Nuvola di Parole;
+            - Grafico a Linee per il Numero di Tweet nel Tempo;
+            - Tabella Riassuntiva;
+        - Sezione di Salvataggio dei Risultati:
+            - Pulsante "Salva Risultati";
+        - Sezione di Output Testuale:
+            - Area di Testo per il Feedback / Log;
+    - Funzionalità della GUI:
+        - Input e Raccolta dei Dati;
+        - Analisi dei Dati;
+        - Visualizzazione Interattiva;
+        - Salvataggio dei Risultati;
+
+**Bonus opzionali (per versione avanzata):** Tecnica AI → ****Natural Language Processing + sentiment analysis + clustering.
+
+- Analisi più sofisticata dei testi (usare modelli tipo BERT, anche semplificati).
+- Clustering dei tweet per individuare "topic nascosti".
+- Previsione del numero di tweet futuri su una tematica con modelli time series.
+
+### 4.4 Simulatore di Previsioni Finanziarie Personali con Random Walk
+
+**Difficoltà:** 🔴 5/5
+
+**Lingue consigliate:** **Python** (per via di `numpy`, `matplotlib`, `pandas`, `scipy`, `tkinter` / `streamlit`)
+
+**Descrizione:**
+
+Questa applicazione simula l’evoluzione del patrimonio personale nel tempo (es. 10, 20, 30 anni), partendo da parametri come:
+
+- età,
+- capitale liquido attuale,
+- spese mensili,
+- investimenti mensili,
+- rendimenti stimati,
+- inflazione stimata,
+- condizioni abitative (affitto, mutuo, mantenuto).
+- Rendimento medio atteso degli investimenti (% annuo)
+    - default: 4–7%
+- Deviazione standard dei rendimenti (per il modello gaussiano)
+    - default: 10–15% (maggiore instabilità = simulazioni più varie)
+- Percentuale spese variabili (oscillazione mensile)
+    - per simulare mesi con più o meno spese (es. imprevisti o ferie)
+- Probabilità di eventi imprevisti
+    - esempio: ogni 5 anni c’è il 30% di probabilità di una spesa straordinaria
+- Crescita stipendio/entrate annuale prevista (%)
+    - per studenti che entreranno nel mondo del lavoro
+    - o per tenere conto di promozioni / inflazione salariale
+- Data stimata di pensionamento
+    - per simulare un calo o azzeramento degli investimenti dopo quella data
+- Tassazione sugli investimenti (%)
+    - per rendere il calcolo netto più realistico
+- Tipologia investimento (rischio alto, medio, basso)
+    - che modifica media e deviazione standard
+
+**Obiettivo:**
+
+Usare un modello **stocastico** per generare **30+ scenari differenti** di crescita/decrescita del patrimonio, basati su una **random walk gaussiana**:
+
+> Ogni anno/mese il capitale evolve in base a un rendimento simulato con distribuzione normale, centrato su una media attesa (es. 4% annuo) e una deviazione standard.
+> 
+> 
+> Questo approccio imita i rendimenti variabili reali del mercato, permettendo una simulazione più realistica del futuro.
+> 
+
+**Componenti:**
+
+- Calcolo simulato mese per mese;
+- Randomizzazione dei rendimenti con distribuzione normale (`numpy.random.normal`);
+- Grafico con **tutte le simulazioni** sovrapposte (curva patrimonio/tempo);
+- Media delle simulazioni (curva di riferimento "centrale");
+- Input user-friendly per tutti i parametri iniziali;
+- Possibilità di esportare i dati delle simulazioni in CSV/PDF;
+- Interfaccia:
+    - Versione desktop con `tkinter`/`customtkinter`;
+    - oppure Web con `streamlit`.
+
+**Bonus opzionali (per versione avanzata):**
+
+- 🔄 Possibilità di **simulare più strategie** (es. "rischio alto vs basso")
+- 📈 Output dei percentili (es. andamento 10º, 50º, 90º percentile)
+- 📊 Calcolo del **valore atteso** finale, varianza e probabilità di capitale < 0
+- 🧮 Calcolo valore attuale netto (NPV)
+- Intelligenza Artificiale: *Modelli di regressione, reti neurali semplici, oppure modelli di forecasting come LSTM (long short-term memory).*
+    - Addestrare un modello sui dati storici reali (o simulati) per *prevedere andamenti futuri del patrimonio.*
+    - Utilizzare **reinforcement learning** per ottimizzare il piano di investimento in base a obiettivi (es. rischio minimo).
+    - Inserire un modulo che *“suggerisce strategie”* di risparmio/investimento tramite clustering di profili utente.
+
+### 4.5 Suggerimenti per la Realizzazione
+
+- **Librerie Utili:**
+    - **pandas** per la gestione e l'analisi dei dati.
+    - **matplotlib** e **seaborn** per la visualizzazione dei dati.
+    - **tkinter / customtkinter / streamlit** per creare interfacce grafiche di base.
+    - **numpy** per operazioni numeriche avanzate.
+- **Dataset:**
+    - Utilizzare dataset pubblici disponibili su siti come Kaggle, UCI Machine Learning Repository o data.gov.
+- **Tutorial e Risorse:**
+    - Seguire tutorial online su **`pandas`**, **`matplotlib`**, **`seaborn`**, **`tkinter` / `customtkinter` / `streamlit`** per familiarizzarsi con queste librerie.
+    - Consultare la documentazione ufficiale per esempi e spiegazioni dettagliate.
+
+### 4.6 Giochi da tavolo
+
+### 4.6.1 Dama (Checkers)
+
+- **Difficoltà:** 🟠 **3/5**
+- Motivo: Richiede gestione eventi, grafica, logica di gioco e turni.
+
+**Descrizione:**
+Un gioco da tavolo per due giocatori dove ogni giocatore cerca di catturare tutte le pedine dell'avversario muovendosi in diagonale.
+
+**Componenti:**
+
+- **Interfaccia grafica:** Creata con **`pygame`**, con una scacchiera 8x8 di pulsanti o canvas.
+- **Logica del gioco:** Implementazione delle regole di movimento e cattura delle pedine, gestione dei turni, e controllo per la vittoria.
+- **Promozione:** Gestione della promozione delle pedine a dama.
+
+**Assets:** https://dani-maccari.itch.io/pixel-checkers
+
+**Bonus opzionali (per versione avanzata):** Tecnica AI **→** *Minimax, Monte Carlo Tree Search, Q-learning.*
+
+- Aggiunta di un *giocatore automatico intelligente*
+- Il bot può migliorare usando *reinforcement learning*.
+
+### 4.6.2 Gioco dell'Oca
+
+- **Difficoltà:** 🟢 **2/5**
+- Motivo: Logica più semplice, ottimo per principianti.
+
+**Descrizione:**
+Un gioco da tavolo classico dove i giocatori avanzano su un percorso tirando un dado e devono affrontare varie sfide.
+
+**Componenti:**
+
+- **Interfaccia grafica:** Creata con **`pygame`**, con un percorso a caselle numerate.
+- **Logica del gioco:** Movimento dei pezzi, gestione degli eventi speciali sulle caselle, e controllo per la vittoria.
+- **Dado virtuale:** Implementazione di un dado che i giocatori possono tirare.
+
+### 4.6.3 Risiko (Risk)
+
+- **Difficoltà:** 🔴 **5/5**
+- Motivo: Strategia complessa, mappe, gestione turni e IA base.
+
+**Descrizione:**
+Un gioco strategico dove i giocatori conquistano territori e cercano di controllare il mondo.
+
+**Componenti:**
+
+- **Interfaccia grafica:** Creata con **`pygame`**, con una mappa del mondo suddivisa in territori.
+- **Logica del gioco:** Gestione dei turni, movimento delle truppe, battaglie, e controllo per la vittoria.
+- **Carte:** Implementazione delle carte obiettivo e rinforzi.
+
+**Bonus opzionali (per versione avanzata):** Tecnica AI **→** *Minimax, Monte Carlo Tree Search, Q-learning.*
+
+- Aggiunta di un *giocatore automatico intelligente*
+- Il bot può migliorare usando *reinforcement learning*.
+
+## 5. Java / C#
+
+<Aside variant="info">
+
+### Descrizione
+
+Questi progetti sono pensati per chi vuole sviluppare applicazioni usando linguaggi ad oggetti per la costruzione di applicazioni desktop o per chi vuole divertirsi a sviluppare qualche giochetto.
+
+N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai programmato in Java o in C#.*
+
+### Prerequisiti consigliati
+
+- conoscenza base della programmazione;
+- conoscenza della programmazione ad oggetti (classi)
+
+### Topics
+
+- GUI (interfaccia grafica);
+- lettura e scrittura su file CSV;
+- lettura e scrittura su file JSON;
+- strutture dati di base;
+</Aside>
+
+<Aside variant="info">
+ℹ️ Per migliorare il design dell’interfaccia in Java, usare: [**FlatLaf](https://www.formdev.com/flatlaf/)**
+Tutorial: https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen
+
+</Aside>
+
+### 🆘 Tutorials
+
+- programmare in **java:** https://www.youtube.com/watch?v=drQK8ciCAjY&ab_channel=CodingwithJohn
+- **lettura e scrittura** in java: https://www.youtube.com/watch?v=ScUJx4aWRi0&ab_channel=CodingwithJohn
+- **GUI** in java: https://www.youtube.com/watch?v=Kmgo00avvEw&ab_channel=BroCode
+- **Json** in java: https://www.youtube.com/watch?v=Hv_a3ZBSO_g&ab_channel=CoderFromScratch
+- programmare in **c#:** https://www.youtube.com/watch?v=gfkTfcpWqAY&ab_channel=ProgrammingwithMosh
+- **lettura e scrittura** in c#: https://www.youtube.com/watch?v=tApBDuVwCrc&ab_channel=tutorialsEU
+- **GUI** in c#: https://www.youtube.com/watch?v=UMc1HLyBHSQ&ab_channel=Simplilearn
+- **Json** in c#: https://www.youtube.com/watch?v=w6M-Bj-tfv4&ab_channel=tutorialsEU-C#
+
+## 💽 Applicazioni
+
+### **1. Gestore Password con generatore randomico**
+
+- **Difficoltà:** 🟠 **3/5**
+- Motivo: Interfaccia ricca, file handling, crittografia.
+
+**Descrizione:** Un'applicazione per generare e gestire password randomiche.
+
+- **Funzionalità:**
+    - Login/Register nell’applicazione.
+    - Generazione di password sicure con criteri personalizzabili.
+    - Salvataggio delle password generate in file.
+    - Ricerca e recupero delle password salvate.
+- **Tecnologie:**
+    - Lettura/scrittura di dati su file JSON per la gestione delle password.
+    - Criptazione e decriptazione delle password salvate.
+    - Interfaccia grafica per la gestione delle password.
+        - Componenti della GUI:
+            - Finestra Principale;
+            - Sezione di Generazione delle Password:
+                - Label "Genera Password";
+                - Campo di Input per Lunghezza Password;
+                - Checkbox per Opzioni di Criteri;
+                - Pulsante "Genera";
+                - Campo di Testo per Visualizzazione Password;
+                - Pulsante "Salva Password";
+            - Sezione di Gestione delle Password Salvate:
+                - Label "Gestione Password" o “Password List” che mostra una lista delle password salvate in cui è possibile:
+                    - eliminare una password;
+                    - modificarla;
+                    - …
+            - Sezione di Criptazione e Decriptazione:
+                - Pulsante "Salva come File Criptato";
+                - Pulsante "Carica File Criptato";
+                - Campo di Testo per Inserimento Chiave di Criptazione;
+            - Sezione di Output Testuale:
+                - Area di Testo per il Feedback / Log;
+        - Funzionalità della GUI:
+            - Generazione delle Password;
+            - Gestione delle Password Salvate;
+            - Criptazione e Decriptazione;
+            - Feedback / Log;
+
+### **2. Applicazione di Gestione delle Finanze Personali**
+
+- **Difficoltà:** 🟠 **3/5**
+- Motivo: CRUD su dati, grafici, GUI ordinata ma gestibile.
+
+**Descrizione:** Un'applicazione per monitorare le entrate e le spese personali.
+
+- **Funzionalità:**
+    - Aggiungere, modificare e rimuovere transazioni.
+    - Categorizzazione delle entrate e delle spese.
+    - Visualizzazione del saldo attuale e delle statistiche mensili.
+- **Tecnologie:**
+    - Lettura/scrittura di dati su file CSV per le transazioni.
+    - Utilizzo di file JSON per la configurazione dell'applicazione e le impostazioni dell'utente.
+    - Interfaccia grafica per la gestione delle finanze personali.
+        - Componenti della GUI:
+            - Finestra Principale;
+            - Sezione di Aggiunta/Modifica delle Transazioni;
+                - Label "Aggiungi/Modifica Transazione";
+                - Campo di Input per la Descrizione della Transazione;
+                - Campo di Input per l'Importo;
+                - Dropdown per la Categoria della Transazione;
+                - Radiobutton per Tipo di Transazione;
+                - Pulsante "Aggiungi/Modifica";
+                - Pulsante "Cancella";
+            - Sezione di Visualizzazione delle Transazioni:
+                - Label "Transazioni";
+                - Tabella delle Transazioni;
+                - Pulsante "Modifica Selezionata";
+                - Pulsante "Rimuovi Selezionata";
+            - Sezione di Visualizzazione del Saldo e delle Statistiche:
+                - Label "Saldo Attuale";
+                - Campo di Testo per il Saldo Attuale;
+                - Label "Statistiche Mensili";
+                - Grafico a Barre per le Statistiche Mensili;
+                - Pulsante "Aggiorna Statistiche";
+            - Sezione di Configurazione e Impostazioni:
+                - Label "Configurazione";
+                - Campo di Input per il File CSV;
+                - Pulsante "Salva Configurazione";
+                - Pulsante "Carica Configurazione";
+            - Sezione di Output Testuale:
+                - Area di Testo per il Feedback / Log
+        - Funzionalità della GUI:
+            - Aggiunta e Modifica delle Transazioni;
+            - Visualizzazione delle Transazioni;
+            - Visualizzazione del Saldo e delle Statistiche;
+            - Configurazione e Impostazioni;
+            - Feedback / Log;
+
+## C/C++
+
+<Aside variant="info">
+
+### Descrizione
+
+Per chi vuole programmare in C / C++
+
+### Prerequisiti consigliati
+
+- conoscenza discreta della programmazione;
+
+### Topics
+
+</Aside>
+
+### 1. **Installatore Automatico con Chocolatey**
+
+- **Linguaggio consigliato:** C++ (più sfidante, ma didattico), alternativa in C# per GUI.
+- **Difficoltà:** 🟢 2**/5**
+
+**Descrizione:**
+Un’applicazione (con o senza GUI) che legge un file di testo (`software.txt`) e installa automaticamente una lista di programmi usando Chocolatey.
+
+**Funzionalità principali:**
+
+- Legge da file `.txt` l’elenco dei pacchetti.
+- Per ogni voce esegue il comando:
+
+    ```bash
+    choco install nomepacchetto -y
+    ```
+
+- Mostra nella console o GUI l’avanzamento (es. “Installing... VLC…”).
+
+**Estensioni opzionali (avanzate ma non obbligatorie):**
+
+- Disinstalla software (`choco uninstall`).
+- Permette di selezionare i programmi da installare via checkbox (solo con GUI).
+
+**Obiettivi didattici:**
+
+- Comprendere input/output da file.
+- Gestione di processi
+- Approccio a tool esterni come **Chocolatey**.
+
+## Unity / Godot
+
+<Aside variant="info">
+
+### Descrizione
+
+Per chi vuole provare a sviluppare un gioco come fanno i veri professionisti! 
+
+- Unity ha una sintassi del codice tipica di c#;
+- Godot ha una sintassi del codice “simile” a python;
+
+Non fatevi spaventare se non sapete nulla sulla modellazione 3D o se non sapete disegnare in 2D. Si può sempre usare qualcosa di gratuito dal web! 😉 Volendo ho già preparato un po di pixel art per chi ne vuole!🚀
+
+*N.B Per chi è interessato ad usare pixel art, consiglio il programma [Piskel](https://www.piskelapp.com/download) che è gratuito e molto valido. Per comodità consigio di fare pixel art 16x16 pixels.*
+
+*N.B. Unity è un programma più pesante di godot che invece è molto leggero (gira bene su qualsiasi PC), quindi assicuratevi di avere un PC decente prima di scaricarlo.*
+
+### Prerequisiti consigliati
+
+- buona conoscenza della programmazione;
+- conoscenza della programmazione object oriented;
+
+### Topics
+
+- animazioni di base
+- GUI
+- 2D / 3D
+- effetti particellari
+</Aside>
+
+### 🆘 Tutorials
+
+- **Unity** tutorial: https://www.youtube.com/watch?v=XtQMytORBmM
+- **Godot** tutorial: https://www.youtube.com/watch?v=LOhfqjmasi0
+
+### 🔗 Link utili
+
+- Pixel art da scaricare: https://itch.io/game-assets/tag-coin/tag-pixel-art
+
+### Videogioco
+
+per questa categoria non sono previsti dei progetti da me proposti. Sentitevi liberi di sbizzarrirvi come meglio credete e lasciatevi trascinare dalla creatività! 🖼️
+
+**Consiglio:** per semplicità vi suggerisco di fare un progetto in 2D.

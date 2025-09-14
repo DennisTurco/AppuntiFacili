@@ -53,13 +53,14 @@ export const sidebar = {
   //   { title: "Dataclass", url: "/informatica/python/Dataclass" },
   //   { title: "Liste", url: "/informatica/python/lista" },
   // ],
-  // "SQL": [
-  //   { title: "Base di dati", url: "/informatica/sql/SQLIntroduzione" },
-  //   { title: "Algebra Relazionale", url: "/informatica/sql/AlgebraRelazionale" },
-  //   { title: "Diagrammi ER", url: "/informatica/sql/DiagrammiER" },
-  //   { title: "SQL: Concetti base", url: "/informatica/sql/sql" },
-  //   { title: "SQL: Trigger", url: "/informatica/sql/Trigger" },
-  // ],
+  "SQL": [
+    { title: "Base di dati", url: "/informatica/sql/1_base-di-dati" },
+    { title: "Algebra Relazionale", url: "/informatica/sql/2_algebra-relazionale" },
+    { title: "Diagrammi ER", url: "/informatica/sql/3_diagrammi-er" },
+    { title: "SQL: Concetti base", url: "/informatica/sql/4_sql-concetti-base" },
+    { title: "SQL: Trigger", url: "/informatica/sql/5_sql-trigger" },
+    { title: "SQL: Trigger", url: "/informatica/sql/6_database-per-esercitarsi" },
+  ],
   // "Strutture Dati": [
   //   { title: "Pila e Coda", url: "/informatica/strutturedati/PilaECoda" },
   //   { title: "Alberi", url: "/informatica/strutturedati/Alberi" },
