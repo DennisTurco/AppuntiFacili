@@ -1,10 +1,10 @@
 ---
-title: "Array Monodimensionali"
+title: "Array monodimensionali"
 draft: false
-lastUpdateDate: "2025-08-27"
-subject: "C"
+lastUpdateDate: "2025-09-14"
+subject: "C++"
 category: "Informatica"
-tags: ["c", "programmazione", "arraymonodimensionali", "medio-difficile"]
+tags: ["c++", "programmazione", "array", "array monodimensionali", "difficile"]
 author: "Dennis Turco"
 videoLesson: false
 ---
@@ -29,7 +29,7 @@ dove:
 - $t$ → tipo;
 - $n$ → costante intera, dimensione;
 
-```c
+```cpp
 #define N 10
 const int M = 100
 
@@ -67,34 +67,34 @@ Per gli array statici e semidinamici, una volta allocata, la dimensione dell'arr
 
 ## 4. Operazioni
 
-### Accesso elemento
+### 4.1 Accesso elemento
 
-```c
+```cpp
 int vett[5] = {2, 0, 1, 6, 3};
 vett[4];  // -> mi riferisco al valore 3
 ```
 
-### Lettura elemento
+### 4.2 Lettura elemento
 
-```c
+```cpp
 int vett[5];
-scanf("%d", &vett[2]); // inserisco un valore nella posizione 3
+cin >> vett[2]; // inserisco un valore nella posizione 3
 ```
 
-### Scrittura elemento
+### 4.3 Scrittura elemento
 
-```c
+```cpp
 int vett[5] = {2, 0, 1, 6, 3};
-printf("%d", vett[2]); //Output: 1
+cout << vett[2]; //Output: 1
 ```
 
 ![array2](../../../assets/for_pages/array2.png)
 
-### Cosa NON si può fare
+### 4.4 Cosa NON si può fare
 
 - NO confronto e assegnamento
 
-    ```c
+    ```cpp
     int A[10];
     int B[10];
 
@@ -104,14 +104,14 @@ printf("%d", vett[2]); //Output: 1
 
 - NO I/O su array
 
-    ```c
+    ```cpp
     int A[10];
 
-    printf("%d", A); // ----> ERRORE
-    scanf("%d", &A);  // ----> ERRORE
+    cout << A; // ----> ERRORE
+    cin >> A;  // ----> ERRORE
     ```
 
-### Soluzione a questi problemi
+### 4.5 Soluzione a questi problemi
 
 per eseguire correttamente operazioni di confronto, assegnamento ed I/O è spesso necessario utilizzare dei **cicli**.
 
@@ -123,39 +123,39 @@ per eseguire correttamente operazioni di confronto, assegnamento ed I/O è spess
 
 - I/O su array:
 
-    *esempio*:  `scanf("%d", &A[3])`
+    *esempio*:  `cin >> A[3]`
 
-    *esempio*:  `printf("%d", A[i])`
+    *esempio*:  `cout << A[i]`
 
 ## 5. Algoritmi principali
 
-### Stampa Array
+### 5.1 Stampa Array
 
-```c
+```cpp
 int vett[5] = {2, 0, 1, 6, 3};
 
 for (int i=0; i<5; i++) {
-    printf("%d ", vett[i]);
+    cout << vett[i] << " ";
 }
 
 // Output: 2 0 1 6 3
 ```
 
-### Leggi Array
+### 5.2 Leggi Array
 
-```c
+```cpp
 int vett[5];
 
 for (int i=0; i<5; i++) {
-    scanf("%d", &vett[i]);
+    cin >> vett[i];
 }
 ```
 
-### Ordinamento Array (Bubble Sort)
+### 5.3 Ordinamento Array (Bubble Sort)
 
 ![array4](https://giancarmelopittala.com/images/articles/bubble-sort.gif)
 
-```c
+```cpp
 int dim = 5;
 int vett[] = {2, 0, 1, 6, 3};
 
@@ -174,9 +174,9 @@ Ragionamento per “swappare” gli elementi di un array tra di loro:
 
 ![array4](../../../assets/for_pages/array4.png)
 
-### Ricerca Massimo/Minimo
+### 5.4 Ricerca Massimo/Minimo
 
-```c
+```cpp
 vett[5] = {2, 5, 1, 0, 3};
 
 int max = vett[0];
@@ -187,7 +187,7 @@ for (int i=0; i<5; i++) {
     }
 }
 
-printf("%d", max);
+cout << max;
 
 // Output: 5
 ```
@@ -198,7 +198,7 @@ printf("%d", max);
 
 [35 Esercizi con gli array](https://ticoprof.wordpress.com/2016/04/26/esercizi-con-gli-array/)
 
-### ESERCIZIO 1
+### 6.1 Esercizio
 
 Leggere un array di interi di 10 posizioni e verificare se è palindromo (ovvero se non cambia ad essere letto dalla prima cella all'ultima o viceversa).
 
@@ -208,15 +208,16 @@ l'array e' palindromo
 <details>
 <summary>💡 Mostra soluzione</summary>
 
-```c
-#include <stdio.h>
+```cpp
+#include <iostream>
+using namespace std;
 
 int main() {
     int a[10];
 
-    printf("inserisci 10 valori: ");
+    cout << "inserisci 10 valori: ";
     for (int i=0; i<10; i++) {
-        scanf("%d", &a[i]);
+        cin >> a[i];
     }
 
     bool palindromo = true;
@@ -227,17 +228,17 @@ int main() {
         }
     }
     if(palindromo) {
-        printf("l'array e' palindromo");
+        cout << "l'array e' palindromo";
     }
     else {
-        printf("l'array NON e' palindromo");
+        cout << "l'array NON e' palindromo";
     }
 }
 ```
 
 </details>
 
-### ESERCIZIO 2
+### 6.2 Esercizio
 
 Leggere un array di 10 interi e stampare solo i numeri che appaiono nell'array una volta soltanto.
 
@@ -247,16 +248,17 @@ inserisci 10 numeri interi:  1 3 5 3 2 0 5 2 3 4
 <details>
 <summary>💡 Mostra soluzione</summary>
 
-```c
-#include <stdio.h>
+```cpp
+#include <iostream>
+using namespace std;
 
 int main(){
     int a[10];
 
     //memorizzo l'array
-    printf("inserisci 10 numeri interi: ");
+    cout << "inserisci 10 numeri interi: ";
     for(int i=0; i<10; i++) {
-        scanf("&d", &a[i]);
+        cin >> a[i];
     }
 
     //per ogni numero dell'array
@@ -271,7 +273,7 @@ int main(){
             }
         }
         if(volte == 1) {
-            printf("%d ", a[i]);
+            cout << a[i] << " ";
         }
     }
     return 0;

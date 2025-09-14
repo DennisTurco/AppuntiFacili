@@ -1,0 +1,201 @@
+---
+title: "Cicli"
+draft: false
+lastUpdateDate: "2025-09-14"
+subject: "C++"
+category: "Informatica"
+tags: ["c++", "programmazione", "cicli", "difficile"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Ciclo For
+
+Quando parliamo di ciclo for parliamo di iterazione definita ovvero di quando abbiamo delle **istruzioni da ripetere** e **conosciamo quante volte** vogliamo **ripeterle**.
+
+### 1.1 Sintassi
+
+Il seguente ciclo scrive per 10 volte sullo schermo la parola “ciao”.
+
+```cpp
+for(int i=0; i<10; i++) {
+   cout << "ciao" << endl;
+}
+```
+
+L'istruzione per richiamare il ciclo **for** si caratterizza è da 4 parti:
+
+- **dichiarazione** (non sempre!) **e assegnazione di una variabile contatore**,
+- **condizione del ciclo**,
+- **aggiornamento della variabile contatore**,
+- **corpo del ciclo**.
+
+nell'esempio precedente:
+
+1. `int i=0`  $\rightarrow$  Dichiarazione e assegnazione di una variabile contatore;
+2. `i < 10`   $\rightarrow$  Condizione del ciclo for;
+3. `i++`      $\rightarrow$  Aggiornamento della variabile contatore;
+
+### 1.2 Esempi
+
+1. esempio 1:
+
+    ```cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5 volte
+
+        int val2 = 0;
+
+        for (int i=0; i<5; i++) {
+            val2++;
+        }
+
+        for (int a=0; a<5; a++) {
+            val2++;
+        }
+
+        cout << "Valore = " << val2 << endl << endl;
+    }
+    ```
+
+2. esempio 2:
+
+    ```cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5 volte * 5 volte
+
+        int val = 1;
+
+        for (int i=0; i<5; i++) {
+            for (int a=0; a<5; a++) {
+                cout << "i = " << i << endl;
+                cout << "a = " << a << endl;
+                cout << "Valore = " << val << endl << endl;
+                val++; //  => val = val + 1;
+            }
+        }
+
+    }
+    ```
+
+3. esempio 3:
+
+    ```cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5*5 volte
+        // il terzo ciclo viene ripetuto 5*5*3 volte
+
+        int val3 = 1;
+
+        for (int i = 0; i < 5; i++) {
+            for (int a = 0; a < 5; a++) {
+                for (int x = 0; x < 3; x++) {
+                    cout << "i = " << i << endl;
+                    cout << "a = " << a << endl;
+                    cout << "x = " << x << endl;
+                    cout << "Valore = " << val3 << endl << endl;
+                    val3++; //  => val = val + 1;
+                }
+            }
+        }
+    }
+    ```
+
+## 2. Ciclo While
+
+L'istruzione **while** prevede che prima venga valutata la *condizione* e poi, se è vera, verranno eseguite le *operazioni* all'interno del ciclo. Ecco perchè si definisce **pre-condizionale**.
+
+Quando la condizione diventa falsa il ciclo si interrompe e si passa all'istruzione successiva.
+
+Il ciclo potrebbe **non essere mai eseguito** se la condizione non fosse vera in partenza.
+
+Il ciclo potrebbe essere **infinito** se la condizione risultasse sempre vera. In questo caso si genera un **loop**.
+
+### 2.1 Sintassi
+
+L'utilizzo tipico del while prevede quasi sempre l'esecuzione di un blocco di istruzioni, quindi quasi sempre troviamo il costrutto espresso nella forma:
+
+```cpp
+while(condizione) {
+    // Istruzioni da eseguire
+}
+```
+
+### 2.2 Esempio
+
+Generiamo i numeri da 0 a 10, a step di 2, utilizzando il ciclo while in C++
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int count = 0;
+    while(count <= 10) {
+        cout << count << endl;
+        count = count + 2;
+    }
+
+    return 0;
+}
+```
+
+## 3. iclo Do-While
+
+L'idea alla base del ciclo **do-while** sta nel fatto che prima si entra nel ciclo (viene eseguito il corpo del ciclo), poi si controllo.
+
+In altre parole il corpo del ciclo do-while viene eseguito almeno una volta. 
+
+La semantica del costrutto **do-while** è dunque la seguente:
+
+1. Si esegue l'istruzione (o più di una);
+2. Si valuta la condizione, la quale può essere vera o falsa.
+3. Se la condizione è vera si ritorna al punto 1; altrimenti si passa all'istruzione successiva.
+
+## **3.1 Sintassi**
+
+troviamo il costrutto espresso nella forma:
+
+```cpp
+do {
+    // istruzioni;
+} while (condizione);
+```
+
+## 3.2 Esempio
+
+inserire un valore finchè non viene letto un valore negativo.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int valore;
+
+    do {
+        cout << "Inserire valore negativo: ";
+        cin >> valore;
+    } while (valore >= 0);
+    // il ciclo continua fintanto che non si inserisce un valore negativo
+}
+```
+
+## 4. Esercizi
+
+[MIX esercizi if/for/while in C++](https://ticoprof.wordpress.com/mix-esercizi-if-for-while-cpp/)

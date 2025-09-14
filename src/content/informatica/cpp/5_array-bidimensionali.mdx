@@ -1,0 +1,84 @@
+---
+title: "Array bidimensionali"
+draft: false
+lastUpdateDate: "2025-09-14"
+subject: "C++"
+category: "Informatica"
+tags: ["c++", "programmazione", "array", "array bisimensionali", "matrici", "difficile"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Descrizione
+
+Matrici (array bidimensionali) Un array bidimensionale, anche detto matrice, è una variabile strutturata tale che:
+
+- Gli elementi sono tutti dello stesso tipo;
+- Il meccanismo di accesso (diretto) ai suoi elementi consiste di due espressioni intere (indici);
+
+## 2. Dichiarazione
+
+```cpp
+int C[4][3];
+
+float f[M][N];
+
+char b[2][3]={{'a', 'b', 'c'},{'d', 'e', 'f'}}
+
+int A[ ][3]= { 1,2,3,4,5,6,7,8,9 };
+```
+
+## 3. Operazioni
+
+### 3.1 Accesso elemento
+
+```cpp
+int matrice[3][3] = {{2, 4, 6}, {5, 1, 8}, {4, 3, 0}};
+matrice[0][2];  // -> mi riferisco al valore 6
+```
+
+### 3.2 Lettura elemento
+
+```cpp
+int matrice[3][3] = {{2, 4, 6}, {5, 1, 8}, {4, 3, 0}};
+cin >> matrice[0][2];
+// inserisco un valore nella posizione 0,2
+```
+
+### 3.3 Scrittura elemento
+
+```cpp
+int matrice[3][3] = {{2, 4, 6}, {5, 1, 8}, {4, 3, 0}};
+cout << matrice[1][2]; //Output: 8
+```
+
+## 4. Algoritmi principali
+
+### 4.1 Stampa Matrice
+
+```cpp
+int matrice[3][3] = {{2, 4, 6}, {5, 1, 8}, {4, 3, 0}};
+
+for(int i=0; i<3; i++) {
+    for(int j=0; j<3; j++) {
+        cout << matrice[i][j] << "  ";
+    }
+    cout << endl;
+}
+```
+
+### 4.2 Leggi Matrice
+
+```cpp
+int matrice[3][3];
+
+for(int i=0; i<3; i++) {
+    for(int j=0; j<3; j++) {
+        cin >> matrice[i][j];
+    }
+}
+```
+
+## 5. Esercizi
+
+[20 Esercizi con matrici (array bidimensionali)](https://ticoprof.wordpress.com/2020/04/17/esercizi-con-array-bidimensionali-in-cplusplus/)
