@@ -1,13 +1,10 @@
 ---
 import { getCollection } from "astro:content";
-import InformaticaLayout from "@/layouts/InformaticaLayout.astro";
-import { sidebar } from "@/data/sidebarInformatica.ts";
-import Aside from "../../components/Aside.astro";
-import Quiz from '../../components/Quiz.jsx';
-
+import MatematicaLayout from "@/layouts/MatematicaLayout.astro";
+import { sidebar } from "@/data/sidebarMatematica.ts";
 
 export async function getStaticPaths() {
-  const entries = await getCollection("informatica");
+  const entries = await getCollection("matematica");
   return entries.map(e => ({
     params: { slug: e.slug },
     props: { entry: e },
@@ -25,10 +22,10 @@ const frontmatter = {
   author: entry.data.author,
   tags: entry.data.tags,
   videoLesson: entry.data.videoLesson,
-  url: `/informatica/${entry.slug}`,
+  url: `/matematica/${entry.slug}`,
 };
 ---
 
-<InformaticaLayout {frontmatter} lessons={sidebar}  {...entry.data}>
-  <Content components={{ Aside: Aside, Quiz: Quiz }} />
-</InformaticaLayout>
+<MatematicaLayout {frontmatter} lessons={sidebar}  {...entry.data}>
+  <Content />
+</MatematicaLayout>
