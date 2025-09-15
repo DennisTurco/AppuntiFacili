@@ -141,14 +141,14 @@ int main() {
 
     // inserimento
     printf("Inserisci il nome della classe (1A, 2B..): ");
-    scanf("%s", s[i].nome);
+    scanf("%s", s.nome);
     printf("Inserisci il numero di alunni: ");
-    scanf("%d", &s[i].alunni);
+    scanf("%d", &s.alunni);
     printf("\n");
 
     // stampa
-    printf("Nome della classe: %s\n", s[i].nome);
-    printf("Numero alunni: %d\n", s[i].alunni);
+    printf("Nome della classe: %s\n", s.nome);
+    printf("Numero alunni: %d\n", s.alunni);
     printf("\n");
 
     return 0;
