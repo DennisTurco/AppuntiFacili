@@ -2,20 +2,18 @@ import React, { useEffect, useRef } from 'react';
 
 const PDF_VIEW_SCRIPT_URL = "https://acrobatservices.adobe.com/view-sdk/viewer.js";
 const ADOBE_CLIENT_ID = "bf958fb9666e4943a0a64fbd4473ab4c";
-const VIEWER_ID = "pdf-viewer-div"; // Use a static ID
 
 export default function PdfViewer({ src, title, height = "800px" }) {
   const viewerRef = useRef(null);
+  const viewerId = useRef(`adobe-pdf-viewer-${Math.random().toString(36).substring(2, 9)}`);
 
   useEffect(() => {
-    // Carica lo script di Adobe solo se non è già presente
     const loadAdobeScript = () => {
       return new Promise((resolve) => {
         if (window.AdobeDC) {
           resolve();
           return;
         }
-
         const existingScript = document.querySelector(`script[src="${PDF_VIEW_SCRIPT_URL}"]`);
         if (existingScript) {
           existingScript.onload = () => resolve();
@@ -29,12 +27,11 @@ export default function PdfViewer({ src, title, height = "800px" }) {
       });
     };
 
-    // Inizializza il visualizzatore Adobe
     loadAdobeScript().then(() => {
-      if (window.AdobeDC) {
+      if (viewerRef.current && window.AdobeDC) {
         const adobeDCView = new window.AdobeDC.View({
           clientId: ADOBE_CLIENT_ID,
-          divId: VIEWER_ID // Use the static ID here
+          divId: viewerId.current // Usa l'ID unico
         });
 
         adobeDCView.previewFile({
@@ -43,12 +40,11 @@ export default function PdfViewer({ src, title, height = "800px" }) {
         }, { embedMode: "IN_LINE" });
       }
     });
-
   }, [src, title]);
 
   return (
     <div
-      id={VIEWER_ID} // Ensure the ID on the element matches the divId in the script
+      id={viewerId.current} // Assegna l'ID unico all'elemento DOM
       ref={viewerRef}
       style={{ height }}
     ></div>
