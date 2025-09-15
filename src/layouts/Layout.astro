@@ -7,6 +7,7 @@ import "@fontsource-variable/bricolage-grotesque";
 import { ViewTransitions } from 'astro:transitions';
 import ToasterProvider from "@/components/ToasterProvider.jsx";
 import "../styles/global.css";
+import CopyToClipboard from "../components/CopyToClipboard";
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
 
@@ -68,56 +69,7 @@ export interface Props {
     </script>
 
     <!-- Copy code to clipboard -->
-     <script>
-      let copyButtonLabel = "Copia il codice";
-      let codeBlocks = Array.from(document.querySelectorAll("pre"));
-
-      for (let codeBlock of codeBlocks) {
-        if (!codeBlock.parentNode) continue;
-
-        let codeEl = codeBlock.querySelector("code");
-        if (!codeEl) continue;
-
-        if (codeEl.className.toLowerCase().includes("mermaid")) continue;
-
-        let wrapper = document.createElement("div");
-        wrapper.style.position = "relative";
-
-        let copyButton = document.createElement("button");
-        copyButton.className = "copy-code";
-        copyButton.innerHTML = copyButtonLabel;
-        copyButton.style.position = "absolute";
-        copyButton.style.top = "5px";
-        copyButton.style.right = "5px";
-
-        codeBlock.setAttribute("tabindex", "0");
-
-        codeBlock.parentNode.insertBefore(wrapper, codeBlock);
-        wrapper.appendChild(codeBlock);
-        wrapper.appendChild(copyButton);
-
-        copyButton.addEventListener("click", async () => {
-          await copyCode(codeBlock, copyButton);
-        });
-      }
-
-      async function copyCode(block, button) {
-        let code = block.querySelector("code");
-        if (!code) return;
-
-        let text = code.innerText;
-
-        try {
-          await navigator.clipboard.writeText(text);
-          button.innerText = "Codice copiato";
-          setTimeout(() => {
-            button.innerText = copyButtonLabel;
-          }, 700);
-        } catch (err) {
-          console.error("Failed to copy:", err);
-        }
-      }
-      </script>
+    <CopyToClipboard client:load />
 
   </head>
   <body>

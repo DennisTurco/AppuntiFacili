@@ -39,10 +39,10 @@ Se scegliete di lavorare in gruppo, è consigliabile utilizzare un sistema come 
 | Gestione Password con generatore sicuro | Java / C# | 🟠 3 |  | Generatore e archivio sicuro di password con GUI, salvataggio criptato. | Utile per esercitarsi su GUI, file JSON e crittografia base. |
 | Gestione Finanze Personali | Java / C# | 🟠 3 | ✅ | CRUD di entrate/uscite con categorizzazione e statistiche mensili in grafico. |  |
 
-## 4. Python
+## 🟨 4. Python
 
 <Aside variant="info">
-### Descrizione
+**Descrizione**
 
 Questi progetti sono pensati per chi desidera sviluppare applicazioni di data analysis per la creazione di report, lo studio dei dati e la generazione di grafici, oppure per chi vuole divertirsi a sviluppare qualche gioco da tavolo con interfaccia grafica.
 
@@ -50,11 +50,15 @@ I progetti qui sotto elencati possono essere sviluppati come applicazione deskto
 
 N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai programmato in python.*
 
-### Prerequisiti consigliati
+<br/>
+
+**Prerequisiti consigliati**
 
 - conoscenza base della programmazione;
 
-### Topics
+<br/>
+
+**Topics**
 
 - GUI (interfaccia grafica);
 - data analisys;
@@ -66,14 +70,14 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
 
 ### 4.1 Tutorials
 
-- programmare in **python:** https://www.youtube.com/watch?v=kqtD5dpn9C8&ab_channel=ProgrammingwithMosh
-- matplotlib per **analisi dei dati:** https://www.youtube.com/watch?v=OZOOLe2imFo&ab_channel=NeuralNine
-- pygame per **giochi:** https://www.youtube.com/watch?v=y9VG3Pztok8&ab_channel=CodingWithRuss
-- piattaforma (scegletene una):
+- [programmare in python](https://www.youtube.com/watch?v=kqtD5dpn9C8&ab_channel=ProgrammingwithMosh)
+- [matplotlib per analisi dei dati](https://www.youtube.com/watch?v=OZOOLe2imFo&ab_channel=NeuralNine)
+- [pygame per giochi](https://www.youtube.com/watch?v=y9VG3Pztok8&ab_channel=CodingWithRuss)
+- [piattaforma (scegletene una):
     - Desktop: tkinter / **customtkinter**
     - Web: **Streamlit**
 
-### 4.2 Applicazioni di analisi dei dati
+### 💽 4.2 Applicazioni di analisi dei dati
 
 Questi progetti forniranno una buona introduzione all'analisi dei dati e allo sviluppo di interfacce grafiche, oltre a essere divertenti e istruttivi.
 
@@ -107,7 +111,7 @@ Scarica un dataset di dati meteorologici (ad esempio, temperature giornaliere, p
         - Generazione e Visualizzazione del Grafico;
         - Salvataggio del Grafico;
 
-### 4.3 Analisi dei Dati sui Social Media
+### 4.2.2 Analisi dei Dati sui Social Media
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: Integrazione con API, analisi testuale, GUI intermedia.
@@ -152,7 +156,7 @@ Scaricare ed analizzare i dati relativi a tweet o post su un certo argomento per
 - Clustering dei tweet per individuare "topic nascosti".
 - Previsione del numero di tweet futuri su una tematica con modelli time series.
 
-### 4.4 Simulatore di Previsioni Finanziarie Personali con Random Walk
+### 4.2.3 Simulatore di Previsioni Finanziarie Personali con Random Walk
 
 **Difficoltà:** 🔴 5/5
 
@@ -160,7 +164,7 @@ Scaricare ed analizzare i dati relativi a tweet o post su un certo argomento per
 
 **Descrizione:**
 
-Questa applicazione simula l’evoluzione del patrimonio personale nel tempo (es. 10, 20, 30 anni), partendo da parametri come:
+Questa applicazione simula l'evoluzione del patrimonio personale nel tempo (es. 10, 20, 30 anni), partendo da parametri come:
 
 - età,
 - capitale liquido attuale,
@@ -170,13 +174,13 @@ Questa applicazione simula l’evoluzione del patrimonio personale nel tempo (es
 - inflazione stimata,
 - condizioni abitative (affitto, mutuo, mantenuto).
 - Rendimento medio atteso degli investimenti (% annuo)
-    - default: 4–7%
+    - default: 4-7%
 - Deviazione standard dei rendimenti (per il modello gaussiano)
-    - default: 10–15% (maggiore instabilità = simulazioni più varie)
+    - default: 10-15% (maggiore instabilità = simulazioni più varie)
 - Percentuale spese variabili (oscillazione mensile)
     - per simulare mesi con più o meno spese (es. imprevisti o ferie)
 - Probabilità di eventi imprevisti
-    - esempio: ogni 5 anni c’è il 30% di probabilità di una spesa straordinaria
+    - esempio: ogni 5 anni c'è il 30% di probabilità di una spesa straordinaria
 - Crescita stipendio/entrate annuale prevista (%)
     - per studenti che entreranno nel mondo del lavoro
     - o per tenere conto di promozioni / inflazione salariale
@@ -192,10 +196,10 @@ Questa applicazione simula l’evoluzione del patrimonio personale nel tempo (es
 Usare un modello **stocastico** per generare **30+ scenari differenti** di crescita/decrescita del patrimonio, basati su una **random walk gaussiana**:
 
 > Ogni anno/mese il capitale evolve in base a un rendimento simulato con distribuzione normale, centrato su una media attesa (es. 4% annuo) e una deviazione standard.
-> 
-> 
+>
+>
 > Questo approccio imita i rendimenti variabili reali del mercato, permettendo una simulazione più realistica del futuro.
-> 
+>
 
 **Componenti:**
 
@@ -220,7 +224,7 @@ Usare un modello **stocastico** per generare **30+ scenari differenti** di cresc
     - Utilizzare **reinforcement learning** per ottimizzare il piano di investimento in base a obiettivi (es. rischio minimo).
     - Inserire un modulo che *“suggerisce strategie”* di risparmio/investimento tramite clustering di profili utente.
 
-### 4.5 Suggerimenti per la Realizzazione
+### 4.3 Suggerimenti per la Realizzazione
 
 - **Librerie Utili:**
     - **pandas** per la gestione e l'analisi dei dati.
@@ -233,7 +237,7 @@ Usare un modello **stocastico** per generare **30+ scenari differenti** di cresc
     - Seguire tutorial online su **`pandas`**, **`matplotlib`**, **`seaborn`**, **`tkinter` / `customtkinter` / `streamlit`** per familiarizzarsi con queste librerie.
     - Consultare la documentazione ufficiale per esempi e spiegazioni dettagliate.
 
-### 4.6 Giochi da tavolo
+### 🕹 4.6 Giochi da tavolo
 
 ### 4.6.1 Dama (Checkers)
 
@@ -289,22 +293,26 @@ Un gioco strategico dove i giocatori conquistano territori e cercano di controll
 - Aggiunta di un *giocatore automatico intelligente*
 - Il bot può migliorare usando *reinforcement learning*.
 
-## 5. Java / C#
+## 🟩 5. Java / C#
 
 <Aside variant="info">
 
-### Descrizione
+**Descrizione**
 
 Questi progetti sono pensati per chi vuole sviluppare applicazioni usando linguaggi ad oggetti per la costruzione di applicazioni desktop o per chi vuole divertirsi a sviluppare qualche giochetto.
 
 N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai programmato in Java o in C#.*
 
-### Prerequisiti consigliati
+<br/>
+
+**Prerequisiti consigliati**
 
 - conoscenza base della programmazione;
 - conoscenza della programmazione ad oggetti (classi)
 
-### Topics
+<br/>
+
+**Topics**
 
 - GUI (interfaccia grafica);
 - lettura e scrittura su file CSV;
@@ -313,25 +321,25 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
 </Aside>
 
 <Aside variant="info">
-ℹ️ Per migliorare il design dell’interfaccia in Java, usare: [**FlatLaf](https://www.formdev.com/flatlaf/)**
-Tutorial: https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen
+ℹ️ Per migliorare il design dell'interfaccia in Java, usare [FlatLaf](https://www.formdev.com/flatlaf/) $\rightarrow$
+[Tutorial](https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen)
 
 </Aside>
 
-### 🆘 Tutorials
+### 5.1 Tutorials
 
-- programmare in **java:** https://www.youtube.com/watch?v=drQK8ciCAjY&ab_channel=CodingwithJohn
-- **lettura e scrittura** in java: https://www.youtube.com/watch?v=ScUJx4aWRi0&ab_channel=CodingwithJohn
-- **GUI** in java: https://www.youtube.com/watch?v=Kmgo00avvEw&ab_channel=BroCode
-- **Json** in java: https://www.youtube.com/watch?v=Hv_a3ZBSO_g&ab_channel=CoderFromScratch
-- programmare in **c#:** https://www.youtube.com/watch?v=gfkTfcpWqAY&ab_channel=ProgrammingwithMosh
-- **lettura e scrittura** in c#: https://www.youtube.com/watch?v=tApBDuVwCrc&ab_channel=tutorialsEU
-- **GUI** in c#: https://www.youtube.com/watch?v=UMc1HLyBHSQ&ab_channel=Simplilearn
-- **Json** in c#: https://www.youtube.com/watch?v=w6M-Bj-tfv4&ab_channel=tutorialsEU-C#
+- [programmare in java](https://www.youtube.com/watch?v=drQK8ciCAjY&ab_channel=CodingwithJohn)
+- [lettura e scrittura in java](https://www.youtube.com/watch?v=ScUJx4aWRi0&ab_channel=CodingwithJohn)
+- [GUI in java](https://www.youtube.com/watch?v=Kmgo00avvEw&ab_channel=BroCode)
+- [Json in java](https://www.youtube.com/watch?v=Hv_a3ZBSO_g&ab_channel=CoderFromScratch)
+- [programmare in c#](https://www.youtube.com/watch?v=gfkTfcpWqAY&ab_channel=ProgrammingwithMosh)
+- [lettura e scrittura in c#](https://www.youtube.com/watch?v=tApBDuVwCrc&ab_channel=tutorialsEU)
+- [GUI in c#](https://www.youtube.com/watch?v=UMc1HLyBHSQ&ab_channel=Simplilearn)
+- [Json in c#](https://www.youtube.com/watch?v=w6M-Bj-tfv4&ab_channel=tutorialsEU-C#)
 
-## 💽 Applicazioni
+### 5.2 💽 Applicazioni
 
-### **1. Gestore Password con generatore randomico**
+### 5.2.1 Gestore Password con generatore randomico
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: Interfaccia ricca, file handling, crittografia.
@@ -339,7 +347,7 @@ Tutorial: https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen
 **Descrizione:** Un'applicazione per generare e gestire password randomiche.
 
 - **Funzionalità:**
-    - Login/Register nell’applicazione.
+    - Login/Register nell'applicazione.
     - Generazione di password sicure con criteri personalizzabili.
     - Salvataggio delle password generate in file.
     - Ricerca e recupero delle password salvate.
@@ -373,7 +381,7 @@ Tutorial: https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen
             - Criptazione e Decriptazione;
             - Feedback / Log;
 
-### **2. Applicazione di Gestione delle Finanze Personali**
+### 5.2.2 Applicazione di Gestione delle Finanze Personali
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: CRUD su dati, grafici, GUI ordinata ma gestibile.
@@ -423,40 +431,44 @@ Tutorial: https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen
             - Configurazione e Impostazioni;
             - Feedback / Log;
 
-## C/C++
+## 🟨 6. C/C++
 
 <Aside variant="info">
 
-### Descrizione
+**Descrizione**
 
 Per chi vuole programmare in C / C++
 
-### Prerequisiti consigliati
+<br/>
+
+**Prerequisiti consigliati**
 
 - conoscenza discreta della programmazione;
 
-### Topics
+<br/>
+
+**Topics**
 
 </Aside>
 
-### 1. **Installatore Automatico con Chocolatey**
+### 6.1 Installatore Automatico con Chocolatey
 
 - **Linguaggio consigliato:** C++ (più sfidante, ma didattico), alternativa in C# per GUI.
 - **Difficoltà:** 🟢 2**/5**
 
 **Descrizione:**
-Un’applicazione (con o senza GUI) che legge un file di testo (`software.txt`) e installa automaticamente una lista di programmi usando Chocolatey.
+Un'applicazione (con o senza GUI) che legge un file di testo (`software.txt`) e installa automaticamente una lista di programmi usando Chocolatey.
 
 **Funzionalità principali:**
 
-- Legge da file `.txt` l’elenco dei pacchetti.
+- Legge da file `.txt` l'elenco dei pacchetti.
 - Per ogni voce esegue il comando:
 
     ```bash
     choco install nomepacchetto -y
     ```
 
-- Mostra nella console o GUI l’avanzamento (es. “Installing... VLC…”).
+- Mostra nella console o GUI l'avanzamento (es. “Installing... VLC…”).
 
 **Estensioni opzionali (avanzate ma non obbligatorie):**
 
@@ -469,11 +481,11 @@ Un’applicazione (con o senza GUI) che legge un file di testo (`software.txt`) 
 - Gestione di processi
 - Approccio a tool esterni come **Chocolatey**.
 
-## Unity / Godot
+## 🟦 7. Unity / Godot
 
 <Aside variant="info">
 
-### Descrizione
+**Descrizione**
 
 Per chi vuole provare a sviluppare un gioco come fanno i veri professionisti! 
 
@@ -482,16 +494,19 @@ Per chi vuole provare a sviluppare un gioco come fanno i veri professionisti!
 
 Non fatevi spaventare se non sapete nulla sulla modellazione 3D o se non sapete disegnare in 2D. Si può sempre usare qualcosa di gratuito dal web! 😉 Volendo ho già preparato un po di pixel art per chi ne vuole!🚀
 
-*N.B Per chi è interessato ad usare pixel art, consiglio il programma [Piskel](https://www.piskelapp.com/download) che è gratuito e molto valido. Per comodità consigio di fare pixel art 16x16 pixels.*
+* *N.B Per chi è interessato ad usare pixel art, consiglio il programma [Piskel](https://www.piskelapp.com/download) che è gratuito e molto valido. Per comodità consigio di fare pixel art 16x16 pixels.*
+* *N.B. Unity è un programma più pesante di godot che invece è molto leggero (gira bene su qualsiasi PC), quindi assicuratevi di avere un PC decente prima di scaricarlo.*
 
-*N.B. Unity è un programma più pesante di godot che invece è molto leggero (gira bene su qualsiasi PC), quindi assicuratevi di avere un PC decente prima di scaricarlo.*
+<br/>
 
-### Prerequisiti consigliati
+**Prerequisiti consigliati**
 
 - buona conoscenza della programmazione;
 - conoscenza della programmazione object oriented;
 
-### Topics
+<br/>
+
+**Topics**
 
 - animazioni di base
 - GUI
@@ -499,16 +514,16 @@ Non fatevi spaventare se non sapete nulla sulla modellazione 3D o se non sapete 
 - effetti particellari
 </Aside>
 
-### 🆘 Tutorials
+### 7.1 Tutorials
 
-- **Unity** tutorial: https://www.youtube.com/watch?v=XtQMytORBmM
-- **Godot** tutorial: https://www.youtube.com/watch?v=LOhfqjmasi0
+- [Unity tutorial](https://www.youtube.com/watch?v=XtQMytORBmM)
+- [Godot tutorial](https://www.youtube.com/watch?v=LOhfqjmasi0)
 
-### 🔗 Link utili
+### 7.2 Link utili
 
-- Pixel art da scaricare: https://itch.io/game-assets/tag-coin/tag-pixel-art
+- [Pixel art da scaricare](https://itch.io/game-assets/tag-coin/tag-pixel-art)
 
-### Videogioco
+### 7.3 Videogioco
 
 per questa categoria non sono previsti dei progetti da me proposti. Sentitevi liberi di sbizzarrirvi come meglio credete e lasciatevi trascinare dalla creatività! 🖼️
 

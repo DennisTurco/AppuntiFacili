@@ -2,6 +2,8 @@
 import Layout from "./Layout.astro";
 import { getFormattedDate } from "@/utils/all";
 import { Icon } from "astro-icon/components";
+import LessonSearch from "../components/LessonSearch";
+import ScrollOnTop from "../components/ScrollOnTop";
 
 const { frontmatter, lessons: rawLessons } = Astro.props;
 
@@ -179,81 +181,7 @@ const lessons = rawLessons as LessonsType;
   </div>
 
   <!-- Script ricerca lezioni -->
-  <script>
-  const searchInput = document.getElementById("lesson-search") as HTMLInputElement | null;
-  const lessonContainers = Array.from(document.querySelectorAll<HTMLDivElement>("#lessons-list > div"));
-
-  searchInput?.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-
-    lessonContainers.forEach((container) => {
-      let anyVisible = false;
-      const items = Array.from(container.querySelectorAll<HTMLLIElement>("li"));
-
-      items.forEach((item) => {
-        const title = item.dataset.title || "";
-        const match = title.includes(query);
-
-        // Cast item a HTMLElement per usare style
-        const htmlItem = item as HTMLElement;
-        htmlItem.style.display = match ? "block" : "none";
-
-        if (match) anyVisible = true;
-      });
-
-      // Mostra/nascondi il container se ci sono elementi visibili
-      const htmlContainer = container as HTMLElement;
-      htmlContainer.style.display = anyVisible ? "block" : "none";
-    });
-  });
-</script>
-
-  <!-- Script Table of Contents -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const content = document.getElementById("lesson-content");
-      const toc = document.getElementById("toc");
-      if (!content || !toc) return;
-
-      const headers = Array.from(content.querySelectorAll("h2, h3, h4"));
-      headers.forEach((header) => {
-        const id =
-          header.id ||
-          header.textContent?.trim().toLowerCase().replace(/\s+/g, "-");
-        if (!id) return;
-        header.id = id;
-
-        const li = document.createElement("li");
-        li.className =
-          header.tagName.toLowerCase() === "h3"
-            ? "ml-4"
-            : header.tagName.toLowerCase() === "h4"
-              ? "ml-8"
-              : "";
-        const a = document.createElement("a");
-        a.href = `#${id}`;
-        a.innerText = header.textContent || "";
-        a.className = "hover:text-blue-600 transition";
-        li.appendChild(a);
-        toc.appendChild(li);
-      });
-    });
-  </script>
-
+  <LessonSearch client:load />
   <!-- Script scroll-top -->
-  <script>
-    const scrollTopBtn = document.getElementById("scrollTopBtn");
-
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 300) {
-        scrollTopBtn?.classList.remove("hidden");
-      } else {
-        scrollTopBtn?.classList.add("hidden");
-      }
-    });
-
-    scrollTopBtn?.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  </script>
+  <ScrollOnTop client:load />
 </Layout>
