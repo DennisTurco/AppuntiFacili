@@ -4,27 +4,43 @@ import Layout from "@/layouts/Layout.astro";
 import Container from "@/components/container.astro";
 import { Icon } from "astro-icon/components";
 
-// Ottieni tutte le lezioni pubblicate
 let entries = await getCollection("matematica", ({ data }) => {
   return !data.draft && data.lastUpdateDate < new Date();
 });
 
-// Ordina per numero nel nome file (slug)
 entries = entries.sort((a, b) => {
   return a.slug.localeCompare(b.slug, undefined, { numeric: true });
 });
 
-// Tipi
 type LessonEntry = typeof entries[number];
 type ByLanguage = Record<string, LessonEntry[]>;
 
-// Raggruppa per linguaggio in base allo slug
 const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
   const [lang] = entry.slug.split("/");
   if (!acc[lang]) acc[lang] = [];
   acc[lang].push(entry);
   return acc;
 }, {} as ByLanguage);
+
+const categoriesOrder = [
+  "numeri",
+  "polinomi",
+  "equazioni",
+  "logaritmi",
+  "limiti",
+  "derivate",
+  "altro",
+];
+
+const icons: Record<string, string> = {
+  numeri: "fa6-solid:hashtag",
+  polinomi: "fa6-solid:superscript",
+  equazioni: "fa6-solid:equals",
+  logaritmi: "fa6-solid:subscript",
+  limiti: "fa6-solid:infinity",
+  derivate: "fa6-solid:chart-line",
+  altro: "fa6-solid:bookmark",
+};
 ---
 
 <Layout title="Matematica">
@@ -44,47 +60,28 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
         </p>
       </div>
 
-          {
-            Object.entries(byLanguage).map(([category, lessons]) => (
-              <div>
-                <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
-                  {category === "numeri" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "polinomi" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "equazioni" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "logaritmi" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "limiti" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "derivate" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  {category === "altro" && (
-                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
-                  )}
-                  <span class="uppercase">{category}</span>
-                </h3>
-                <ul class="list-disc pl-6 space-y-2">
-                  {lessons.map((lesson) => (
-                    <li>
-                      <a
-                        href={`/matematica/${lesson.slug}`}
-                        class="text-blue-600 hover:underline">
-                        {lesson.data.title || lesson.slug}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
+          {categoriesOrder.map((category) =>
+  byLanguage[category] && (
+    <div>
+      <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
+        <Icon name={icons[category]} class="text-gray-700" />
+        <span class="uppercase">{category}</span>
+      </h3>
+      <ul class="list-disc pl-6 space-y-2">
+        {byLanguage[category].map((lesson) => (
+          <li>
+            <a
+              href={`/matematica/${lesson.slug}`}
+              class="text-blue-600 hover:underline"
+            >
+              {lesson.data.title || lesson.slug}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+)}
         </div>
     </div>
   </Container>
