@@ -3,12 +3,14 @@ import { useEffect } from "react";
 export default function Toc() {
   useEffect(() => {
     const content = document.getElementById("lesson-content");
-    const toc = document.getElementById("toc");
+    const toc = document.getElementById("toc-container");
     if (!content || !toc) return;
 
-    toc.innerHTML = ""; // reset ogni volta
+    toc.innerHTML = ""; // reset TOC
 
-    const headers = Array.from(content.querySelectorAll("h2, h3, h4"));
+    const headers = Array.from(content.querySelectorAll("h2, h3, h4")) as HTMLElement[];
+    const links: HTMLAnchorElement[] = [];
+
     headers.forEach((header) => {
       const id =
         header.id ||
@@ -31,8 +33,36 @@ export default function Toc() {
 
       li.appendChild(a);
       toc.appendChild(li);
+      links.push(a);
     });
+
+    // Funzione per evidenziare la sezione corrente
+    const onScroll = () => {
+      const scrollPos = window.scrollY + 120; // offset per top
+      let currentIndex = -1;
+
+      headers.forEach((header, idx) => {
+        if (header.offsetTop <= scrollPos) {
+          currentIndex = idx;
+        }
+      });
+
+      links.forEach((link, idx) => {
+        if (idx === currentIndex) {
+          link.classList.add("font-bold", "text-blue-600");
+        } else {
+          link.classList.remove("font-bold", "text-blue-600");
+        }
+      });
+    };
+
+    window.addEventListener("scroll", onScroll);
+    onScroll(); // run iniziale
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
-  return null; // non renderizza nulla, solo logica
+  return null;
 }

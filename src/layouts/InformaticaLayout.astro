@@ -145,15 +145,6 @@ const lessons = rawLessons as LessonsType;
         )}
 
         <slot />
-
-        <div class="text-center mt-8">
-          <a
-            href="/informatica"
-            class="inline-flex items-center gap-2 bg-gray-200 px-5 py-3 rounded-md hover:bg-gray-300 transition no-underline">
-            <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
-            Torna Indietro
-          </a>
-        </div>
       </div>
 
       <!-- Bottone torna su -->
@@ -181,14 +172,24 @@ const lessons = rawLessons as LessonsType;
     </div>
 
     <!-- Table of Contents -->
-    <aside class="hidden xl:block border-l border-gray-200 pl-4">
-      <h2 class="font-bold mb-4">Indice</h2>
-      <ul id="toc" class="space-y-2 text-sm"></ul>
-    </aside>
+    <aside class="hidden xl:block border-l border-gray-200 pl-4 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto">
+  <h2 class="font-bold mb-4">Indice</h2>
+  <div id="toc-container">
+    <Toc client:load />
+  </div>
+</aside>
   </div>
 
+  <div class="text-center mt-8">
+          <a
+            href="/informatica"
+            class="inline-flex items-center gap-2 bg-gray-200 px-5 py-3 rounded-md hover:bg-gray-300 transition no-underline">
+            <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
+            Torna Indietro
+          </a>
+        </div>
+
   <LessonSearch client:load />
-  <Toc client:load />
   <ScrollOnTop client:load />
 
 </Layout>
