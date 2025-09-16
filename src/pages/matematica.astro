@@ -31,40 +31,60 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
   <Container>
 
     <div class="container mx-auto px-6 py-12 space-y-8">
-  <h1 class="text-3xl font-bold text-center mb-4">Lezioni matematica</h1>
+      <h1 class="text-3xl font-bold text-center mb-4">Lezioni matematica</h1>
 
-<!-- Descrizione -->
-<div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
-  <p class="text-gray-800 text-lg">
-    Ci tengo a precisare che non sono presenti tutte le lezioni, se manca qualcosa che vi serve, non esitate a
-    <a href="/contact" class="text-blue-600 font-semibold underline hover:text-blue-800">
-      contattarmi
-    </a>
-    e aggiungo!
-  </p>
-</div>
+      <!-- Descrizione -->
+      <div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
+        <p class="text-gray-800 text-lg">
+          Ci tengo a precisare che non sono presenti tutte le lezioni, se manca qualcosa che vi serve, non esitate a
+          <a href="/contact" class="text-blue-600 font-semibold underline hover:text-blue-800">
+            contattarmi
+          </a>
+          e aggiungo!
+        </p>
+      </div>
 
-      <!-- Layout principale con flex -->
-      <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Contenuto principale: lezioni -->
-
-          {Object.entries(byLanguage || {}).map(([category, lessons]) => (
-          <div>
-            <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
-              {category === "numeri" && <Icon name="fa6-solid:bookmark" class="text-gray-700" />}
-              <span class="uppercase">{category}</span>
-            </h3>
-            <ul class="list-disc pl-6 space-y-2">
-              {lessons.map((lesson) => (
-                <li>
-                  <a href={`/matematica/${lesson.slug}`} class="text-blue-600 hover:underline">
-                    {lesson.data.title || lesson.slug}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          {
+            Object.entries(byLanguage).map(([category, lessons]) => (
+              <div>
+                <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
+                  {category === "numeri" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "polinomi" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "equazioni" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "logaritmi" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "limiti" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "derivate" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {category === "altro" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  <span class="uppercase">{category}</span>
+                </h3>
+                <ul class="list-disc pl-6 space-y-2">
+                  {lessons.map((lesson) => (
+                    <li>
+                      <a
+                        href={`/matematica/${lesson.slug}`}
+                        class="text-blue-600 hover:underline">
+                        {lesson.data.title || lesson.slug}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
         </div>
     </div>
   </Container>

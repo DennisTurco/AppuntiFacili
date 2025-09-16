@@ -144,15 +144,6 @@ const lessons = rawLessons as LessonsType;
         )}
 
         <slot />
-
-        <div class="text-center mt-8">
-          <a
-            href="/matematica"
-            class="inline-flex items-center gap-2 bg-gray-200 px-5 py-3 rounded-md hover:bg-gray-300 transition no-underline">
-            <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
-            Torna Indietro
-          </a>
-        </div>
       </div>
 
       <!-- Bottone torna su -->
@@ -177,7 +168,18 @@ const lessons = rawLessons as LessonsType;
           Prenota una lezione
         </span>
       </a>
+
     </div>
+
+  </div>
+
+  <div class="text-center mt-8">
+    <a
+      href="/matematica"
+      class="inline-flex items-center gap-2 bg-gray-200 px-5 py-3 rounded-md hover:bg-gray-300 transition no-underline">
+      <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
+      Torna Indietro
+    </a>
   </div>
 
   <!-- Script ricerca lezioni -->
