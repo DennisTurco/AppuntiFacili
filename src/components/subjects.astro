@@ -1,19 +1,8 @@
 ---
-import Card from "./card.astro";
-import mateIcon from "@/assets/logo/matematica.webp";
-import infoIcon from "@/assets/logo/informatica.webp";
+import Card from "./Card2.astro";
 ---
 
-<div class="grid grid-cols-2 gap-4">
-  <Card
-    image={infoIcon.src}
-    url="/informatica"
-    title="Informatica"
-  />
-
-  <Card
-    image={mateIcon.src}
-    url="/matematica"
-    title="Matematica"
-  />
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <Card url="/informatica" title="Informatica" icon="💻" />
+  <Card url="/matematica" title="Matematica" icon="📐" />
 </div>
