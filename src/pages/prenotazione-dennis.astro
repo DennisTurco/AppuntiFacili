@@ -1,0 +1,83 @@
+---
+import Container from "@/components/container.astro";
+import Layout from "@/layouts/Layout.astro";
+import { Icon } from "astro-icon/components";
+---
+
+<Layout title="Prenotazione">
+  <Container>
+    <!-- Descrizione -->
+    <div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
+      <p class="text-gray-800 text-lg font-bold">
+        Qui puoi prenotare una lezione
+      </p>
+
+      <p class="text-gray-800 text-lg mt-2">
+        Se non trovi un orario disponibile e hai urgenza, non esitare a
+        <a
+          href="/contact"
+          class="text-blue-600 font-semibold underline hover:text-blue-800">
+          contattarmi
+        </a>
+        e cercherò di aggiungere un momento adatto!
+      </p>
+
+      <p class="text-gray-800 text-lg mt-2">
+        Tutti gli appuntamenti prenotati verranno sincronizzati con il tuo
+        calendario Google.
+      </p>
+
+      <p class="text-gray-800 text-lg mt-4 font-bold">Risorse utili:</p>
+      <ul class="list-none flex flex-col md:flex-row justify-center gap-4 mt-2">
+        <li class="flex items-center gap-2">
+          <Icon name="fa6-brands:discord" class="h-6 w-6 text-blue-600" />
+          <a
+            href="https://discordapp.com/invite/9Jb4Gt3HhB"
+            target="_blank"
+            class="text-blue-600 font-semibold underline hover:text-blue-800">
+            Lezioni a distanza
+          </a>
+        </li>
+        <li class="flex items-center gap-2">
+          <Icon name="fa6-solid:house" class="h-6 w-6 text-blue-600" />
+          <a
+            href="/"
+            class="text-blue-600 font-semibold underline hover:text-blue-800">
+            Home sito appunti
+          </a>
+        </li>
+        <li class="flex items-center gap-2">
+          <Icon name="fa6-brands:github" class="h-6 w-6 text-blue-600" />
+          <a
+            href="https://github.com/DennisTurco/AppuntiLezioni"
+            target="_blank"
+            class="text-blue-600 font-semibold underline hover:text-blue-800">
+            Programmi ed esercizi di informatica
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Iframe visibile solo su desktop -->
+    <div class="hidden md:block">
+      <div style="position: relative; width: 100%; padding-bottom: 75%;">
+        <iframe
+          src="https://calendar.app.google/Rjok4qYyNwfbJnja9"
+          style="border: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+          frameborder="0"
+          scrolling="no"></iframe>
+      </div>
+    </div>
+
+    <!-- Pulsante visibile solo su mobile -->
+    <div class="block md:hidden text-center my-8">
+      <a
+        href="https://calendar.app.google/Rjok4qYyNwfbJnja9"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+        Prenota un appuntamento
+      </a>
+    </div>
+  </Container>
+</Layout>
