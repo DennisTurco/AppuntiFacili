@@ -15,7 +15,7 @@ entries = entries.sort((a, b) => {
 });
 
 // Tipi
-type LessonEntry = typeof entries[number];
+type LessonEntry = (typeof entries)[number];
 type ByLanguage = Record<string, LessonEntry[]>;
 
 // Raggruppa per linguaggio in base allo slug
@@ -29,24 +29,32 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
 
 <Layout title="Informatica">
   <Container>
-
     <div class="container mx-auto px-6 py-12 space-y-8">
-  <h1 class="text-3xl font-bold text-center mb-4">Lezioni informatica</h1>
+      <h1 class="text-3xl font-bold text-center mb-4">Lezioni informatica</h1>
 
-<!-- Descrizione -->
-<div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
-  <p class="text-gray-800 text-lg">
-    Ci tengo a precisare che non sono presenti tutte le lezioni, se manca qualcosa che vi serve, non esitate a
-    <a href="/contact" class="text-blue-600 font-semibold underline hover:text-blue-800">
-      contattarmi
-    </a>
-    e aggiungo!
+      <!-- Descrizione -->
+      <div
+        class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
+        <p class="text-gray-800 text-lg">
+          Ci tengo a precisare che non sono presenti tutte le lezioni, se manca
+          qualcosa che vi serve, non esitate a
+          <a
+            href="/contact"
+            class="text-blue-600 font-semibold underline hover:text-blue-800">
+            contattarmi
+          </a>
+          e aggiungo!
 
-    <p class="text-gray-800 text-lg mt-2">
-      Per accedere a tutti i programmi preparati a lezione: <a target="_blank" href="https://github.com/DennisTurco/AppuntiLezioni" class="text-blue-600 font-semibold underline hover:text-blue-800"> Github </a>
-    </p>
-  </p>
-</div>
+          <p class="text-gray-800 text-lg mt-2">
+            Per accedere a tutti i programmi preparati a lezione: <a
+              target="_blank"
+              href="https://github.com/DennisTurco/AppuntiLezioni"
+              class="text-blue-600 font-semibold underline hover:text-blue-800">
+              Github
+            </a>
+          </p>
+        </p>
+      </div>
 
       <!-- Layout principale con flex -->
       <div class="flex flex-col lg:flex-row gap-8">
@@ -55,14 +63,16 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
           <h2 class="text-2xl font-bold mb-4">Progetti ed esercizi</h2>
           <ul class="list-disc pl-6 space-y-2">
             <li>
-              <a href="/informatica/altro/progetti" class="text-blue-600 hover:underline">Progetti</a>
+              <a
+                href="/informatica/altro/progetti"
+                class="text-blue-600 hover:underline">Progetti</a
+              >
             </li>
             <li>
               <a
                 href="https://www.geeksforgeeks.org/explore?page=2&difficulty=School,Basic,Easy&sortBy=submissions&itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=practice_header"
                 target="_blank"
-                class="text-blue-600 hover:underline"
-              >
+                class="text-blue-600 hover:underline">
                 Esercizi e sfide di programmazione (tutti i linguaggi)
               </a>
             </li>
@@ -70,40 +80,59 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
 
           <h2 class="text-2xl font-bold mt-6">Linguaggi</h2>
 
-          {Object.entries(byLanguage).map(([lang, lessons]) => (
-            <div>
-              <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
-                {lang === "c" && <Icon name="fa6-solid:bookmark" class="text-gray-700" />}
-                {lang === "cpp" && <Icon name="fa6-solid:bookmark" class="text-gray-700" />}
-                {lang === "java" && <Icon name="fa6-brands:java" class="text-red-600" />}
-                {lang === "python" && <Icon name="fa6-brands:python" class="text-green-600" />}
-                {lang === "sql" && <Icon name="fa6-solid:database" class="text-blue-600" />}
-                <span class="uppercase">{lang}</span>
-              </h3>
-              <ul class="list-disc pl-6 space-y-2">
-                {lessons.map((lesson) => (
-                  <li>
-                    <a href={`/informatica/${lesson.slug}`} class="text-blue-600 hover:underline">
-                      {lesson.data.title || lesson.slug}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {
+            Object.entries(byLanguage).map(([lang, lessons]) => (
+              <div>
+                <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
+                  {lang === "c" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {lang === "cpp" && (
+                    <Icon name="fa6-solid:bookmark" class="text-gray-700" />
+                  )}
+                  {lang === "java" && (
+                    <Icon name="fa6-brands:java" class="text-red-600" />
+                  )}
+                  {lang === "python" && (
+                    <Icon name="fa6-brands:python" class="text-green-600" />
+                  )}
+                  {lang === "sql" && (
+                    <Icon name="fa6-solid:database" class="text-blue-600" />
+                  )}
+                  <span class="uppercase">{lang}</span>
+                </h3>
+                <ul class="list-disc pl-6 space-y-2">
+                  {lessons.map((lesson) => (
+                    <li>
+                      <a
+                        href={`/informatica/${lesson.slug}`}
+                        class="text-blue-600 hover:underline">
+                        {lesson.data.title || lesson.slug}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
         </div>
 
         <!-- Sidebar: libri consigliati -->
-        <aside class="w-full lg:w-1/3 bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <aside
+          class="w-full lg:w-1/3 bg-gray-50 border border-gray-200 rounded-xl p-4">
           <h2 class="text-2xl font-bold mb-4">Libri consigliati</h2>
           <ul class="list-disc pl-5 space-y-2">
             <li>
-              <a href="https://github.com/DennisTurco/clean-code-summary" target="_blank" class="text-blue-600 hover:underline">
+              <a
+                href="https://github.com/DennisTurco/clean-code-summary"
+                target="_blank"
+                class="text-blue-600 hover:underline">
                 Clean Code Summary (English Version)
               </a>
             </li>
           </ul>
         </aside>
+      </div>
     </div>
   </Container>
 </Layout>
