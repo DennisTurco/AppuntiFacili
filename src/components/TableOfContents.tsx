@@ -3,12 +3,19 @@ import { useEffect } from "react";
 export default function Toc() {
   useEffect(() => {
     const content = document.getElementById("lesson-content");
-    const toc = document.getElementById("toc-container");
-    if (!content || !toc) return;
+    const tocContainer = document.getElementById("toc-container");
+    if (!content || !tocContainer) return;
 
-    toc.innerHTML = ""; // reset TOC
+    tocContainer.innerHTML = ""; // reset TOC
 
-    const headers = Array.from(content.querySelectorAll("h2, h3, h4")) as HTMLElement[];
+    // 👉 Creo UL senza pallini
+    const ul = document.createElement("ul");
+    ul.className = "list-none space-y-2 text-sm"; // 👈 niente bullet + spaziatura
+    tocContainer.appendChild(ul);
+
+    const headers = Array.from(
+      content.querySelectorAll("h2, h3, h4")
+    ) as HTMLElement[];
     const links: HTMLAnchorElement[] = [];
 
     headers.forEach((header) => {
@@ -32,7 +39,7 @@ export default function Toc() {
       a.className = "hover:text-blue-600 transition";
 
       li.appendChild(a);
-      toc.appendChild(li);
+      ul.appendChild(li); // 👈 adesso dentro UL, non container
       links.push(a);
     });
 
