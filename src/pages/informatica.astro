@@ -30,7 +30,7 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
 <Layout title="Informatica">
   <Container>
     <div class="container mx-auto px-6 py-12 space-y-8">
-      <h1 class="text-3xl font-bold text-center mb-4">Lezioni informatica</h1>
+      <h1 class="text-3xl font-bold text-center mb-4">Appunti informatica</h1>
 
       <!-- Descrizione -->
       <div
@@ -98,6 +98,9 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
                   )}
                   {lang === "sql" && (
                     <Icon name="fa6-solid:database" class="text-blue-600" />
+                  )}
+                  {lang === "algorithms-and-data-structures" && (
+                    <Icon name="fa6-solid:project-diagram" class="text-purple-600" />
                   )}
                   <span class="uppercase">{lang}</span>
                 </h3>
