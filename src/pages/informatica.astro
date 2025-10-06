@@ -99,6 +99,9 @@ const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
                   {lang === "sql" && (
                     <Icon name="fa6-solid:database" class="text-blue-600" />
                   )}
+                  {lang === "html" && (
+                    <Icon name="fa6-brands:html5" class="text-red-600" />
+                  )}
                   <span class="uppercase">{lang}</span>
                 </h3>
                 <ul class="list-disc pl-6 space-y-2">

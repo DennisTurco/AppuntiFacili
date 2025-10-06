@@ -85,6 +85,9 @@ export const sidebar = {
     // { title: "Eccezioni", "url": "/informatica/python/14_eccezioni" },
     // { title: "Modulo unittest", "url": "/informatica/python/15_unittest" }
   ],
+  "HTML": [
+    { title: "Introduzione", url: "/informatica/html/1_introduzione" },
+  ],
   "SQL": [
     { title: "Base di dati", url: "/informatica/sql/1_base-di-dati" },
     { title: "Algebra Relazionale", url: "/informatica/sql/2_algebra-relazionale" },

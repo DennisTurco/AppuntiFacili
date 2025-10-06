@@ -1,0 +1,107 @@
+---
+title: "Introduzione"
+draft: false
+lastUpdateDate: "2025-10-06"
+subject: "HTML"
+category: "Informatica"
+tags: ["html", "programmazione", "introduzione", "facile"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+**HTML = Hypertext Markup Language.** <br/>
+È un linguaggio utilizzato per creare pagine web. <br/>
+Non è un linguaggio di programmazione: serve a **strutturare i contenuti** di una pagina.
+
+## 2. Tag
+
+In HTML, un **tag è etichetta** che serve a definire la struttura e il significato di una pagina web. <br/>
+Un tag è racchiuso tra `< >` e indica l'inizio e la fine di un elemento.
+
+### 2.1 Tipi di Tag
+
+Ci sono 2 tipi di tag:
+
+1. **Tag di apertura e chiusura**
+
+    Sono formati da una coppia di tag con lo steso nome, uno per l'apertura e l'altro per la chiusura, delimitando il comportamento all'interno di un blocco.
+
+    Esempio:
+    ```html
+    <h1> Titolo principale </h1>
+    ```
+
+2. **Tag auto-chiudenti**
+
+    Non hanno contenuto, si chiudono da soli.
+
+    Esempio:
+    ```html
+    <br>
+    <img src="foto.jpg" alt="Foto esempio">
+    ```
+
+### 2.2 Lista Tag Principali
+
+|  Tag | Descrizione |
+|---|---|
+| `<!--...-->`  | Creare un commento (multiriga o a riga singola)  |
+| `<!DOCTYPE>`  | Definisce il tipo di documento  |
+| `<html>`  | Elemento radice della pagina |
+| `<head>`  | Contenere tutte le informazioni della pagina (titolo, meta dati, ecc...)  |
+| `<body>`  | Contiene tutto il contenuto visibile della pagina  |
+| `<title>`  | Titolo della pagina  |
+| `<h1>`  | Titolo principale |
+| `<h2>`, `<h3>`, `<h...>`  | Sottotitoli  |
+| `<p>`  |  Apre un paragrafo |
+| `<br>`  | Permette di andare a capo  |
+| `<img>`  |  Inserisce un immagine |
+| `<pre>`  | Per scrivere un paragrafo "speciale" che rispetta la formattazione  |
+| `<b>`  | Per scrivere in grassetto |
+| `<strong>`  | Per scrivere in grassetto |
+| `<i>`  | Per scrivere in corsivo  |
+| `<em>`  | Per scrivere in corsivo  |
+| `<mark>`  | Permette di marcare del testo  |
+| `<div>`  | Per costruire un divisore  |
+
+## 3. Attributi Principali
+
+Gli attributi in HTML sono delle proprietà che permettono di modificare il comportamento o l'aspetto di un tag.
+
+<Aside variant="caution">
+
+Attenzione! Molti attributi come: background, align, bgcolor, left-margin, right-margin sono **obsoleti in HTML5** e dovrebbero essere sostituiti da CSS.
+
+</Aside>
+
+|  Attributo | Descrizione  |
+|---|---|
+| `background="..."`  | Permette di aggiungere uno sfondo  |
+| `align="left/right"`  | Permette di allineare un testo  |
+| `align="justify"`  | Allinea il testo su entrambi i lati, creando un effetto di blocco uniforme  |
+| `src="percorso_file"`  | Permette di inserire un immagine, video o script  |
+| `bgcolor="..."`  | Permette modificare il colore di sfondo  |
+| `left-margin="numero"`  | Modifica la distanza dal margine di sinistra  |
+| `right-margin="numero"`  | Modifica la distanza dal margine di destra  |
+| `text="colore"`  | Per colorare il testo  |
+
+## 4. Struttura Base di Una Pagina HTML
+
+Un documento HTML ha sempre una struttura minima.
+
+Esempio:
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Titolo della pagina </title>
+    </head>
+
+    <body>
+        <h1> Ciao Mondo! </h1>
+        <p> Questa è la mia bellissima pagina HTML. </p>
+    </body>
+</html>
+```
