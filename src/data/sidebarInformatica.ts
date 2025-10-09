@@ -12,7 +12,7 @@ export const sidebar = {
     { title: "Strings", url: "/informatica/c/6_stringhe1" },
     { title: "Strings - Funzioni Numeriche", url: "/informatica/c/7_stringhe2" },
     { title: "Funzioni", url: "/informatica/c/8_funzioni" },
-    // { title: "Funzione rand() (Work in Progress)", url: "/informatica/c/9_funzione-rand" },
+    { title: "Funzione rand() (Work in Progress)", url: "/informatica/c/9_funzione-rand" },
     { title: "Puntatori", url: "/informatica/c/10_puntatori" },
     // { title: "Gestione Memoria Dinamica", url: "/informatica/c/11_" },
     { title: "File", url: "/informatica/c/12_file" },
