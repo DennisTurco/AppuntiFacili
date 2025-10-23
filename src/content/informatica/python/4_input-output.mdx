@@ -1,10 +1,10 @@
 ---
 title: "Input e Output"
 draft: false
-lastUpdateDate: "2025-09-15"
+lastUpdateDate: "2025-10-23"
 subject: "Python"
 category: "Informatica"
-tags: ["python", "programmazione", "introduzione", "input", "output", "facile"]
+tags: ["python", "programmazione", "introduzione", "input", "output", "base"]
 author: "Dennis Turco"
 videoLesson: false
 ---
@@ -98,3 +98,61 @@ La funzione che si usa per scrivere (input) a tastiera è la funzione `input()`
     ```py
     result = int(input("Insert an integer: "))
     ```
+
+<Aside variant="caution">
+    La funzione `input()` restituisce sempre una **stringa**, quindi è necessario convertire il valore se serve un numero.
+</Aside>
+
+## 3. Variabili
+
+Le **variabili** servono per memorizzare dati che possono essere usati nel programma.
+
+Si assegna un valore con l'operatore **=**:
+```py
+nome = "Anna"
+eta = 20
+altezza = 1.65
+```
+
+Puoi poi usare queste variabili, ad esempio per la stampa:
+```py
+print(f"{nome} ha {eta} anni ed è alta {altezza} metri.")
+```
+
+Le variabili (sono appunto variabili e quindi possono campbiare) possono cambiare valore nel tempo:
+```py
+x = 5
+x = x + 3
+print(x)  # Output: 8
+```
+
+## 4. Tipi di dati primitivi
+I tipi di dati più comuni in Python sono:
+| Tipo    | Nome                         | Esempio                  |
+| ------- | ---------------------------- | ------------------------ |
+| `int`   | Numero intero                | `x = 10`                 |
+| `float` | Numero decimale              | `x = 3.14`               |
+| `str`   | Stringa di testo             | `x = "Ciao"`             |
+| `bool`  | Valore booleano (vero/falso) | `x = True` o `x = False` |
+
+Possibile verificare il tipo con la funzione `type()`:
+```py
+x = 3.14
+print(type(x))  # Output: <class 'float'>
+```
+
+## 5. Esercizi
+
+### 5.1 Esercizio
+
+Scrivi un programma che:
+- Chieda all'utente il suo nome e la sua età
+- Calcoli quanti anni avrà tra 5 anni
+- Stampi una frase di riepilogo
+
+Esempio Output:
+
+Come ti chiami? Anna <br/>
+Quanti anni hai? 20 <br/>
+Ciao Anna, tra 5 anni avrai 25 anni! <br/>
+

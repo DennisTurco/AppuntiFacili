@@ -1,0 +1,163 @@
+---
+title: "Operatori Aritmetici Logici"
+draft: false
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "operatori e controllo del flusso", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Operatori Aritmetici
+
+Gli **operatori aritmetici** in Python vengono utilizzati per eseguire operazioni matematiche su variabili e valori numerici.
+Sono gli stessi che si usano comunemente in matematica, ma con alcune particolarità quando si lavora con numeri interi o decimali.
+
+Per esempio:
+
+```py
+print(120 + 12) # Output: 132
+```
+
+Gli operatori aritmetici in python sono:
+
+| Operatore | Nome                         | Esempio   |
+| --------- | ---------------------------- | --------- |
+| +         | Addizione                    | `x + y`   |
+| -         | Sottrazione                  | `x - y`   |
+| *         | Moltiplicazione              | `x * y`   |
+| /         | Divisione                    | `x / y`   |
+| %         | Modulo                       | `x % y`   |
+| **        | Esponente                    | `x ** y`  |
+| //        | Divisione intera             | `x // y`  |
+
+### 1.1 Divisioni
+
+In Pyhton ci sono 2 tipi di divisioni:
+
+- **/**: Divisione classica $\rightarrow$ 5 / 2 = 2.5
+- **//**: Divisione intera $\rightarrow$ 5 / 2 = 2
+
+Esempio:
+
+```py
+print(7 / 3)   # Output: 2.333...
+print(7 // 3)  # Output: 2
+print(7 % 3)   # Output: 1
+```
+
+<Aside variant="info">
+L'operatore % restituisce il resto della divisione, utile per controllare la parità di un numero (n % 2 == 0).
+</Aside>
+
+### 1.2 Esercizi
+
+1. Calcola l'area e il perimetro di un rettangolo di base 10 e altezza 4.
+2. Dato un numero, stampa se è pari o dispari usando l'operatore `%`.
+
+## 2. Operatori Logici
+
+Gli **operatori logici** servono per combinare condizioni booleane (`True` o `False`).
+Sono molto utilizzati nelle strutture di controllo (`if`, `while`, ecc.) per verificare più condizioni contemporaneamente.
+
+| Operatore | Descrizione                                        | Esempio          | Output  |
+| --------- | -------------------------------------------------- | ---------------- | ------- |
+| `and`     | Ritorna `True` se entrambe le condizioni sono vere | `True and False` | `False` |
+| `or`      | Ritorna `True` se almeno una condizione è vera     | `True or False`  | `True`  |
+| `not`     | Inverte il valore logico                           | `not True`       | `False` |
+
+<Aside variant="info">
+Gli operatori logici si usano spesso insieme a quelli di confronto per costruire condizioni più complesse.
+</Aside>
+
+### 2.1 Esercizi
+
+1. Scrivi un programma che controlli se una variabile `numero` è compresa tra 1 e 100.
+2. Dati due numeri, verifica se entrambi sono positivi oppure almeno uno lo è.
+
+
+## 3. Operatori di Confronto
+
+Gli **operatori di confronto** servono per confrontare due valori e restituiscono un valore booleano (`True` o `False`).
+Sono fondamentali per prendere decisioni nei programmi.
+
+| Operatore | Significato       | Esempio  | Risultato |
+| --------- | ----------------- | -------- | --------- |
+| ==        | Uguale a          | `5 == 5` | `True`    |
+| !=        | Diverso da        | `5 != 3` | `True`    |
+| >         | Maggiore di       | `7 > 4`  | `True`    |
+| \<         | Minore di         | `3 < 1`  | `False`   |
+| >=        | Maggiore o uguale | `5 >= 5` | `True`    |
+| \<=        | Minore o uguale   | `2 <= 1` | `False`   |
+
+Esempio:
+
+```py
+x = 7
+y = 10
+
+print(x == y)  # False
+print(x != y)  # True
+print(x < y)   # **True**
+```
+
+Altro esempio:
+
+```py
+x = 10
+y = 5
+
+print(x > 5 and y < 10)  # True (entrambe vere)
+print(x < 5 or y < 10)   # True (una è vera)
+print(not(x > y))        # False (inverte il risultato)
+```
+
+<Aside variant="info">
+I confronti multipli sono possibili anche in modo "matematico", ad esempio:
+
+```py
+print(5 < x < 15)  # True se x è compreso tra 5 e 15
+```
+</Aside>
+
+### 3.1 Esercizi
+
+1. Scrivi un programma che chieda l'età all'utente e stampi `True` se è maggiorenne, `False` altrimenti.
+2. Verifica se una variabile `a` è uguale a `b` oppure se entrambe sono maggiori di 0.
+
+## 4. Operatori Ternari
+
+L'**operatore ternario** (o condizionale) permette di scrivere un `if` in una sola riga.
+È utile per assegnare un valore a una variabile in base a una condizione.
+
+Sintassi:
+
+$$
+\text{valore\_se\_vero \ if \ condizione \ else \ valore\_se\_falso}
+$$
+
+Esempio:
+
+```py
+x = 10
+messaggio = "Positivo" if x > 0 else "Negativo"
+print(messaggio)  # Output: Positivo
+```
+
+Altro esempio:
+
+```py
+eta = 18
+status = "Maggiorenne" if eta >= 18 else "Minorenne"
+print(status)  # Output: Maggiorenne
+```
+
+<Aside variant="info">
+L'operatore ternario è una forma compatta dell'istruzione `if-else`, utile quando si vuole scrivere codice più leggibile e sintetico, ma va usato con moderazione per non compromettere la chiarezza.
+</Aside>
+
+### 4.1 Esercizi
+
+1. Dato un numero `n`, stampa `"Pari"` se è pari altrimenti `"Dispari"` usando un operatore ternario.
+2. Chiedi all'utente un voto (0-30) e assegna `"Promosso"` se è ≥ 18, `"Bocciato"` altrimenti.

@@ -4,7 +4,7 @@ draft: false
 lastUpdateDate: "2025-09-15"
 subject: "Python"
 category: "Informatica"
-tags: ["python", "programmazione", "list", "array", "difficile"]
+tags: ["python", "programmazione", "list", "array", "base"]
 author: "Dennis Turco"
 videoLesson: false
 ---

@@ -1,0 +1,131 @@
+---
+title: "Introduzione al Linguaggio"
+draft: false
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "introduzione", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+**Python** è un linguaggio di programmazione **versatile, potente e facile da imparare**.
+È utilizzato in moltissimi ambiti: dallo sviluppo web all'intelligenza artificiale, dall'analisi dei dati alla robotica.
+
+Il suo punto di forza è la **semplicità della sintassi**, che lo rende leggibile anche per chi è alle prime armi.
+
+Esempio di codice Python:
+
+```py
+print("Ciao, mondo!")
+```
+
+Output: Ciao, mondo!
+
+## 2. Un linguaggio ad alto livello
+
+Python è definito un linguaggio ad alto livello perché si avvicina molto al linguaggio umano e nasconde i dettagli più complessi del computer, come la gestione della memoria.
+
+Ad esempio, in linguaggi più "bassi" (come il C) il programmatore deve occuparsi manualmente di allocare e liberare la memoria.
+Python invece gestisce tutto automaticamente.
+
+<Aside variant="info">
+Significa che puoi concentrarti sulla logica del programma, senza preoccuparti troppo di come il computer lo esegue internamente.
+</Aside>
+
+## 3. Un linguaggio versatile
+
+Python è chiamato `versatile` perché può essere utilizzato per tantissimi scopi diversi:
+
+| Ambito               | Esempi di utilizzo                             | Librerie comuni                   |
+| -------------------- | ---------------------------------------------- | --------------------------------- |
+| **Sviluppo Web**     | Backend di siti e API                          | Django, Flask, FastAPI            |
+| **Data Science**     | Analisi e visualizzazione dei dati             | Pandas, NumPy, Matplotlib         |
+| **Machine Learning** | Intelligenza artificiale e modelli predittivi  | TensorFlow, PyTorch, Scikit-learn |
+| **Automazione**      | Script per automatizzare operazioni ripetitive | os, shutil, schedule              |
+| **Cybersecurity**    | Analisi di rete e penetration testing          | Scapy, Requests, Paramiko         |
+| **Giochi e Grafica** | Piccoli videogiochi e simulazioni grafiche     | Pygame, Turtle                    |
+
+Inoltre, Python è multipiattaforma:
+funziona su Windows, macOS e Linux senza modifiche al codice.
+
+## 4. Interpretato e dinamico
+
+Python è un linguaggio **interpretato**, cioè il codice viene eseguito riga per riga da un interprete (come `python` o `python3`) invece di essere compilato in un file binario.
+
+Esempio:
+
+```bash
+python3 mio_programma.py
+```
+
+Questo rende lo sviluppo più rapido e flessibile, anche se può risultare leggermente più lento rispetto a linguaggi compilati.
+
+<Aside variant="info">
+I **linguaggi compilati** trasformano il codice in un file eseguibile prima dell'esecuzione.
+I **linguaggi interpretati** eseguono il codice direttamente, riga per riga.
+Python è principalmente interpretato, ma usa una piccola fase di compilazione interna in bytecode.
+
+#### Linguaggi compilati
+- Vantaggi:
+    - Esecuzione molto veloce (il codice è già tradotto in linguaggio macchina)
+    - Maggiore efficienza nell'uso della memoria
+    - Più adatto a programmi complessi o con prestazioni critiche (giochi, sistemi operativi, ecc.)
+- Svantaggi:
+    - Serve **ricompilare** il programma ogni volta che si modifica il codice
+    - L'eseguibile è **specifico per un sistema operativo** (Windows, Linux, ecc.)
+    - Debug più difficile (gli errori si scoprono solo dopo la compilazione)
+- Esempi:
+    - C e C++
+    - Rust
+    - Go
+- Flusso: Codice sorgente → Compilatore → File eseguibile → CPU
+
+#### Linguaggi interpretati
+- Vantaggi
+    - Esecuzione molto veloce (il codice è già tradotto in linguaggio macchina)
+    - Maggiore efficienza nell'uso della memoria
+    - Più adatto a programmi complessi o con prestazioni critiche (giochi, sistemi operativi, ecc.)
+- Svantaggi
+    - Serve **ricompilare** il programma ogni volta che si modifica il codice
+    - L'eseguibile è **specifico per un sistema operativo** (Windows, Linux, ecc.)
+    - Debug più difficile (gli errori si scoprono solo dopo la compilazione)
+- Esempi:
+    - Python
+    - JavaScript
+    - PHP
+- Flusso: Codice sorgente → Interprete (es. Python) → Esecuzione diretta
+</Aside>
+
+
+È anche **tipizzato dinamicamente**: non serve dichiarare il tipo delle variabili.
+
+```py
+nome = "Luca"
+eta = 25
+print(nome, eta)
+```
+
+Python riconosce automaticamente il tipo dei dati, rendendo il codice più fluido e leggibile.
+
+## 5. Filosofia di Python
+
+Python è stato creato da **Guido van Rossum** nel 1991.
+La sua filosofia si basa sulla leggibilità e sulla semplicità del codice.
+
+Il "Zen di Python" riassume i principi fondamentali del linguaggio.
+Puoi leggerlo direttamente dal terminale digitando:
+
+```bash
+import this
+```
+
+Output (parziale):
+
+```bash
+Beautiful is better than ugly.
+Simple is better than complex.
+Readability counts.
+```

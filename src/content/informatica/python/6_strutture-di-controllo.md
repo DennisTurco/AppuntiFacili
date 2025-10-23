@@ -1,0 +1,10 @@
+---
+title: "Installazione di Python"
+draft: true
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "operatori e controllo del flusso", "strutture di controllo", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---

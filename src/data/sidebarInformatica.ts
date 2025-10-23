@@ -69,8 +69,11 @@ export const sidebar = {
   //   { title: "LINQ", url: "/informatica/c#/LINQ" },
   // ],
   "Python": [
-    { title: "Input e Output", "url": "/informatica/python/1_input-output" },
-    // { title: "Variabili e Tipi di Dato", "url": "/informatica/python/2_variabili-tipi" },
+    { title: "Introduzione al Linguaggio", "url": "/informatica/python/1_introduzione-al-linguaggio" },
+    { title: "Installazione di Python", "url": "/informatica/python/2_installazione-di-python" },
+    { title: "Struttura del Programma", "url": "/informatica/python/3_struttura-del-programma" },
+    { title: "Input Output", "url": "/informatica/python/4_input-output" },
+    { title: "Operatori", "url": "/informatica/python/4_input-output" },
     // { title: "Operatori e Controlli Condizionali", "url": "/informatica/python/3_operatori-controlli" },
     // { title: "Cicli", "url": "/informatica/python/4_cicli" },
     { title: "List", "url": "/informatica/python/5_list" },
