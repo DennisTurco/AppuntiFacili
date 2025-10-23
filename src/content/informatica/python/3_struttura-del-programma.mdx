@@ -1,0 +1,141 @@
+---
+title: "Struttura del programma"
+draft: false
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "introduzione", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Un **programma Python** è un insieme di **istruzioni** che il computer esegue una dopo l'altra.
+Ogni riga di codice rappresenta un'azione, come stampare un messaggio, calcolare un valore o leggere un dato dall'utente.
+
+Quando scriviamo un programma, in realtà stiamo **dando istruzioni al computer** in un linguaggio che lui può comprendere, grazie all'interprete Python.
+Python, infatti, traduce il nostro codice *riga per riga* e lo esegue immediatamente.
+
+Un programma Python è in genere composto da:
+
+- **istruzioni sequenziali** (eseguite in ordine)
+- **strutture di controllo** (condizioni e cicli)
+- **funzioni e moduli** (blocchi riutilizzabili di codice)
+
+<Aside variant="info">
+Per capire meglio come il computer interpreta il codice: [How the Python Interpreter Works](https://realpython.com/cpython-source-code-guide/)
+</Aside>
+
+## 2. Il tuo primo programma
+
+Crea un file chiamato `primo_programma.py` e scrivi:
+
+```py
+print("Ciao, mondo!")
+```
+
+Poi eseguilo da terminale o da VS Code:
+
+```bash
+python primo_programma.py
+```
+
+Output: Ciao, mondo!
+
+<Aside variant="info">
+`print()` è una funzione predefinita di Python che serve per **stampare a schermo** un messaggio o un valore.
+</Aside>
+
+<Aside variant="info">
+La tradizione di iniziare con “Hello, World!” deriva dal linguaggio C, e da allora è diventata il primo passo per imparare qualsiasi linguaggio di programmazione.
+Tutta la storia di Hello World: [The History of Hello World Programs](https://www.freecodecamp.org/news/a-brief-history-of-hello-world-programs/)
+</Aside>
+
+## 3. Struttura di base di un programma Python
+
+Un tipico programma in Python può essere suddiviso in 5 sezioni logiche:
+
+1. **Import di librerie o moduli**
+2. **Dichiarazione di variabili e costanti**
+3. **Logica del programma** (istruzioni, condizioni, cicli)
+4. **Output finale o risultati**
+
+Esempio:
+
+```py
+# vari import di moduli
+import math
+
+# variabili
+a = 5
+b = 7
+
+# logica
+somma = a + b
+
+# output
+print("La somma è:", somma)
+```
+
+Output: La somma è: 12
+
+## 4. Commenti
+
+I **commenti** sono parti di testo che non vengono eseguite dal programma, ma servono a spiegare il codice.
+
+### 4.1 Tipi di commenti
+
+- Singola riga:
+
+    ```py
+    # commento su una riga
+    ```
+
+- Multilinea:
+
+    ```py
+    """
+    Questo è un commento
+    su più righe.
+    """
+    ```
+
+<Aside variant="info">
+Consiglio: se sei all'inizio usa i commenti per spiegare il perchè del tuo codice e appuntarti cosa fa, sopprattutto per quelle cose che vedi per la prima volta.
+
+Tieni però presente che i programmatori professionisti non usano commenti dappertutto, ma solo quando serve. Per saperne di più $\rightarrow$ [Comments - Clean Code by Robert Martin (Summary)](https://github.com/DennisTurco/clean-code-summary/blob/master/chapter-04.md)
+</Aside>
+
+## 5. L'indentazione
+
+![Indentation](https://media.geeksforgeeks.org/wp-content/uploads/20241203113516014762/Indentation-in-python.webp)
+
+In Python **l'indentazione o tabulatura** è fondamentale.
+Indica quali istruzioni appartengono a un certo blocco di codice (ad esempio dentro un `if` o un ciclo `for`).
+
+<Aside>
+Si chiama *tabulatura* perché per "tabbare" occorre premere il tasto **TAB** sulla tastiera.
+Tuttavia, la convenzione ufficiale di Python prevede **4 spazi per ogni livello di indentazione**, non l'uso del tasto TAB puro.
+
+Impostabile in VS Code: File → Preferences → Settings → Editor: Insert Spaces → True
+</Aside>
+
+Esempio corretto:
+
+```py
+if True:
+    print("Questo è dentro l'if")
+    print("Anche questa riga è indentata correttamente")
+```
+
+Esempio errato (genera un errore di sintassi):
+
+```py
+if True:
+print("Errore! Manca l'indentazione.")
+```
+
+<Aside variant="info">
+Solitamente si usano **4 spazi** per ogni livello di indentazione.
+</Aside>

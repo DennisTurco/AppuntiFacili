@@ -2,16 +2,16 @@
 import { Icon } from "astro-icon/components";
 
 interface Props {
-  variant: "tip" | "caution" | "danger" | "info";
+  variant: "tip" | "warning" | "danger" | "info";
 }
 
 const { variant } = Astro.props as Props;
 
 const iconName = {
   tip: "fa6-solid:lightbulb",
-  caution: "fa6-solid:triangle-exclamation", // nome corretto in FA6
+  warning: "fa6-solid:triangle-exclamation",
   danger: "fa6-solid:fire",
-  info: "fa6-solid:circle-info",          // nome corretto in FA6
+  info: "fa6-solid:circle-info",
 }[variant];
 ---
 
@@ -24,7 +24,7 @@ const iconName = {
     },
     {
       " [&>p>code]:prose-code:bg-yellow-400/20 border-yellow-400 bg-yellow-400/10 text-yellow-950":
-        variant === "caution",
+        variant === "warning",
     },
     {
       " [&>p>code]:prose-code:bg-red-400/20 border-red-400 bg-red-400/10 text-red-950":

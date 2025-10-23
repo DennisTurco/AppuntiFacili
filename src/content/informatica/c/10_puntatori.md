@@ -1,7 +1,7 @@
 ---
 title: "Puntatori"
 draft: false
-lastUpdateDate: "2025-08-28"
+lastUpdateDate: "2025-10-23"
 subject: "C"
 category: "Informatica"
 tags: ["c", "programmazione", "puntatori", "difficile"]
@@ -56,7 +56,7 @@ In questo esempio:
 - `numeri` è un puntatore implicito a `&numeri[0]`
 - `numeri` accede al valore del primo elemento (cioè 10)
 
-Puoi anche accedere agli altri elementi usando l'aritmetica dei puntatori:
+Possibile anche accedere agli altri elementi usando l'aritmetica dei puntatori:
 
 ```c
 printf("%d\n", *(numeri + 1)); // output -> 20
@@ -97,7 +97,7 @@ for (int* p = numeri; p < end; p++) {
 
 ## 4. Puntatori e Funzioni
 
-Puoi passare un array a una funzione come puntatore:
+Possibile passare un array a una funzione come puntatore:
 
 ```c
 void stampaArray(int* arr, int lunghezza) {

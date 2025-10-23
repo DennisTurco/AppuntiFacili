@@ -1,0 +1,202 @@
+---
+title: "Stringhe in Python"
+draft: false
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "stringhe", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione alle stringhe
+
+Le **stringhe** sono **sequenze di caratteri** usate per rappresentare testo in Python.
+Si possono scrivere tra **virgolette singole**, **virgolette doppie**, o anche su più righe con **triple virgolette**.
+
+Esempi:
+
+```py
+testo1 = 'Ciao'
+testo2 = "Python"
+testo3 = """Questo è
+un testo su più righe"""
+
+print(testo1)
+print(testo2)
+print(testo3)
+```
+
+Output:
+Ciao
+Python
+Questo è
+un testo su più righe
+
+<Aside variant="info">
+Python non fa distinzione tra virgolette singole e doppie. Scegli quelle che preferisci, ma sii coerente nel tuo codice.
+</Aside>
+
+## 2. Concatenazione di stringhe
+
+Possibile **unire (concatenare)** due o più stringhe usando l'operatore `+`.
+
+Esempio:
+
+```py
+nome = "Fanchetto"
+cognome = "Lipini"
+messaggio = nome + " " + cognome
+print(messaggio)
+```
+
+Output:
+Fanchetto Lipini
+
+Possibile anche **ripetere** una stringa con l'operatore `*`:
+
+```py
+risata = "ha" * 3
+print(risata)
+```
+
+Output:
+hahaha
+
+## 3. Accesso ai caratteri e slicing
+
+Le stringhe sono **sequenze indicizzate**, proprio come le liste o le tuple.
+Possibile accedere ai singoli caratteri tramite un **indice numerico** (partendo da 0).
+
+Esempio:
+
+```py
+testo = "Python"
+print(testo[0])   # P
+print(testo[1])   # y
+print(testo[-1])  # n (ultimo carattere)
+```
+
+### 3.1 Slicing
+
+Possibile ottenere **sotto-stringhe** utilizzando la notazione `[inizio:fine:passo]`.
+
+Esempi:
+
+```py
+testo = "Programmazione"
+print(testo[0:7])     # Program
+print(testo[:7])      # Program (stesso risultato)
+print(testo[7:])      # mazione
+print(testo[-5:])     # zione
+print(testo[::2])     # Pormzi (un carattere ogni due)
+```
+
+<Aside>
+Gli indici in Python **escludono** il valore finale, quindi `testo[0:7]` prende i caratteri da 0 a 6.
+</Aside>
+
+## 4. Metodi comuni delle stringhe
+
+Le stringhe in Python hanno molti **metodi predefiniti** per manipolare il testo.
+Ecco i più usati:
+
+| Metodo        | Descrizione                                   | Esempio                        | Output           |
+|----------------|-----------------------------------------------|----------------------------------|------------------|
+| `.upper()`     | Converte tutti i caratteri in maiuscolo        | `"ciao".upper()`                | `"CIAO"`         |
+| `.lower()`     | Converte tutti i caratteri in minuscolo        | `"CIAO".lower()`                | `"ciao"`         |
+| `.capitalize()`| Maiuscola la prima lettera                    | `"python".capitalize()`         | `"Python"`       |
+| `.title()`     | Maiuscola ogni parola                         | `"ciao mondo".title()`          | `"Ciao Mondo"`   |
+| `.strip()`     | Rimuove spazi all'inizio e alla fine           | `"  ciao  ".strip()`            | `"ciao"`         |
+| `.replace(a, b)` | Sostituisce una sottostringa con un'altra    | `"ciao".replace("a", "u")`      | `"ciuo"`         |
+| `.split()`     | Divide una stringa in una lista di parole      | `"ciao mondo".split()`          | `['ciao', 'mondo']` |
+| `.join()`      | Unisce una lista di stringhe con un separatore | `" ".join(["ciao", "mondo"])`   | `"ciao mondo"`   |
+
+## 5. Verifica di contenuto
+
+Possibile controllare se una sottostringa è presente in un'altra usando gli operatori `in` e `not in`.
+
+Esempio:
+
+```py
+testo = "Programmare in Python è divertente"
+print("Python" in testo)      # True
+print("Java" not in testo)    # True
+```
+
+## 6. Formattazione delle stringhe
+
+### 6.1 f-string (metodo moderno)
+
+Le **f-string** (introdotte in Python 3.6) sono il modo più semplice e leggibile per inserire variabili dentro le stringhe.
+
+Esempio:
+
+```py
+nome = "Anna"
+eta = 25
+print(f"Ciao, mi chiamo {nome} e ho {eta} anni.")
+```
+
+Output:
+Ciao, mi chiamo Anna e ho 25 anni.
+
+### 6.2 Metodo `.format()`
+
+```py
+nome = "Luca"
+linguaggio = "Python"
+frase = "Ciao, sono {} e programmo in {}.".format(nome, linguaggio)
+print(frase)
+```
+
+Output:
+Ciao, sono Luca e programmo in Python.
+
+## 7. Stringhe multilinea
+
+Possibile creare stringhe su più righe usando **triple virgolette** (`'''` o `"""`).
+
+Esempio:
+
+```py
+testo = """Questa è una stringa
+su più righe,
+scritta in Python."""
+print(testo)
+```
+
+Output:
+Questa è una stringa
+su più righe,
+scritta in Python.
+
+## 8. Esercizi
+
+### 8.1 Esercizio
+
+Chiedi all'utente il suo nome e stampa:
+
+- Il nome in maiuscolo
+- Il numero di lettere del nome
+- Un messaggio del tipo: “Ciao, [nome]! Il tuo nome ha X lettere.”
+
+### 8.2 Esercizio
+
+Data la stringa `testo = "Imparare Python è bellissimo (spero)"`, stampa:
+
+- I primi 9 caratteri
+- Gli ultimi 4
+- Il testo tutto in maiuscolo
+
+### 8.3 Esercizio
+
+Dividi la frase `"Python è un linguaggio potente e semplice"` in parole e stampale una per riga.
+
+### 8.4 Esercizio
+
+Scrivi un programma che prenda una frase e sostituisca tutte le vocali con `*`.
+
+Esempio:
+Input → "Ciao mondo"
+Output → "C\*\*\* m\*nd\*"

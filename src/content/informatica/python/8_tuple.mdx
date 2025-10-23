@@ -1,0 +1,294 @@
+---
+title: "Tuple in Python"
+draft: false
+lastUpdateDate: "2025-10-23"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "collezioni", "base"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+- [Documentazione ufficiale Python - Tuples](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences)
+- [Real Python - Python Tuples in Depth](https://realpython.com/python-lists-tuples/#tuples)
+
+Le **tuple** in Python sono una delle strutture dati fondamentali insieme a **liste**, **insiemi** e **dizionari**.
+Servono per **memorizzare più valori** all'interno di un'unica variabile.
+
+A differenza delle liste, le tuple **non possono essere modificate** dopo la loro creazione.
+Questo significa che sono **immutabili**.
+
+Esempio:
+
+```py
+tupla = (1, 2, 3, 4)
+print(tupla)
+```
+
+Output: (1, 2, 3, 4)
+
+<Aside variant="info">
+Una tupla è simile a una lista, ma una volta creata **non è possibile aggiungere, rimuovere o cambiare elementi**.
+</Aside>
+
+## 2. Creazione di una tupla
+
+Possibile creare una tupla usando le **parentesi tonde** `( )` oppure semplicemente separando gli elementi con le **virgole**.
+
+Esempio:
+
+```py
+tupla1 = (1, 2, 3)
+tupla2 = "a", "b", "c"
+tupla_vuota = ()
+
+print(tupla1)
+print(tupla2)
+print(tupla_vuota)
+```
+
+Output:
+(1, 2, 3)
+('a', 'b', 'c')
+()
+
+<Aside variant="info">
+Per creare una tupla con **un solo elemento**, è necessario aggiungere una **virgola finale**.
+Senza la virgola, Python non la riconoscerà come tupla.
+</Aside>
+
+Esempio:
+
+```py
+tupla_singola = ("ciao",)
+print(type(tupla_singola))  # <class 'tuple'>
+```
+
+## 3. Accesso agli elementi
+
+Come le liste, le tuple sono **indicizzate**: possibile accedere ai singoli elementi usando gli **indici numerici**, che partono da **0**.
+
+Esempio:
+
+```py
+tupla = ("mela", "banana", "kiwi")
+print(tupla[0])  # mela
+print(tupla[2])  # kiwi
+```
+
+Possibile anche usare **indici negativi** per contare dalla fine:
+
+```py
+print(tupla[-1])  # kiwi
+print(tupla[-2])  # banana
+```
+
+## 4. Slicing delle tuple
+
+Possibile ottenere una **sotto-tupla** usando la **notazione slicing** `[inizio:fine]`.
+
+Esempio:
+
+```py
+numeri = (10, 20, 30, 40, 50, 60)
+print(numeri[1:4])   # (20, 30, 40)
+print(numeri[:3])    # (10, 20, 30)
+print(numeri[3:])    # (40, 50, 60)
+print(numeri[-3:])   # (40, 50, 60)
+```
+
+## 5. Immutabilità delle tuple
+
+Una volta creata, una tupla **non può essere modificata**.
+
+Esempio:
+
+```py
+frutta = ("mela", "banana", "kiwi")
+frutta[1] = "arancia"   # Errore
+```
+
+Output:
+TypeError: 'tuple' object does not support item assignment
+
+<Aside variant="warning">
+Questa caratteristica rende le tuple **più sicure e performanti** rispetto alle liste, quando non si devono modificare i dati.
+</Aside>
+
+Per "modificare" una tupla, è possibile **convertirla in lista**, fare i cambiamenti e poi riconvertirla in tupla:
+
+```py
+frutta = ("mela", "banana", "kiwi")
+lista = list(frutta)
+lista[1] = "arancia"
+frutta = tuple(lista)
+print(frutta)
+```
+
+Output:
+('mela', 'arancia', 'kiwi')
+
+## 6. Operazioni con le tuple
+
+### 6.1 Concatenazione
+
+Possibile **unire** due tuple con l'operatore `+`:
+
+```py
+tupla1 = (1, 2, 3)
+tupla2 = (4, 5)
+tupla3 = tupla1 + tupla2
+print(tupla3)
+```
+
+Output:
+(1, 2, 3, 4, 5)
+
+### 6.2 Ripetizione
+
+Possibile **ripetere** una tupla con l'operatore `*`:
+
+```py
+tupla = ("ciao",) * 3
+print(tupla)
+```
+
+Output:
+('ciao', 'ciao', 'ciao')
+
+### 6.3 Appartenenza
+
+Possibile verificare se un elemento è presente con `in` o `not in`:
+
+```py
+tupla = (10, 20, 30)
+print(20 in tupla)     # True
+print(50 not in tupla) # True
+```
+
+## 7. Funzioni utili con le tuple
+
+Python fornisce alcune **funzioni predefinite** per lavorare con le tuple:
+
+```py
+numeri = (10, 50, 30, 10, 20)
+
+print(len(numeri))   # Lunghezza → 5
+print(max(numeri))   # Valore massimo → 50
+print(min(numeri))   # Valore minimo → 10
+print(numeri.count(10))  # Quante volte compare → 2
+print(numeri.index(30))  # Indice della prima occorrenza → 2
+```
+
+## 8. Tuple e assegnazione multipla
+
+Una caratteristica molto potente di Python è la **destrutturazione** delle tuple.
+Permette di assegnare più variabili in una sola riga.
+
+Esempio:
+
+```py
+coordinate = (5, 10)
+x, y = coordinate
+print("x =", x)
+print("y =", y)
+```
+
+Output:
+x = 5
+y = 10
+
+<Aside variant="info">
+Questa tecnica è molto usata per restituire più valori da una funzione o per scambiare rapidamente due variabili.
+</Aside>
+
+Esempio di scambio di variabili:
+
+```py
+a = 1
+b = 2
+a, b = b, a
+print(a, b)
+```
+
+Output:
+2 1
+
+## 9. Tuple annidate
+
+Le tuple possono contenere **altre tuple** (o liste, o dizionari).
+Questo si chiama **annidamento** (*nesting*).
+
+Esempio:
+
+```py
+persona = ("Mario", ("Rossi", 30), "Roma")
+
+print(persona[0])        # Mario
+print(persona[1][0])     # Rossi
+print(persona[1][1])     # 30
+```
+
+## 10. Quando usare le tuple?
+
+Le tuple sono ideali quando:
+
+- i dati **non devono cambiare** (es. coordinate, date, configurazioni);
+- vuoi **proteggere** i dati da modifiche accidentali;
+- ti serve una **struttura più veloce e leggera** delle liste;
+- vuoi **usare elementi come chiavi di un dizionario** (solo le tuple possono farlo, le liste no).
+
+Esempi di casi d'uso:
+
+```py
+coordinate = (40.7128, -74.0060)
+colore_rgb = (255, 128, 0)
+giorno = ("Lunedì", 14, "Ottobre", 2025)
+```
+
+## 11. Tuple vs List
+
+[Random item retrieving benchmark](https://svbtleusercontent.com/yhsnffz0gabog_small.png)
+
+| **Caratteristica**                | **Lista**                                                     | **Tupla**                                                                             |
+| --------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Sintassi**                      | Usa parentesi quadre: `[elem1, elem2]`                        | Usa parentesi tonde o solo virgole: `(elem1, elem2)` o `elem1, elem2`                 |
+| **Mutabilità**                    |  Mutabile, possibile aggiungere, rimuovere o modificare elementi |  Immutabile, non è possibile modificare, aggiungere o rimuovere elementi dopo la creazione |
+| **Metodi disponibili**            | Molti: `append()`, `remove()`, `sort()`, `pop()`…             | Pochi: `count()`, `index()`                                                           |
+| **Performance e memoria**         | Più lenta e occupa più memoria                                | Più veloce e leggera in memoria                                                       |
+| **Uso come chiave nei dizionari** |  No, non è hashabile                                        |  Sì, se gli elementi interni sono hashabili                                         |
+| **Ordinamento e accesso**         | Ordinata, indicizzabile e modificabile                        | Ordinata, indicizzabile ma non modificabile                                           |
+| **Quando usarla**                 | Quando i dati devono poter cambiare nel tempo                 | Quando i dati devono restare fissi o costanti                                         |
+| **Esempio sintattico**            | `lista = [1, 2, 3]`                                           | `tupla = (1, 2, 3)`                                                                   |
+
+## 12. Esercizi
+
+### 12.1 Esercizio
+
+Crea una tupla con 5 numeri e stampa:
+
+- il primo e l'ultimo elemento
+- la lunghezza della tupla
+- la somma dei valori
+
+### 12.2 Esercizio
+
+Dati due tuple `a = (1, 2, 3)` e `b = (4, 5, 6)`, uniscile in una sola tupla e stampa il risultato.
+
+### 12.3 Esercizio
+
+Data la tupla `coordinate = (10, 20, 30)`, estrai i valori in tre variabili `x`, `y`, `z` e stampali singolarmente.
+
+### 12.4 Esercizio
+
+Scrivi un programma che prenda una lista di tuple con nomi e età, e stampi solo le persone maggiorenni.
+
+```py
+esempio_dati = [("Luca", 17), ("Anna", 22), ("Marco", 19)]
+```
+
+Output previsto:
+Anna, 22
+Marco, 19
