@@ -1,0 +1,254 @@
+---
+title: "Delegates"
+draft: false
+lastUpdateDate: "2025-10-28"
+subject: "C#"
+category: "Informatica"
+tags: ["csharp", "programmazione", "delegati", "avanzato"]
+author: "Dennis Turco"
+videoLesson: false
+---
+## 1. Introduzione
+
+Un **delegato** è un tipo che incapsula in modo sicuro un **riferimento a uno o più metodi**.
+In pratica, è un *puntatore a funzione* tipizzato, che consente di:
+
+- Passare metodi come parametri ad altri metodi.
+- Implementare **callback** ed **eventi**.
+- Creare codice **flessibile e riutilizzabile**, in cui il comportamento è definito a runtime.
+- Favorire uno stile **funzionale** di programmazione (con **LINQ**, **lambda expressions** e **metodi anonimi**).
+
+## 2. Dichiarazione
+
+Per dichiarare un tipo delegato si utilizza la parola chiave `delegate`:
+
+$$
+\text{[modificatore] delegate [tipo\_ritorno] [nome\_funzione]([lista\_parametri]);}
+$$
+
+Esempio:
+
+```cs
+public class Program
+{
+    // dichiarazione delegato
+    public delegate void Delegato(string messaggio);
+
+    // metodo che fa riferimento alla firma del delegato
+    public static void MetodoStampa(string messaggio)
+    {
+        Console.WriteLine(messaggio);
+    }
+
+    public static void Main()
+    {
+        // instanzia il delegato
+        Delegato del = MetodoStampa;
+
+        // invocazione del delegato
+        del("Hello World");
+    }
+}
+```
+
+In questo esempio:
+
+- Il delegato `Delegato` rappresenta un metodo che non restituisce nulla (void) e accetta una stringa.
+- `MetodoStampa` è compatibile con il delegato, quindi può essere assegnato.
+- `del("Hello World!")` equivale a chiamare `MetodoStampa("Hello World!")`.
+
+## 3. Multicasting di un delegato
+
+Un **delegato multicast** può referenziare **più metodi** contemporaneamente.
+
+Regole principali:
+
+- Si usano gli operatori + o += per aggiungere metodi.
+- Si usano gli operatori - o -= per rimuoverli.
+- I metodi vengono invocati in ordine FIFO (First In First Out).
+- Se uno dei metodi lancia un’eccezione, l’invocazione si interrompe.
+
+```cs
+public delegate void Delegato(string messaggio);
+
+public class Program
+{
+    public static void MetodoA(string msg) => Console.WriteLine("A: " + msg);
+    public static void MetodoB(string msg) => Console.WriteLine("B: " + msg);
+    public static void MetodoC(string msg) => Console.WriteLine("C: " + msg);
+
+    public static void Main()
+    {
+        Delegato d = MetodoA;
+        d += MetodoB;
+        d += MetodoC;
+
+        d("Prova di multicast"); // Invoca A, poi B, poi C
+
+        d -= MetodoB;
+        d("Dopo rimozione di B"); // Invoca A e C
+    }
+}
+```
+
+## 4. Delegati con tipo di ritorno
+
+Quando un delegato rappresenta metodi che **ritornano un valore**, solo **il valore restituito dall'ultimo metodo** della lista multicast viene mantenuto.
+
+Esempio:
+
+```cs
+public delegate int Calcola();
+
+public class Program
+{
+    public static int Somma() => 10;
+    public static int Moltiplica() => 5 * 2;
+
+    public static void Main()
+    {
+        Calcola calc = Somma;
+        calc += Moltiplica;
+
+        int risultato = calc(); // ritorna 10 (Somma) e poi 10 (Moltiplica) ma mantiene l'ultimo risultato
+        Console.WriteLine(risultato); // 10
+    }
+}
+```
+
+## 5. Delegati predefiniti: Action, Func e Predicate
+
+C# fornisce **delegati generici** già pronti per l’uso, che evitano di dichiarare nuovi tipi `delegate`.
+
+### 5.1 Action
+
+Rappresenta un metodo che non restituisce valore (`void`)
+
+```cs
+Action<string> stampa = msg => Console.WriteLine(msg);
+stampa("Ciao da Action!");
+```
+
+### 5.2 Func
+
+Rappresenta un metodo che restituisce un valore.
+
+```cs
+Func<int, int, int> somma = (a, b) => a + b;
+int risultato = somma(5, 4); // 7
+```
+
+L'ultimo tipo generico rappresenta il tipo di ritorno.
+
+Esempio:
+`Func<string, int>` $\rightarrow$ accetta una `string`, restituisce un `int`.
+
+### 5.3 Predicate
+
+Rappresenta un metodo che restituisce un valore booleano (`bool`) e accetta un singolo parametro.
+
+```cs
+Predicate<int> pari = n => n % 2 == 0;
+Console.WriteLine(pari(4)); // True
+```
+
+## 6. Delegati anonimi
+
+È possibile definire un delegato senza dichiararne esplicitamente il tipo senza creare un metodo separato.
+
+Esempio:
+
+```cs
+public delegate void Stampa(string messaggio);
+
+Stampa stampa = delegate(string msg)
+{
+    Console.WriteLine($"Anonimo: {msg}");
+};
+
+stampa("Hello!");
+```
+
+Questa forma è utile quando la logica del metodo è semplice o usata una sola volta.
+
+## 7. Lambda expressions e delegati
+
+Le **lambda expressions** sono una forma compatta per definire metodi anonimi.
+
+```cs
+Action<int> stampaQuadrato = n => Console.WriteLine(n * n);
+stampaQuadrato(5); // 25
+```
+
+Sono comunemente utilizzate con **LINQ** e metodi di estansione come `Select`, `Where`, `OrderBy`.
+
+Esempio LINQ:
+
+```cs
+int[] numeri = {1, 2, 3, 4, 5};
+var pari = numeri.Where(n => n % 2 == 0);
+
+foreach (var n in pari)
+{
+    Console.WriteLine(n);
+}
+```
+
+## 8. Delegati ed eventi
+
+Gli **eventi** in C# si basano proprio sui delegati.
+Un evento è un meccanismo che permette a una classe di notificare a una o più altre classi che qualcosa è successo.
+
+Esempio:
+
+```cs
+public delegate void Notifica(string message);
+
+public class Publisher
+{
+    public event Notifica OnNotifica;
+
+    public void Invia()
+    {
+        OnNotifica?.Invoke("Evento generato!");
+    }
+}
+
+public class Subscriber
+{
+    public void Ricevi(string msg)
+    {
+        Console.WriteLine($"Ricevuto: {msg}");
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Publisher pub = new Publisher();
+        Subscriber sub = new Subscriber();
+
+        pub.OnNotifica += sub.Ricevi;
+        pub.Invia(); // Ricevuto: Evento generato!
+    }
+}
+```
+
+## 9. Covarianza e controvarianza dei delegati
+
+I delegati supportano la covarianza e la controvarianza, cioè la possibilità di utilizzare tipi derivati o base in modo compatibile con la firma del delegato.
+
+- **Covarianza**: permette a un delegato di restituire un tipo derivato rispetto a quello dichiarato.
+- **Controvarianza**: permette a un delegato di accettare un tipo più generico come parametro.
+
+```cs
+public class Animale { }
+public class Cane : Animale { }
+
+public delegate Animale CreaAnimale();
+public delegate void GestisciAnimale(Cane c);
+
+CreaAnimale d1 = () => new Cane(); // Covarianza
+GestisciAnimale d2 = (Animale a) => Console.WriteLine(a.GetType().Name); // Controvarianza
+```
