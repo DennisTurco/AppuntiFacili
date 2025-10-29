@@ -1,7 +1,7 @@
 ---
 title: "Delegates"
 draft: false
-lastUpdateDate: "2025-10-28"
+lastUpdateDate: "2025-10-29"
 subject: "C#"
 category: "Informatica"
 tags: ["csharp", "programmazione", "delegati", "avanzato"]
@@ -22,9 +22,7 @@ In pratica, è un *puntatore a funzione* tipizzato, che consente di:
 
 Per dichiarare un tipo delegato si utilizza la parola chiave `delegate`:
 
-$$
-\text{[modificatore] delegate [tipo\_ritorno] [nome\_funzione]([lista\_parametri]);}
-$$
+`[modificatore] delegate [tipo_ritorno] [nome_funzione]([lista_parametri]);`
 
 Esempio:
 
@@ -66,7 +64,7 @@ Regole principali:
 - Si usano gli operatori + o += per aggiungere metodi.
 - Si usano gli operatori - o -= per rimuoverli.
 - I metodi vengono invocati in ordine FIFO (First In First Out).
-- Se uno dei metodi lancia un’eccezione, l’invocazione si interrompe.
+- Se uno dei metodi lancia un'eccezione, l'invocazione si interrompe.
 
 ```cs
 public delegate void Delegato(string messaggio);
@@ -118,7 +116,7 @@ public class Program
 
 ## 5. Delegati predefiniti: Action, Func e Predicate
 
-C# fornisce **delegati generici** già pronti per l’uso, che evitano di dichiarare nuovi tipi `delegate`.
+C# fornisce **delegati generici** già pronti per l'uso, che evitano di dichiarare nuovi tipi `delegate`.
 
 ### 5.1 Action
 
@@ -252,3 +250,75 @@ public delegate void GestisciAnimale(Cane c);
 CreaAnimale d1 = () => new Cane(); // Covarianza
 GestisciAnimale d2 = (Animale a) => Console.WriteLine(a.GetType().Name); // Controvarianza
 ```
+
+## 10. Esercizi
+
+### 10.1 Esercizio
+**Scenario**:
+Vuoi creare un piccolo motore di calcolo personalizzabile, dove l'utente può scegliere che tipo di operazione applicare su due numeri.
+
+**Consegna**:
+
+1. Crea un delegato Operazione(int a, int b) che restituisce un int.
+2. Implementa tre metodi statici:
+    - `Somma(int a, int b)`
+    - `Differenza(int a, int b)`
+    - `Moltiplicazione(int a, int b)`
+3. Scrivi un metodo `EseguiOperazione(int a, int b, Operazione op)` che invoca il delegato passato.
+4. Nel `Main`, chiedi all'utente di scegliere l'operazione da eseguire e usa il delegato corrispondente.
+
+*Obiettivo didattico: capire come passare comportamenti come parametri, e come cambiare la logica di un metodo a runtime.*
+
+### 10.2 Esercizio
+
+**Scenario**:
+Hai un'applicazione che deve registrare log in modo diverso a seconda del contesto (console, file, o rete).
+Vuoi che il tipo di logging sia pluggabile tramite delegati.
+
+**Consegna**:
+
+1. Crea un delegato Logger(string messaggio).
+2. Implementa tre metodi diversi:
+    - `LogConsole(string msg)` → scrive in console.
+    - `LogFile(string msg)` → scrive su file log.txt.
+    - `LogNetwork(string msg)` → simula l'invio di un log in rete (es. `Console.WriteLine("Inviato: " + msg)`).
+3. Crea un metodo `RegistraOperazione(string azione, Logger log)` che invoca il logger passato.
+4. Nel `Main`, esegui varie chiamate con diversi logger e mostra come cambia il comportamento.
+
+*Obiettivo didattico: imparare a decouplare la logica di logging dal codice principale, passando comportamenti dinamici tramite delegati.*
+
+### 10.3 Esercizio
+
+**Scenario**:
+Hai una lista di numeri interi e vuoi filtrarla in modo dinamico (pari, dispari, maggiori di N, ecc.) usando delegati o `Predicate<int>`.
+
+**Consegna**:
+
+1. Crea una lista di interi da 1 a 20.
+2. Crea un metodo `Filtra(List<int> numeri, Predicate<int> condizione)` che restituisce una nuova lista contenente solo gli elementi che rispettano la condizione.
+3. Usa il metodo tre volte con filtri diversi:
+    - Numeri pari
+    - Maggiori di 10
+    - Multipli di 3
+4. Stampa i risultati a video.
+
+*Obiettivo didattico: comprendere come usare delegati predefiniti (Predicate, Func) per scrivere codice generico e riutilizzabile.*
+
+### 10.4 Esercizio
+
+**Scenario**:
+Vuoi simulare un contatore di download che notifica gli utenti quando viene raggiunto un certo numero di download.
+
+**Consegna**:
+
+1. Crea un delegato `DownloadHandler(string messaggio)`.
+2. Crea una classe `DownloadManager` con:
+    - Un evento `OnLimiteRaggiunto`
+    - Un campo `conteggio`
+    - Un metodo `RegistraDownload()` che incrementa il contatore e, se arriva a 5, genera l'evento.
+3. Crea due classi "ascoltatrici":
+    - `EmailNotifier` che stampa: "Email inviata: {messaggio}"
+    - `ConsoleNotifier` che stampa: "Notifica: {messaggio}"
+4. Nel `Main`, collega entrambe le classi all'evento e simula più download.
+
+*Obiettivo didattico: collegare il concetto di delegato → evento → subscriber, come accade nei sistemi reali.*
