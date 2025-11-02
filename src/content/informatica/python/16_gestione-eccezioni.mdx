@@ -1,0 +1,244 @@
+---
+title: "Gestione Eccezioni"
+draft: false
+lastUpdateDate: "2025-10-02"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "try", "except", "eccezioni", "medio"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Durante l'esecuzione di un programma Python, possono verificarsi errori.
+Alcuni di questi sono **errori di sintassi**, che impediscono l'esecuzione del programma; altri sono **eccezioni**, cioè errori che si verificano durante l'esecuzione (runtime errors).
+
+Esempi di eccezioni comuni:
+- `ValueError`: si verifica quando un valore non è del o previsto.
+- `ZeroDivisionError`: divisione per zero.
+- `FileNotFoundError`: apertura di un file inesistente.
+- `TypeError`: operazioni tra i non compatibili (es. sommare stringa e intero).
+- `IndexError`: accesso a un indice di lista inesistente.
+
+Per gestire in modo controllato le eccezioni, Python mette a disposizione il costrutto:
+
+**try → except → else → finally**
+
+![try-except-finally](https://www.boardinfinity.com/blog/content/images/2023/02/Try--except--else-and-finally-python-1.png)
+
+Non tutti i blocchi sono obbligatori, ma devono seguire quest'ordine.
+
+## 2. Blocco Try
+
+Il blocco `try` contiene il codice che potrebbe **generare un'eccezione**.
+Se durante l'esecuzione di quel codice si verifica un'eccezione non gestita, il controllo viene passato ai blocchi `except` successivi.
+
+Esempio:
+
+```python
+try:
+    x = int(input("Inserisci un numero: "))
+    print("Hai inserito:", x)
+```
+
+Se l'utente inserisce qualcosa che non può essere convertito in intero (es. "abc"), viene sollevata un'eccezione `ValueError`.
+
+<Aside variant="info">
+Il blocco `try` non serve a prevenire gli errori, ma a gestirli **in modo ordinato** quando si verificano.
+</Aside>
+
+## 3. Blocco except
+
+`except` serve per **intercettare e gestire** le eccezioni.
+Può essere generico o specifico.
+
+![try-except](https://embeddedinventor.com/wp-content/uploads/2023/04/1-1.png)
+
+1. Esempio base (cattura qualsiasi eccezione)
+
+    ```python
+    try:
+        x = int(input("Inserisci un numero: "))
+    except:
+        print("Si è verificato un errore!")
+    ```
+
+    <Aside variant="warning">
+    Questo approccio è poco raccomandato perché nasconde informazioni utili al debug.
+    </Aside>
+
+2. Esempio con o specifico
+
+    ```python
+    try:
+        x = int(input("Inserisci un numero: "))
+    except ValueError:
+        print("Devi inserire un numero valido!")
+    ```
+
+    Intercetta solo `ValueError`, lasciando passare eventuali altri errori (es. `KeyboardInterrupt`).
+
+3. Più `except` per i diversi
+
+    ```py
+    try:
+        x = int(input("Inserisci un numero: "))
+        risultato = 10 / x
+    except ValueError:
+        print("Non hai inserito un numero!")
+    except ZeroDivisionError:
+        print("Non puoi dividere per zero!")
+    ```
+
+4. Gestire più eccezioni in una sola clausola
+
+    ```py
+    try:
+        x = int(input("Inserisci un numero: "))
+        risultato = 10 / x
+    except (ValueError, ZeroDivisionError):
+        print("Errore: input non valido o divisione per zero!")
+    ```
+
+## 4. Blocco else
+
+Il blocco `else` **viene eseguito solo se non si è verificata alcuna eccezione** nel `try`.
+Serve per separare il codice di "successo" da quello di "errore".
+
+![else](https://embeddedinventor.com/wp-content/uploads/2023/04/3-1.png.webp)
+
+Esempio:
+
+```py
+try:
+    x = int(input("Inserisci un numero: "))
+except ValueError:
+    print("Errore: non è un numero valido.")
+else:
+    print("Hai inserito correttamente il numero:", x)
+```
+
+<Aside variant="info">
+Usare `else` migliora la leggibilità e chiarisce l'intento del programmatore: "se tutto è andato bene, esegui questo blocco".
+</Aside>
+
+## 5. Blocco finally
+
+`finally` **viene sempre eseguito**, indipendentemente dal fatto che sia avvenuta o meno un'eccezione.
+È utile per **rilasciare risorse**, come file o connessioni a database.
+
+![finally](https://embeddedinventor.com/wp-content/uploads/2023/04/2-2.png.webp)
+
+Esempio
+
+```py
+try:
+    file = open("dati.txt", "r")
+    contenuto = file.read()
+except FileNotFoundError:
+    print("File non trovato!")
+else:
+    print("File letto con successo.")
+finally:
+    file.close()
+    print("File chiuso.")
+```
+
+<Aside variant="info">
+Anche se si verifica un'eccezione, il `finally` viene eseguito (a meno che il processo non venga terminato forzatamente).
+</Aside>
+
+## 6. Schema Generale
+
+```py
+try:
+    # codice che potrebbe generare un errore
+except oErrore1:
+    # gestisce il primo o di errore
+except oErrore2:
+    # gestisce il secondo o di errore
+else:
+    # eseguito se non ci sono errori
+finally:
+    # eseguito sempre
+```
+
+<Aside variant="info">
+Note:
+- Possibile avere zero o più blocchi `except`.
+- `else` è opzionale e va dopo tutti gli `except`.
+- `finally` è opzionale e, se presente, va per **ultimo**.
+</Aside>
+
+## 7. Rilancio delle Eccezioni (raise)
+
+Possibile **rilanciare** l'eccezione dopo averla parzialmente gestita, per farla propagare più in alto nello stack:
+
+```py
+try:
+    x = int(input("Inserisci un numero: "))
+except ValueError:
+    print("Errore catturato, ma lo rilancio...")
+    raise
+```
+
+<Aside variant="tip">
+`raise` senza argomenti rilancia l'ultima eccezione catturata. È utile per registrare un errore o effettuare operazioni di pulizia, senza sopprimere l'errore originale.
+</Aside>
+
+## 8. Eccezioni personalizzate
+
+Possibile creare eccezioni custom definendo una classe che eredita da `Exception`:
+
+```py
+class NumeroNegativoError(Exception):
+    pass
+
+try:
+    n = int(input("Inserisci un numero positivo: "))
+    if n < 0:
+        raise NumeroNegativoError("Hai inserito un numero negativo!")
+except NumeroNegativoError as e:
+    print("Errore personalizzato:", e)
+```
+
+Le eccezioni personalizzate migliorano la chiarezza e rendono il codice più robusto.
+
+<Aside variant="info">
+Possibile anche aggiungere logica personalizzata alla classe, ad esempio campi aggiuntivi o metodi per formattare il messaggio di errore.
+</Aside>
+
+## 9. Buone pratiche
+
+1. Evitare except generici, sempre meglio specificare l'eccezione attesa
+2. Loggare le eccezioni importanto con `logging`
+3. Rilanciare (raise) quando non si è al livello giusto per decidere come gestire l'errore.
+4. Definire eccezioni custom per condizioni di errore logiche dell'applicazione.
+
+## 10. Esercizi
+
+### 10.1 Esercizio - Conversione Sicura
+
+Scrivere un programma che:
+1. chiede un numero intero all'utente.
+2. stampa il quadrato del numero.
+3. gestisce gli errori in caso di input non valido.
+
+Suggerimento: usare try-except-else.
+
+### 10.2 Esercizio - Divisione Sicura
+
+Scrivere un programma che:
+1. chiede due numeri (dividendo e divisore).
+2. calcola il risultato della divisione.
+3. gestisce i casi di input non numerico e divisione per zero.
+4. stampa sempre un messaggio finale "Operazione terminata".
+
+### 10.3 Esercizio -Eccezione Personalizzata
+
+Crea una classe di eccezione "EtaNonValidaError" e scrivere un programma che:
+
+1. chiede l'età all'utente.
+2. solleva l'eccezione se l'età è minore di 0 o maggiore di 120.
+3. gestisce l'errore con un messaggio personalizzato.

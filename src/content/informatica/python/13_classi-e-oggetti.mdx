@@ -1,0 +1,302 @@
+---
+title: "Classi e Oggetti"
+draft: false
+lastUpdateDate: "2025-10-02"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "oop", "classi", "oggetti", "medio"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+La **programmazione orientata agli oggetti** (OOP, *Object-Oriented Programming*) è un paradigma che organizza il codice attorno a **oggetti**, che combinano **dati** (attributi) e **funzionalità** (metodi).
+
+Python è un linguaggio fortemente orientato agli oggetti: tutto è un oggetto, anche numeri, stringhe, funzioni e moduli.
+
+<Aside variant="info">
+Un oggetto è un'istanza concreta di una classe.
+*La classe è come un modello o progetto da cui vengono creati gli oggetti.*
+</Aside>
+
+![instanza-oggetto](https://media.geeksforgeeks.org/wp-content/uploads/20250906151500826906/420046617.webp)
+
+
+L'OOP consente di:
+- organizzare il codice in modo modulare e riutilizzabile;
+- rappresentare entità reali (es. persona, automobile, studente) come oggetti nel programma;
+- mantenere il codice più leggibile e scalabile.
+
+---
+
+## 2. Creazione di una Classe
+
+Una **classe** in Python si definisce con la parola chiave `class`.
+All'interno si possono definire attributi (dati) e metodi (funzioni).
+
+```python
+class Persona:
+    pass
+```
+
+Questa classe è vuota, ma può essere utilizzata per creare oggetti:
+
+```python
+p1 = Persona()
+print(type(p1))
+```
+
+Output:
+
+```bash
+<class '__main__.Persona'>
+```
+
+In questo caso, `p1` è un'istanza della classe `Persona`.
+
+
+## 3. Il Metodo __init__ (Costruttore)
+
+Il metodo speciale `__init__` è il **costruttore**: viene eseguito automaticamente alla creazione dell'oggetto.
+Serve per inizializzare gli **attributi di istanza**, cioè i dati che appartengono a ciascun oggetto.
+
+![classi e oggetti](https://miro.medium.com/1*SqHq5pwi3OqjjUOLkX1HJA.png)
+
+```python
+class Persona:
+    def __init__(self, nome, eta):
+        self.nome = nome
+        self.eta = eta
+```
+
+Creazione di un oggetto:
+
+```python
+p1 = Persona("Anna", 25)
+print(p1.nome)
+print(p1.eta)
+```
+
+<Aside variant="info">
+`self` rappresenta l'istanza corrente. È obbligatorio come primo parametro nei metodi della classe.
+</Aside>
+
+### 3.1 Costruttori multipli (alternativi)
+
+In Python è possibile creare **metodi di classe** come costruttori alternativi, utilizzando il decoratore `@classmethod`.
+
+```python
+
+class Persona:
+    def init(self, nome, eta):
+        self.nome = nome
+        self.eta = eta
+
+    @classmethod
+    def da_stringa(cls, stringa):
+        nome, eta = stringa.split(",")
+        return cls(nome, int(eta))
+
+p2 = Persona.da_stringa("Marco,40")
+```
+
+<Aside variant="info">
+`cls` rappresenta la classe stessa (simile a `self`, ma per la classe anziché l'istanza).
+</Aside>
+
+## 4. Attributi di Classe e di Istanza
+
+- **Attributi di istanza**: appartengono a una singola istanza (oggetto).
+- **Attributi di classe**: condivisi da tutte le istanze della classe.
+
+Esempio:
+
+```python
+class Studente:
+    scuola = "Liceo Galileo"   # attributo di classe
+
+    def __init__(self, nome, voto):
+        self.nome = nome       # attributo di istanza
+        self.voto = voto
+```
+
+Uso:
+
+```python
+s1 = Studente("Luca", 8)
+s2 = Studente("Giulia", 9)
+
+print(s1.scuola)   # accesso all'attributo di classe
+print(s2.voto)     # accesso all'attributo di istanza
+```
+
+<Aside variant="tip">
+Se si cambia `Studente.scuola`, la modifica sarà visibile in tutte le istanze.
+Se invece si cambia `s1.scuola`, si crea un attributo solo per quell'oggetto.
+</Aside>
+
+## 5. Metodi
+
+I **metodi** sono funzioni definite all'interno della classe.
+Servono per manipolare o mostrare i dati dell'oggetto.
+
+```python
+class Persona:
+    def __init__(self, nome, eta):
+        self.nome = nome
+        self.eta = eta
+
+    def saluta(self):
+        print(f"Ciao, mi chiamo {self.nome} e ho {self.eta} anni.")
+```
+
+Uso:
+
+```python
+p1 = Persona("Marco", 30)
+p1.saluta()
+```
+
+Output: Ciao, mi chiamo Marco e ho 30 anni.
+
+### 5.1 Tipologie di metodi
+- **Metodi di istanza** → operano sui dati dell'oggetto (usano `self`).
+- **Metodi di classe** → operano sulla classe (usano `cls`).
+- **Metodi statici** → non dipendono né dall'oggetto né dalla classe, ma appartengono logicamente a essa.
+
+Esempio con metodi di classe e statici:
+
+```python
+class Calcolatrice:
+    @classmethod
+    def info(cls):
+        print("Classe per calcoli matematici.")
+
+    @staticmethod
+    def somma(a, b):
+        return a + b
+
+Calcolatrice.info()
+print(Calcolatrice.somma(5, 3))
+```
+
+## 6. Metodi Speciali (Dunder Methods)
+
+Python include molti **metodi speciali** (detti anche *dunder methods*, “double underscore”), che permettono di personalizzare il comportamento degli oggetti.
+
+I più comuni:
+
+| Metodo     | Scopo                                |
+| ---------- | ------------------------------------ |
+| `__init__` | Inizializza l'oggetto alla creazione |
+| `__str__`  | Rappresentazione testuale leggibile  |
+| `__repr__` | Rappresentazione ufficiale (debug)   |
+| `__len__`  | Lunghezza oggetto (usato da `len()`) |
+| `__add__`  | Somma tra oggetti personalizzata     |
+
+Esempio `__str__`:
+
+```python
+class Punto:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return f"Punto({self.x}, {self.y})"
+
+p = Punto(2, 5)
+print(p)   # usa automaticamente __str__
+```
+
+Output: Punto(2, 5)
+
+## 7. Incapsulamento
+
+**L'incapsulamento** serve a **proteggere i dati** interni all'oggetto, nascondendoli o limitandone l'accesso diretto.
+In Python, gli attributi **privati** si dichiarano anteponendo un underscore `_` (convenzione) o doppio underscore `__` (name mangling).
+
+<Aside variant="info">
+Un singolo underscore `_attributo` è solo una convenzione: indica che l'attributo non dovrebbe essere usato all'esterno della classe, ma è comunque accessibile.  
+Il doppio underscore `__attributo` attiva il *name mangling*, cioè Python rinomina automaticamente l'attributo in `_NomeClasse__attributo`, rendendolo meno accessibile (ma non completamente privato).
+</Aside>
+
+```python
+class ContoBancario:
+    def __init__(self, titolare, saldo):
+        self.titolare = titolare
+        self.__saldo = saldo  # attributo privato
+
+    def deposita(self, importo):
+        self.__saldo += importo
+
+    def preleva(self, importo):
+        if importo <= self.__saldo:
+            self.__saldo -= importo
+        else:
+            print("Saldo insufficiente.")
+
+    def mostra_saldo(self):
+        print(f"Saldo attuale: {self.__saldo} €")
+```
+
+Uso:
+
+```python
+conto = ContoBancario("Luca", 1000)
+conto.deposita(200)
+conto.mostra_saldo()
+conto.__saldo = 0  # non modifica il vero saldo
+conto.mostra_saldo()
+```
+
+<Aside variant="warning">
+Gli attributi “privati” non sono veramente nascosti, ma resi meno accessibili (`_ContoBancario__saldo`). Python si basa sulla **fiducia del programmatore**, non su regole rigide.
+</Aside>
+
+## 8. Proprietà (`@property`) - Piccolo cenno
+
+Le **property** permettono di **controllare la lettura e la scrittura degli attributi** in modo elegante, mantenendo una sintassi semplice.
+Sono utili per **validare i dati** senza modificare il modo in cui gli attributi vengono usati.
+
+```python
+class Persona:
+    def __init__(self, nome, eta):
+        self._nome = nome
+        self._eta = eta
+
+    @property
+    def eta(self):
+        return self._eta
+
+    @eta.setter
+    def eta(self, valore):
+        if valore < 0:
+            print("L'età non può essere negativa!")
+        else:
+            self._eta = valore
+```
+
+Uso:
+
+```python
+p = Persona("Luca", 25)
+print(p.eta)   # usa il getter
+p.eta = -3     # usa il setter → messaggio di errore
+```
+
+<Aside variant="tip">
+Le `@property` rendono il codice più **sicuro, leggibile e Pythonic**. Permettono di aggiungere logica di controllo agli attributi senza cambiare la loro sintassi d'uso.
+</Aside>
+
+## 9. Esercizi
+
+### 9.1 Esercizio - Rettangolo
+
+Creare una classe `Rettangolo` che abbia:
+
+1. attributi `base` e `altezza`.
+2. un metodo `area()` che restituisce l'area,
+3. un metodo `perimetro()` che restituisce il perimetro,
+4. un metodo `__str__()` che descrive il rettangolo.
