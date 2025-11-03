@@ -317,8 +317,8 @@ Vuoi simulare un contatore di download che notifica gli utenti quando viene ragg
     - Un campo `conteggio`
     - Un metodo `RegistraDownload()` che incrementa il contatore e, se arriva a 5, genera l'evento.
 3. Crea due classi "ascoltatrici":
-    - `EmailNotifier` che stampa: "Email inviata: {messaggio}"
-    - `ConsoleNotifier` che stampa: "Notifica: {messaggio}"
+    - `EmailNotifier` che stampa: "Email inviata: messaggio"
+    - `ConsoleNotifier` che stampa: "Notifica: messaggio"
 4. Nel `Main`, collega entrambe le classi all'evento e simula più download.
 
 *Obiettivo didattico: collegare il concetto di delegato → evento → subscriber, come accade nei sistemi reali.*
