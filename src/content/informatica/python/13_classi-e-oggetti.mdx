@@ -1,7 +1,7 @@
 ---
 title: "Classi e Oggetti"
 draft: false
-lastUpdateDate: "2025-10-02"
+lastUpdateDate: "2025-11-03"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "oop", "classi", "oggetti", "medio"]
@@ -11,12 +11,22 @@ videoLesson: false
 
 ## 1. Introduzione
 
-La **programmazione orientata agli oggetti** (OOP, *Object-Oriented Programming*) è un paradigma che organizza il codice attorno a **oggetti**, che combinano **dati** (attributi) e **funzionalità** (metodi).
+* [Documentazione Ufficiale](https://docs.python.org/3/tutorial/classes.html)
+
+La **programmazione orientata agli oggetti** (OOP, *Object-Oriented Programming*) è un paradigma che
+organizza il codice attorno a **oggetti**, che combinano **dati** (attributi) e **funzionalità** (metodi).
+
+Questo permette di "modellare" il mondo esterno in codice, rendendo il codice riusabile, organizzato e maggiormente manutenibile.
 
 Python è un linguaggio fortemente orientato agli oggetti: tutto è un oggetto, anche numeri, stringhe, funzioni e moduli.
 
+Classi e oggetti:
+- **Classe**: È una sorta di template che serve per creare oggetti.
+- **Oggetto**: È una specifica istanza di una classe.
+
+
 <Aside variant="info">
-Un oggetto è un'istanza concreta di una classe.
+Quindi, in altri termini, un oggetto è un'istanza concreta di una classe.
 *La classe è come un modello o progetto da cui vengono creati gli oggetti.*
 </Aside>
 
@@ -89,7 +99,7 @@ In Python è possibile creare **metodi di classe** come costruttori alternativi,
 ```python
 
 class Persona:
-    def init(self, nome, eta):
+    def __init__(self, nome, eta):
         self.nome = nome
         self.eta = eta
 
@@ -107,8 +117,8 @@ p2 = Persona.da_stringa("Marco,40")
 
 ## 4. Attributi di Classe e di Istanza
 
-- **Attributi di istanza**: appartengono a una singola istanza (oggetto).
-- **Attributi di classe**: condivisi da tutte le istanze della classe.
+- **Attributi di istanza** (instance variable): appartengono a una singola istanza (oggetto).
+- **Attributi di classe** (class variable): condivisi da tutte le istanze della classe.
 
 Esempio:
 
@@ -255,10 +265,13 @@ conto.mostra_saldo()
 Gli attributi “privati” non sono veramente nascosti, ma resi meno accessibili (`_ContoBancario__saldo`). Python si basa sulla **fiducia del programmatore**, non su regole rigide.
 </Aside>
 
-## 8. Proprietà (`@property`) - Piccolo cenno
+## 8. Proprietà (`@property`)
 
 Le **property** permettono di **controllare la lettura e la scrittura degli attributi** in modo elegante, mantenendo una sintassi semplice.
 Sono utili per **validare i dati** senza modificare il modo in cui gli attributi vengono usati.
+
+- **Getter**: Usato per accedere al valore di un attributo.
+- **Setter**: Usato per modificare il valore di un attributo.
 
 ```python
 class Persona:
@@ -267,15 +280,23 @@ class Persona:
         self._eta = eta
 
     @property
+    def nome(self):
+        return self._nome # Getter
+
+    @nome.setter
+    def nome(self, valore):
+        self._nome = valore # Setter
+
+    @property
     def eta(self):
-        return self._eta
+        return self._eta # Getter
 
     @eta.setter
     def eta(self, valore):
         if valore < 0:
             print("L'età non può essere negativa!")
         else:
-            self._eta = valore
+            self._eta = valore # Setter
 ```
 
 Uso:

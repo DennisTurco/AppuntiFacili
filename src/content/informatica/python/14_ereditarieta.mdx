@@ -1,0 +1,207 @@
+---
+title: "Ereditarietà in Python"
+draft: false
+lastUpdateDate: "2025-11-03"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "oop", "ereditarietà", "classi", "medio"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+- [Documentazione Ufficiale](https://docs.python.org/3/tutorial/classes.html)
+
+![inheritance](https://static-assets.codecademy.com/python-inheritance/inheritance_analogy.png)
+
+L'**ereditarietà** (inheritance) è un principio fondamentale della *programmazione orientata agli oggetti* (OOP).
+Consente di **riutilizzare e estendere** il codice di una classe già esistente.
+
+L'idea è semplice: una classe figlia (o **sottoclasse**) eredita attributi e metodi da una classe madre (o **superclasse**),
+potendo eventualmente modificarli o aggiungerne di nuovi.
+
+<Aside variant="info">
+L'ereditarietà promuove il *riuso del codice* e la *manutenibilità*, riducendo la duplicazione e rendendo il programma più modulare.
+</Aside>
+
+## 2. Creare una classe base e una classe derivata
+
+![animal-inheritance](https://media.geeksforgeeks.org/wp-content/uploads/20251009164207176209/animal_class.webp)
+
+```python
+class Animale:
+    def __init__(self, nome):
+        self.nome = nome
+
+    def parla(self):
+        print("L'animale emette un suono.")
+```
+
+Ora creiamo una **classe derivata** che eredita da `Animale`:
+
+```python
+class Cane(Animale):
+    def parla(self):
+        print("Bau!")
+```
+
+Uso:
+
+```python
+a = Animale("Creatura")
+c = Cane("Fido")
+
+a.parla()   # L'animale emette un suono.
+c.parla()   # Bau!
+```
+
+<Aside variant="tip">
+Se un metodo è definito **sia nella classe base** che nella **classe derivata**, Python usa **quello della sottoclasse**. Questo meccanismo si chiama **override**.
+</Aside>
+
+## 3. Il costruttore e la funzione super()
+
+Quando una sottoclasse ha un proprio costruttore `__init__`, può comunque richiamare quello della classe base tramite `super()`.
+
+
+```python
+class Animale:
+    def __init__(self, nome):
+        self.nome = nome
+
+class Cane(Animale):
+    def __init__(self, nome, razza):
+        super().__init__(nome)     # chiama il costruttore della superclasse
+        self.razza = razza
+```
+
+
+Uso:
+
+```python
+c = Cane("Fido", "Labrador")
+print(c.nome, c.razza) # Output: Fido Labrador
+```
+
+<Aside variant="info">
+`super()` permette di **accedere ai metodi della superclasse**, ed è il modo corretto per evitare errori di duplicazione o sovrascrittura involontaria.
+</Aside>
+
+
+## 4. Aggiungere nuovi metodi o estendere quelli esistenti
+
+Le sottoclassi possono aggiungere nuovi metodi oppure estendere quelli ereditati.
+
+```python
+class Animale:
+    def parla(self):
+        print("Suono generico.")
+
+class Cane(Animale):
+    def parla(self):
+        super().parla()      # chiama il metodo originale
+        print("Bau!")
+
+c = Cane()
+c.parla()
+```
+
+Output:
+
+```text
+Suono generico.
+Bau!
+```
+
+## 5. Verificare relazioni di ereditarietà
+
+In Python una classe può **ereditare da più superclassi**.
+È una caratteristica potente, ma da usare con attenzione.
+
+```python
+class Volante:
+    def vola(self):
+        print("Sto volando!")
+
+class Nuotante:
+    def nuota(self):
+        print("Sto nuotando!")
+
+class Anatra(Volante, Nuotante):
+    pass
+
+a = Anatra()
+a.vola()
+a.nuota()
+```
+
+Output:
+
+```text
+Sto volando!
+Sto nuotando!
+```
+
+<Aside variant="warning">
+In caso di conflitti (metodi con lo stesso nome in più superclassi), Python risolve automaticamente l'ordine di ricerca con la **MRO (Method Resolution Order)**.
+</Aside>
+
+## 7. La MRO (Method Resolution Order)
+
+La **MRO** definisce l'ordine in cui Python cerca un attributo o metodo nelle classi coinvolte nell'ereditarietà multipla.
+
+Possibile visualizzarla con:
+
+```python
+print(Anatra.mro())
+```
+
+Output (esempio):
+
+```python
+[<class '__main__.Anatra'>, <class '__main__.Volante'>, <class '__main__.Nuotante'>, <class 'object'>]
+```
+
+## 8. Classi astratte
+
+A volte vogliamo definire **una classe base che non sia istanziabile**, ma che serva solo da modello per altre classi.
+In Python si possono creare usando il modulo `abc`.
+
+```python
+from abc import ABC, abstractmethod
+
+class Animale(ABC):
+    @abstractmethod
+    def parla(self):
+        pass
+
+class Cane(Animale):
+    def parla(self):
+        print("Bau!")
+```
+
+Uso:
+
+```python
+c = Cane()
+c.parla()
+```
+
+<Aside variant="info">
+Una classe astratta:
+- non può essere istanziata direttamente;
+- può definire metodi “vuoti” che **devono** essere implementati nelle sottoclassi.
+</Aside>
+
+## 9. Esercizi
+
+### 9.1 Esercizio
+
+Creare una gerarchia di classi che rappresenti veicoli:
+
+- Classe base `Veicolo` con attributo marca e metodo `info()`.
+- Classe `Auto` che eredita da `Veicolo` e aggiunge `porte`.
+- Classe `Moto` che eredita da `Veicolo` e aggiunge `cilindrata`.
+- Sovrascrivere `info()` in entrambe le sottoclassi per mostrare informazioni specifiche.
+- Creare alcune istanze e verifica l'uso di `isinstance()` e `issubclass()`.
