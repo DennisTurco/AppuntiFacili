@@ -1,0 +1,131 @@
+---
+title: "Metodi avanzati e gestione degli attributi"
+draft: false
+lastUpdateDate: "2025-11-04"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "oop", "classi", "metodi", "property"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+In questa lezione approfondiamo alcuni aspetti più avanzati della programmazione orientata agli oggetti (OOP) in Python.
+
+Dopo aver visto come creare classi, oggetti e metodi di base, esploreremo:
+
+- Costruttori alternativi, per creare oggetti da formati diversi (come stringhe);
+- Tipologie di metodi, per capire la differenza tra metodi di istanza, di classe e statici;
+- Proprietà (`@property`), per controllare l'accesso e la modifica degli attributi.
+
+Questi concetti rendono il codice più flessibile, leggibile e Pythonic.
+
+## 2. Costruttori alternativi (`@classmethod`)
+
+Oltre al costruttore classico `__init__`, una classe può avere costruttori alternativi,
+utili quando si vogliono creare oggetti da sorgenti di dati diverse.
+
+Per farlo si usa il decoratore `@classmethod`.
+
+```python
+class Persona:
+    def __init__(self, nome, eta):
+        self.nome = nome
+        self.eta = eta
+
+    @classmethod
+    def da_stringa(cls, stringa):
+        nome, eta = stringa.split(",")
+        return cls(nome, int(eta))
+
+p2 = Persona.da_stringa("Marco,40")
+```
+
+<Aside variant="info">
+`cls` rappresenta la **classe stessa**, e non l'istanza.
+È utile quando si vogliono creare metodi che generano oggetti in modo personalizzato.
+</Aside>
+
+## 3. Tipologie di Metodi
+
+In Python esistono tre tipi principali di metodi all'interno delle classi:
+
+| Tipo              | Decoratore      | Primo parametro | Accesso a...                    |
+| ----------------- | --------------- | --------------- | ------------------------------- |
+| Metodo di istanza | —               | `self`          | Attributi e metodi dell'oggetto |
+| Metodo di classe  | `@classmethod`  | `cls`           | Attributi e metodi della classe |
+| Metodo statico    | `@staticmethod` | —               | Nessuno, è indipendente         |
+
+
+Esempio:
+
+```python
+class Calcolatrice:
+    @classmethod
+    def info(cls):
+        print("Classe per calcoli matematici.")
+
+    @staticmethod
+    def somma(a, b):
+        return a + b
+
+Calcolatrice.info()
+print(Calcolatrice.somma(5, 3))
+```
+
+<Aside variant="tip">
+I metodi statici sono utili per funzioni “utility” che hanno senso all'interno di una classe, ma **non dipendono** dallo stato di essa.
+</Aside>
+
+## 4. Proprietà (`@property`)
+
+Le **property** permettono di gestire l'accesso agli attributi in modo controllato, mantenendo una sintassi semplice come se si accedesse a un campo pubblico.
+
+Sono particolarmente utili per **validare** o **filtrare i dati** durante la lettura o la scrittura.
+
+```python
+class Persona:
+    def __init__(self, nome, eta):
+        self._nome = nome
+        self._eta = eta
+
+    @property
+    def eta(self):
+        return self._eta
+
+    @eta.setter
+    def eta(self, valore):
+        if valore < 0:
+            print("L'età non può essere negativa!")
+        else:
+            self._eta = valore
+```
+
+Uso:
+
+```python
+p = Persona("Luca", 25)
+print(p.eta)   # usa il getter
+p.eta = -3     # usa il setter → messaggio di errore
+```
+
+<Aside variant="info">
+Le property rendono il codice **più robusto** e permettono di introdurre logica di controllo **senza cambiare** la sintassi di accesso agli attributi.
+</Aside>
+
+## 5. Esercizi
+
+### 5.1 Esercizio - Costruttore alternativo
+
+Creare una classe `Libro` con:
+
+- attributi `titolo`, `autore` e `prezzo`;
+- un costruttore alternativo `da_stringa("titolo;autore;prezzo")`.
+
+### 5.2 Esercizio - Property
+
+Creare una classe `Studente` con un attributo `voto` e una property che:
+
+- permette di leggere il voto;
+- impedisce di impostare valori minori di 0 o maggiori di 10.

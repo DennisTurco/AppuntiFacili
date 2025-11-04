@@ -1,7 +1,7 @@
 ---
 title: "Classi e Oggetti"
 draft: false
-lastUpdateDate: "2025-11-03"
+lastUpdateDate: "2025-11-04"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "oop", "classi", "oggetti", "medio"]
@@ -92,29 +92,6 @@ print(p1.eta)
 `self` rappresenta l'istanza corrente. È obbligatorio come primo parametro nei metodi della classe.
 </Aside>
 
-### 3.1 Costruttori multipli (alternativi)
-
-In Python è possibile creare **metodi di classe** come costruttori alternativi, utilizzando il decoratore `@classmethod`.
-
-```python
-
-class Persona:
-    def __init__(self, nome, eta):
-        self.nome = nome
-        self.eta = eta
-
-    @classmethod
-    def da_stringa(cls, stringa):
-        nome, eta = stringa.split(",")
-        return cls(nome, int(eta))
-
-p2 = Persona.da_stringa("Marco,40")
-```
-
-<Aside variant="info">
-`cls` rappresenta la classe stessa (simile a `self`, ma per la classe anziché l'istanza).
-</Aside>
-
 ## 4. Attributi di Classe e di Istanza
 
 - **Attributi di istanza** (instance variable): appartengono a una singola istanza (oggetto).
@@ -169,27 +146,6 @@ p1.saluta()
 ```
 
 Output: Ciao, mi chiamo Marco e ho 30 anni.
-
-### 5.1 Tipologie di metodi
-- **Metodi di istanza** → operano sui dati dell'oggetto (usano `self`).
-- **Metodi di classe** → operano sulla classe (usano `cls`).
-- **Metodi statici** → non dipendono né dall'oggetto né dalla classe, ma appartengono logicamente a essa.
-
-Esempio con metodi di classe e statici:
-
-```python
-class Calcolatrice:
-    @classmethod
-    def info(cls):
-        print("Classe per calcoli matematici.")
-
-    @staticmethod
-    def somma(a, b):
-        return a + b
-
-Calcolatrice.info()
-print(Calcolatrice.somma(5, 3))
-```
 
 ## 6. Metodi Speciali (Dunder Methods)
 
@@ -265,55 +221,9 @@ conto.mostra_saldo()
 Gli attributi “privati” non sono veramente nascosti, ma resi meno accessibili (`_ContoBancario__saldo`). Python si basa sulla **fiducia del programmatore**, non su regole rigide.
 </Aside>
 
-## 8. Proprietà (`@property`)
+## 8. Esercizi
 
-Le **property** permettono di **controllare la lettura e la scrittura degli attributi** in modo elegante, mantenendo una sintassi semplice.
-Sono utili per **validare i dati** senza modificare il modo in cui gli attributi vengono usati.
-
-- **Getter**: Usato per accedere al valore di un attributo.
-- **Setter**: Usato per modificare il valore di un attributo.
-
-```python
-class Persona:
-    def __init__(self, nome, eta):
-        self._nome = nome
-        self._eta = eta
-
-    @property
-    def nome(self):
-        return self._nome # Getter
-
-    @nome.setter
-    def nome(self, valore):
-        self._nome = valore # Setter
-
-    @property
-    def eta(self):
-        return self._eta # Getter
-
-    @eta.setter
-    def eta(self, valore):
-        if valore < 0:
-            print("L'età non può essere negativa!")
-        else:
-            self._eta = valore # Setter
-```
-
-Uso:
-
-```python
-p = Persona("Luca", 25)
-print(p.eta)   # usa il getter
-p.eta = -3     # usa il setter → messaggio di errore
-```
-
-<Aside variant="tip">
-Le `@property` rendono il codice più **sicuro, leggibile e Pythonic**. Permettono di aggiungere logica di controllo agli attributi senza cambiare la loro sintassi d'uso.
-</Aside>
-
-## 9. Esercizi
-
-### 9.1 Esercizio - Rettangolo
+### 8.1 Esercizio - Rettangolo
 
 Creare una classe `Rettangolo` che abbia:
 
