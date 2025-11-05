@@ -1,0 +1,337 @@
+---
+title: "Crittografia"
+draft: false
+lastUpdateDate: "2025-11-05"
+subject: "Python"
+category: "Informatica"
+tags: ["python", "programmazione", "crittografia", "hashing", "security", "avanzato"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1.Introduzione
+
+La **crittografia** è la scienza che studia le tecniche per proteggere le informazioni da accessi non autorizzati, garantendo **riservatezza**, **integrità** e **autenticità** dei dati.
+
+In informatica, si basa sull'uso di **algoritmi matematici** che trasformano i dati leggibili (testo in chiaro) in dati illeggibili (testo cifrato),
+e viceversa, attraverso **chiavi**.
+
+<Aside variant="info">
+*Obiettivo della crittografia:* rendere i dati comprensibili solo a chi possiede la chiave giusta per decifrarli.
+</Aside>
+
+### 1.1 Tipi di crittografia
+
+| Tipo            | Descrizione                                                                | Esempio        |
+| --------------- | -------------------------------------------------------------------------- | -------------- |
+| **Simmetrica**  | Usa la stessa chiave per cifrare e decifrare                               | AES, Fernet    |
+| **Asimmetrica** | Usa una coppia di chiavi: pubblica (per cifrare) e privata (per decifrare) | RSA, ECC       |
+| **Hashing**     | Trasforma i dati in un'impronta digitale unidirezionale, non reversibile   | SHA256, bcrypt |
+
+
+<Aside variant="info">
+**Strumento utile:** [CyberChef - Tool di crittografia online](https://gchq.github.io/CyberChef/)
+</Aside>
+
+## 1.1 Crittografia simmetrica e asimmetrica
+
+- **Simmetrica**: usa la *stessa chiave* per cifrare e decifrare.
+Esempio: AES.
+
+    ![simmetrica](https://media.geeksforgeeks.org/wp-content/uploads/20250804180026204817/symmetric_encryption.webp)
+
+- **Asimmetrica**: usa una *chiave pubblica* per cifrare e una *privata* per decifrare.
+Esempio: RSA.
+
+    ![asimmetrica](https://media.geeksforgeeks.org/wp-content/uploads/20250804180306539476/asymmetric_encryption.webp)
+
+    Immagina una scatola con lucchetto:
+
+    - 🔑 La **chiave pubblica** chiude la scatola (cifratura)
+    - 🔒 Solo la **chiave privata** la può riaprire (decifratura)
+
+## Hashing (Crittografia unidirezionale)
+
+L'hashing è un processo che prende un input di lunghezza arbitraria e produce un output (hash o digest) di lunghezza fissa.
+Un hash **non può essere decifrato**: serve per verificare integrità o autenticare dati, **non per nasconderli**.
+
+### 2.1 Esempio con SHA256
+
+```python
+import hashlib
+
+text = "Hello World"
+hash_object = hashlib.sha256(text.encode())
+hash_digest = hash_object.hexdigest()
+print(f"SHA256 Hash di '{text}' è:\n{hash_digest}")
+```
+
+Output:
+
+```text
+SHA256 Hash di 'Hello World' è:
+a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e
+```
+
+
+### 2.2 Hash di un file
+
+```python
+def hash_file(file_path):
+    h = hashlib.new("sha256")
+    with open(file_path, "rb") as file:
+        for chunk in iter(lambda: file.read(4096), b""):
+            h.update(chunk)
+    return h.hexdigest()
+```
+
+<Aside variant="info">
+Gli hash di file si usano per verificare **integrità** (es. controllare che un file scaricato non sia stato modificato).
+</Aside>
+
+### 2.3 Hashare un file e controllare l'integrità
+
+```python
+import hashlib
+
+def hash_file(file_path):
+    h = hashlib.new("sha256")
+    with open(file_path, "rb") as file:
+        for chunk in iter(lambda: file.read(4096), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+# ipotizziamo di avere un file hashato e voler vedere se è cambiato nel corso del tempo:
+def controllo_integrita(file1, file2):
+    hash1 = hash_file(file1)
+    hash2 = hash_file(file2)
+    print(f"Controllo integrità tra {file1} e {file2}:")
+    if hash1 == hash2:
+        return "Il file è intatto. Nessuna modifica rilevata."
+    else:
+        return "Il file è stato modificato o corrotto!"
+
+```
+
+Esempio d'uso:
+
+```python
+# Per testare la funzione controllo_integrita, prendere 1 file immagine, duplicarlo 2 volte (averne 3)
+# su uno dei 3 applicare una modifica, per esempio ruotare l'immagine
+print(controllo_integrita("immagine_nomrale1.svg", "immagine_nomrale2.svg"))
+print(controllo_integrita("immagine_nomrale1.svg", "immagine_ruotata.svg"))
+```
+
+## 3. Hash sicuri con salt (protezione contro attacchi dizionario)
+
+L'hashing semplice (es. SHA256) non basta per le password, perché è vulnerabile ad attacchi di tipo “rainbow table”.
+La soluzione è usare un **salt**, una stringa casuale univoca aggiunta alla password prima di eseguire l'hash.
+In Python possiamo usare `hashlib.pbkdf2_hmac` per derivare chiavi sicure.
+
+```python
+import hashlib, os
+
+password = b"mypass123"
+salt = os.urandom(16)
+key = hashlib.pbkdf2_hmac("sha256", password, salt, 100_000) # 100_000 sono il numero delle iterazioni (possibile modificare)
+print(f"Salt: {salt.hex()}")
+print(f"Hash derivato: {key.hex()}")
+```
+
+<Aside variant="info">
+Di norma, più alto è il **numero di iterazioni**, più la chiave risultante sarà **difficile da forzare** (più sicura), ma anche **più tempo** servirà per generarla.
+
+Esempio pratico con `hashlib.pbkdf2_hmac`:
+
+(importante: evita valori troppo grandi se esegui su macchine poco performanti)
+
+```python
+import hashlib, os, time
+
+password = b"mypass123"
+salt = os.urandom(16)
+print(f"Salt: {salt.hex()}")
+
+start = time.time()
+key = hashlib.pbkdf2_hmac("sha256", password, salt, 100_000)
+end = time.time()
+print(f"Hash derivato (100.000 iterazioni): {key.hex()} in {end - start:.4f} secondi")
+
+start = time.time()
+key = hashlib.pbkdf2_hmac("sha256", password, salt, 1_000_000)
+end = time.time()
+print(f"Hash derivato (1.000.000 iterazioni): {key.hex()} in {end - start:.4f} secondi")
+
+```
+</Aside>
+
+<Aside variant="tip">
+Le funzioni di derivazione come **PBKDF2**, **bcrypt** o **scrypt** rallentano il calcolo dell'hash, rendendo più difficile un attacco brute-force.
+</Aside>
+
+## 4. Crittografia simmetrica
+
+La **crittografia simmetrica** usa la stessa chiave sia per cifrare che per decifrare.
+È veloce ed efficiente, ma richiede un canale sicuro per condividere la chiave.
+
+### 4.1 Esempio con AES-GCM
+
+```python
+import secrets
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+def aes_encrypt_decrypt(message):
+    key = secrets.token_bytes(32)
+    nonce = secrets.token_bytes(12)
+    aes = AESGCM(key)
+
+    ciphertext = aes.encrypt(nonce, message.encode(), None)
+    plaintext = aes.decrypt(nonce, ciphertext, None)
+
+    return key.hex(), ciphertext.hex(), plaintext.decode()
+
+print(aes_encrypt_decrypt("Ciao AES!"))
+```
+
+### 4.2 Fernet - interfaccia semplificata
+
+Per casi pratici, la libreria `cryptography` offre un'interfaccia più facile: **Fernet**, che integra automaticamente AES + HMAC.
+
+```python
+from cryptography.fernet import Fernet
+
+key = Fernet.generate_key()
+f = Fernet(key)
+
+token = f.encrypt(b"Messaggio segreto")
+print(token)
+print(f.decrypt(token))
+```
+
+<Aside variant="info">
+Fernet gestisce automaticamente nonce, padding e autenticazione, garantendo sicurezza “out of the box”.
+</Aside>
+
+
+## 5. Crittografia asimmetrica (RSA)
+
+La crittografia asimmetrica utilizza due chiavi:
+
+- una **pubblica**, per cifrare;
+- una **privata**, per decifrare.
+
+```python
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+
+# Generazione chiavi
+private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+public_key = private_key.public_key()
+
+# Cifratura
+message = b"Messaggio segreto RSA"
+ciphertext = public_key.encrypt(
+    message,
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
+)
+
+# Decifratura
+plaintext = private_key.decrypt(
+    ciphertext,
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
+)
+
+print(plaintext.decode())
+```
+
+## 6. Firma digitale
+
+La **firma digitale** consente di garantire l'autenticità e l'integrità di un messaggio.
+
+- Il mittente firma il messaggio con la **chiave privata**.
+- Il destinatario verifica la firma con la **chiave pubblica**.
+
+
+```python
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes
+
+message = b"Messaggio firmato"
+
+signature = private_key.sign(
+    message,
+    padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
+    ),
+    hashes.SHA256()
+)
+
+# Verifica
+public_key.verify(
+    signature,
+    message,
+    padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
+    ),
+    hashes.SHA256()
+)
+```
+
+<Aside variant="info">
+Se la verifica fallisce, significa che il messaggio è stato modificato o che la firma non proviene dal mittente previsto.
+</Aside>
+
+
+## 7. Crittografia e password
+
+### 7.1 Controllo della robustezza
+
+La libreria `zxcvbn` consente di stimare la forza di una password.
+
+```python
+from zxcvbn import zxcvbn
+
+def controllo_password(password):
+    result = zxcvbn(password)
+    score = result["score"]
+    if score >= 3:
+        return f"Password efficace (score {score})"
+    else:
+        return f"Password debole (score {score}) - {result['feedback']['suggestions']}"
+```
+
+### 7.2 Hash e verifica password con bcrypt
+
+```python
+import bcrypt
+
+def hash_pw(password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode(), salt)
+
+def verifica_password(pw_attempt, hashed):
+    return bcrypt.checkpw(pw_attempt.encode(), hashed)
+```
+
+## 8. Best Practice di Sicurezza
+
+<Aside variant="tip">
+**Buone pratiche** per la crittografia:
+
+- Usa librerie collaudate (es. cryptography, bcrypt, hashlib), mai algoritmi fatti a mano.
+- Non riutilizzare mai le stesse chiavi o nonce.
+- Non memorizzare password in chiaro.
+- Proteggi sempre le chiavi private.
+- Aggiungi sempre un salt agli hash delle password.
+- Usa algoritmi aggiornati (AES-256, RSA-2048+, SHA-256).
+</Aside>

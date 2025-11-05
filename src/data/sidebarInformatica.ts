@@ -88,6 +88,7 @@ export const sidebar = {
     { title: "Dataclass", "url": "/informatica/python/16_dataclass" },
     { title: "Gestione Eccezioni", "url": "/informatica/python/17_gestione-eccezioni" },
     // { title: "Gestione File", "url": "/informatica/python/18_file" },
+    { title: "Crittografia", "url": "/informatica/python/99_crittografia" },
   ],
   "HTML": [
     { title: "Introduzione", url: "/informatica/html/1_introduzione" },
