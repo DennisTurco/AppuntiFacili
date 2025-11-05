@@ -92,6 +92,17 @@ const lessons = rawLessons as LessonsType;
           </div>
         </div>
 
+        <nav class="text-sm text-gray-500 mb-4">
+        <a href="/informatica" class="hover:underline">Informatica</a>
+        {frontmatter.subject && (
+          <>
+            {" "}›{" "}
+              {frontmatter.subject}
+          </>
+        )}
+        {" "}› {frontmatter.title}
+      </nav>
+
         <h1 class="text-5xl font-extrabold tracking-tight">{frontmatter.title}</h1>
 
         <div class="mt-3 flex flex-wrap items-center gap-x-3 text-sm text-gray-600">
