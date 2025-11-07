@@ -1,7 +1,7 @@
 ---
 title: "Ereditarietà in Python"
 draft: false
-lastUpdateDate: "2025-11-03"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "oop", "ereditarietà", "classi", "medio"]
@@ -194,9 +194,116 @@ Una classe astratta:
 - può definire metodi “vuoti” che **devono** essere implementati nelle sottoclassi.
 </Aside>
 
-## 9. Esercizi
+## 9. Quiz a risposta multipla
 
-### 9.1 Esercizio
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) In Python, cosa rappresenta l'ereditarietà?",
+    answers: {
+      a: "Un modo per creare copie identiche di una classe",
+      b: "Un meccanismo che permette a una classe di ereditare attributi e metodi da un'altra classe",
+      c: "Un metodo per nascondere gli attributi di una classe",
+      d: "Una funzione per collegare più file Python"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "2) Qual è la parola chiave usata per creare una sottoclasse in Python?",
+    answers: {
+      a: "inherits",
+      b: "extends",
+      c: "class Figlia(ClasseMadre)",
+      d: "subclass"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "3) Cosa fa la funzione super() in una sottoclasse?",
+    answers: {
+      a: "Richiama i metodi privati della sottoclasse",
+      b: "Elimina gli attributi ereditati",
+      c: "Richiama metodi e costruttori della superclasse",
+      d: "Duplica la superclasse"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "4) Se una sottoclasse ridefinisce un metodo della superclasse, cosa succede?",
+    answers: {
+      a: "Python genera un errore di ereditarietà",
+      b: "Il metodo della sottoclasse sostituisce quello della superclasse",
+      c: "Entrambi i metodi vengono eseguiti in ordine casuale",
+      d: "Il metodo originale viene cancellato dal codice"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "5) Come si definisce una classe astratta in Python?",
+    answers: {
+      a: "Usando la parola chiave abstract class",
+      b: "Ereditando da ABC e usando @abstractmethod",
+      c: "Usando la funzione abs() nella classe",
+      d: "Non è possibile creare classi astratte in Python"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "6) Quale tra questi metodi serve per verificare se un oggetto appartiene a una classe o sottoclasse?",
+    answers: {
+      a: "hasattr()",
+      b: "issubclass()",
+      c: "isinstance()",
+      d: "super()"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "7) In un'ereditarietà multipla, come decide Python l'ordine di ricerca dei metodi?",
+    answers: {
+      a: "In base all'ordine alfabetico delle classi",
+      b: "Usando il Method Resolution Order (MRO)",
+      c: "Seguendo la gerarchia inversa delle classi",
+      d: "In modo casuale a ogni esecuzione"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "8) Quale delle seguenti affermazioni sul polimorfismo è corretta?",
+    answers: {
+      a: "Permette di usare lo stesso nome di metodo in classi diverse con comportamenti differenti",
+      b: "Significa che una classe può avere più di un costruttore",
+      c: "Rende i metodi privati accessibili da sottoclassi",
+      d: "Serve solo nelle interfacce grafiche"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "9) Cosa restituisce la chiamata print(ClasseFiglia.mro())?",
+    answers: {
+      a: "Un elenco dei metodi ereditati",
+      b: "L'ordine di risoluzione dei metodi tra le classi della gerarchia",
+      c: "I parametri del costruttore della superclasse",
+      d: "I nomi di tutti gli attributi pubblici della classe"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "10) Quando è opportuno usare una classe astratta?",
+    answers: {
+      a: "Quando vogliamo creare una classe che non deve essere istanziata ma solo estesa",
+      b: "Quando serve una classe con metodi statici soltanto",
+      c: "Quando la classe deve ereditare da più classi contemporaneamente",
+      d: "Quando vogliamo creare un costruttore privato"
+    },
+    correctAnswer: "a"
+  }
+]} />
+
+## 10. Esercizi
+
+### 10.1 Esercizio
 
 Creare una gerarchia di classi che rappresenti veicoli:
 
@@ -205,3 +312,40 @@ Creare una gerarchia di classi che rappresenti veicoli:
 - Classe `Moto` che eredita da `Veicolo` e aggiunge `cilindrata`.
 - Sovrascrivere `info()` in entrambe le sottoclassi per mostrare informazioni specifiche.
 - Creare alcune istanze e verifica l'uso di `isinstance()` e `issubclass()`.
+
+### 10.2 Esercizio — Gestione di un Parco Veicoli Aziendale
+
+Creare un programma orientato agli oggetti che gestisca diversi tipi di veicoli, sfruttando **ereditarietà**, **polimorfismo** e **classi astratte**.
+
+**Specifiche**:
+
+- Creare una **classe base astratta** `Veicolo` con:
+  - attributi: `marca`, `modello`, `anno`, `targa`
+  - metodo `descrizione()` che restituisce una stringa con le informazioni del veicolo
+  - metodo `eta()` che calcola l'età come differenza tra la data attuale e l'anno di immatricolazione  
+  - metodo astratto `calcola_costo_manutenzione()`
+
+- Creare le sottoclassi:
+  - `Auto` → aggiunge `numero_porte` e `tipo_carburante`
+  - `Moto` → aggiunge `cilindrata`
+  - `Camion` → aggiunge `portata_massima`
+
+- In ciascuna sottoclasse:
+  - **Sovrascrivere** `calcola_costo_manutenzione()` con formule diverse
+    - Auto: `100 + 10 * età`
+    - Moto: `80 + 5 * età`
+    - Camion: `200 + 20 * età`
+  - **Ridefinire** `descrizione()` per includere gli attributi specifici
+
+- Creare una classe `ParcoVeicoli` che:
+  - Contenga una lista di veicoli
+  - Permetta di aggiungere nuovi veicoli (`aggiungi_veicolo()`)
+  - Stampi tutti i veicoli con `stampa_veicoli()`
+  - Calcoli il **costo totale di manutenzione annuale**
+  - Ordini i veicoli in base al costo di manutenzione
+
+- Aggiungere un metodo di classe `numero_veicoli()` nella classe base per contare quanti veicoli sono stati creati.
+
+**Suggerimento**:
+
+Usare il modulo `datetime` per calcolare l'età dei veicoli

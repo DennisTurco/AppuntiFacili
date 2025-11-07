@@ -1,7 +1,7 @@
 ---
 title: "Metodi avanzati e gestione degli attributi"
 draft: false
-lastUpdateDate: "2025-11-04"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "oop", "classi", "metodi", "property"]
@@ -129,3 +129,110 @@ Creare una classe `Studente` con un attributo `voto` e una property che:
 
 - permette di leggere il voto;
 - impedisce di impostare valori minori di 0 o maggiori di 10.
+
+## 6. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) Qual è la funzione principale di un metodo con decoratore @classmethod?",
+    answers: {
+      a: "Gestire gli attributi di un'istanza",
+      b: "Creare o gestire la classe stessa invece di un'istanza",
+      c: "Eseguire operazioni indipendenti dalla classe",
+      d: "Controllare la scrittura di un attributo"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "2) Qual è il primo parametro che riceve un metodo di classe?",
+    answers: {
+      a: "self",
+      b: "this",
+      c: "cls",
+      d: "obj"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "3) In quale caso è utile un costruttore alternativo?",
+    answers: {
+      a: "Quando si vogliono creare oggetti da formati diversi, come stringhe o file",
+      b: "Solo quando si devono modificare attributi privati",
+      c: "Quando serve rendere gli attributi statici",
+      d: "Per sostituire completamente __init__"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "4) A cosa serve il decoratore @staticmethod?",
+    answers: {
+      a: "A creare un metodo che non dipende né dalla classe né dall'istanza",
+      b: "A rendere il metodo più veloce",
+      c: "A proteggere gli attributi della classe",
+      d: "A gestire la lettura di un attributo"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "5) Qual è la differenza tra un metodo statico e uno di classe?",
+    answers: {
+      a: "Il metodo statico riceve self, quello di classe riceve cls",
+      b: "Il metodo di classe riceve la classe come primo parametro, quello statico nessuno",
+      c: "Sono equivalenti in Python",
+      d: "Il metodo statico può accedere agli attributi della classe"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "6) Cosa consente di fare il decoratore @property?",
+    answers: {
+      a: "Creare un attributo privato",
+      b: "Trasformare un metodo in un attributo leggibile come una proprietà",
+      c: "Bloccare la modifica di un attributo",
+      d: "Creare automaticamente un costruttore alternativo"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "7) Cosa accade se in una property setter si tenta di assegnare un valore non valido?",
+    answers: {
+      a: "Python genera sempre un errore di tipo",
+      b: "Il valore viene comunque assegnato",
+      c: "È possibile gestirlo con logica personalizzata (es. messaggio di errore o blocco)",
+      d: "L'attributo viene eliminato"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "8) Qual è il vantaggio principale nell'usare @property?",
+    answers: {
+      a: "Permette di rinominare attributi senza modificare il codice che li usa",
+      b: "Aumenta la velocità del programma",
+      c: "Evita l'uso di metodi in una classe",
+      d: "Serve solo per nascondere attributi privati"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "9) Quale dei seguenti è un esempio corretto di costruttore alternativo?",
+    answers: {
+      a: "def __init__(self): pass",
+      b: "@staticmethod def crea(): return Persona()",
+      c: "@classmethod def da_stringa(cls, s): return cls(*s.split(','))",
+      d: "def factory(): return new Persona()"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "10) In quale caso si userebbe un metodo statico?",
+    answers: {
+      a: "Quando serve una funzione di utilità che non usa né self né cls",
+      b: "Quando serve modificare gli attributi della classe",
+      c: "Quando si vuole accedere a variabili d'istanza",
+      d: "Solo per gestire property e setter"
+    },
+    correctAnswer: "a"
+  }
+]} />

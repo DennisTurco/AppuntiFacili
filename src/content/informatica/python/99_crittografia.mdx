@@ -1,7 +1,7 @@
 ---
 title: "Crittografia"
 draft: false
-lastUpdateDate: "2025-11-05"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "crittografia", "hashing", "security", "avanzato"]
@@ -335,3 +335,111 @@ def verifica_password(pw_attempt, hashed):
 - Aggiungi sempre un salt agli hash delle password.
 - Usa algoritmi aggiornati (AES-256, RSA-2048+, SHA-256).
 </Aside>
+
+
+## 9. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) Qual è l'obiettivo principale della crittografia?",
+    answers: {
+      a: "Aumentare la velocità di trasmissione dei dati",
+      b: "Proteggere le informazioni da accessi non autorizzati",
+      c: "Ridurre la dimensione dei file",
+      d: "Rendere i dati compatibili con tutti i dispositivi"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "2) Qual è la differenza principale tra crittografia simmetrica e asimmetrica?",
+    answers: {
+      a: "La simmetrica usa una sola chiave, l'asimmetrica due (pubblica e privata)",
+      b: "La simmetrica è più sicura dell'asimmetrica",
+      c: "L'asimmetrica non utilizza chiavi",
+      d: "Nessuna differenza sostanziale"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "3) Quale tra i seguenti algoritmi è di tipo asimmetrico?",
+    answers: {
+      a: "AES",
+      b: "Fernet",
+      c: "RSA",
+      d: "SHA256"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "4) Che cos'è l'hashing?",
+    answers: {
+      a: "Un metodo reversibile per cifrare i dati",
+      b: "Un processo unidirezionale che genera un'impronta digitale dei dati",
+      c: "Un sistema per comprimere le informazioni",
+      d: "Un protocollo di rete"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "5) Perché si utilizza il salt negli hash delle password?",
+    answers: {
+      a: "Per aumentare la lunghezza della password",
+      b: "Per rendere ogni hash unico e resistere agli attacchi con rainbow table",
+      c: "Per ridurre i tempi di calcolo dell'hash",
+      d: "Per cifrare i dati in modo reversibile"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "6) Quale libreria Python fornisce un'interfaccia semplice per la crittografia simmetrica con Fernet?",
+    answers: {
+      a: "hashlib",
+      b: "cryptography",
+      c: "bcrypt",
+      d: "secrets"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "7) Quale algoritmo si usa comunemente per creare hash sicuri e lenti per le password?",
+    answers: {
+      a: "SHA1",
+      b: "MD5",
+      c: "bcrypt",
+      d: "Base64"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "8) Nella crittografia asimmetrica RSA, quale chiave viene usata per cifrare un messaggio?",
+    answers: {
+      a: "Chiave privata",
+      b: "Chiave pubblica",
+      c: "Chiave simmetrica",
+      d: "Chiave segreta condivisa"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "9) A cosa serve la firma digitale?",
+    answers: {
+      a: "A garantire integrità e autenticità di un messaggio",
+      b: "A cifrare i dati con AES",
+      c: "A rendere più veloce la comunicazione",
+      d: "A nascondere i file di sistema"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "10) Quale delle seguenti è una buona pratica di sicurezza?",
+    answers: {
+      a: "Creare algoritmi crittografici personalizzati",
+      b: "Salvare le password in chiaro nel database",
+      c: "Usare librerie affidabili come cryptography e bcrypt",
+      d: "Riutilizzare la stessa chiave su più sistemi"
+    },
+    correctAnswer: "c"
+  }
+]} />

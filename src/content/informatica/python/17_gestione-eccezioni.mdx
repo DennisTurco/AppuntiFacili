@@ -1,7 +1,7 @@
 ---
 title: "Gestione Eccezioni"
 draft: false
-lastUpdateDate: "2025-10-02"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "try", "except", "eccezioni", "medio"]
@@ -216,9 +216,117 @@ Possibile anche aggiungere logica personalizzata alla classe, ad esempio campi a
 3. Rilanciare (raise) quando non si è al livello giusto per decidere come gestire l'errore.
 4. Definire eccezioni custom per condizioni di errore logiche dell'applicazione.
 
-## 10. Esercizi
+## 10. Quiz a risposta multipla
 
-### 10.1 Esercizio - Conversione Sicura
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) Qual è la differenza principale tra un errore di sintassi e un'eccezione?",
+    answers: {
+      a: "L'errore di sintassi viene rilevato a runtime, l'eccezione a compilazione",
+      b: "L'errore di sintassi impedisce l'esecuzione del programma, mentre un'eccezione può essere gestita",
+      c: "L'eccezione è più grave di un errore di sintassi",
+      d: "Non c'è alcuna differenza"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "2) Cosa accade se si verifica un'eccezione all'interno di un blocco try senza un blocco except corrispondente?",
+    answers: {
+      a: "L'errore viene ignorato e il programma continua",
+      b: "Il programma si blocca mostrando un messaggio di errore",
+      c: "Viene automaticamente eseguito un blocco finally",
+      d: "Python tenta di correggere l'errore"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "3) Qual è la sintassi corretta per catturare un'eccezione specifica in Python?",
+    answers: {
+      a: "try: ... except(ValueError): ...",
+      b: "try { ... } catch(ValueError): ...",
+      c: "try: ... except ValueError: ...",
+      d: "catch ValueError: ..."
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "4) Qual è lo scopo del blocco else in una struttura try-except?",
+    answers: {
+      a: "Viene eseguito solo se si verifica un'eccezione",
+      b: "Serve per chiudere risorse come file o connessioni",
+      c: "Viene eseguito solo se nessuna eccezione è stata sollevata",
+      d: "Serve per rilanciare eccezioni"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "5) Quale delle seguenti affermazioni sul blocco finally è vera?",
+    answers: {
+      a: "Viene eseguito solo se si verifica un'eccezione",
+      b: "Viene eseguito sempre, anche se c'è un'eccezione",
+      c: "Serve per catturare eccezioni multiple",
+      d: "Non può essere usato insieme al blocco else"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "6) Come si possono gestire più tipi di eccezioni in un singolo blocco except?",
+    answers: {
+      a: "except ValueError, ZeroDivisionError:",
+      b: "except (ValueError, ZeroDivisionError):",
+      c: "except [ValueError, ZeroDivisionError]:",
+      d: "except {ValueError, ZeroDivisionError}:"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "7) Cosa fa l'istruzione 'raise' in Python?",
+    answers: {
+      a: "Termina il programma immediatamente",
+      b: "Ignora l'eccezione corrente",
+      c: "Solleva un'eccezione in modo esplicito",
+      d: "Crea un nuovo blocco try"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "8) Quando si usa 'raise' senza argomenti all'interno di un blocco except?",
+    answers: {
+      a: "Per rilanciare la stessa eccezione catturata",
+      b: "Per terminare il blocco except",
+      c: "Per creare una nuova eccezione personalizzata",
+      d: "Per saltare il blocco finally"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "9) Come si definisce correttamente un'eccezione personalizzata in Python?",
+    answers: {
+      a: "class ErrorePersonalizzato:",
+      b: "class ErrorePersonalizzato(Exception): pass",
+      c: "def ErrorePersonalizzato(Exception): pass",
+      d: "raise ErrorePersonalizzato()"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "10) Qual è una buona pratica nella gestione delle eccezioni?",
+    answers: {
+      a: "Usare except senza specificare l'errore",
+      b: "Evitare di usare finally",
+      c: "Gestire solo le eccezioni attese e specifiche",
+      d: "Ignorare gli errori per migliorare la performance"
+    },
+    correctAnswer: "c"
+  }
+]} />
+
+
+## 11. Esercizi
+
+### 11.1 Esercizio - Conversione Sicura
 
 Scrivere un programma che:
 1. chiede un numero intero all'utente.
@@ -227,7 +335,7 @@ Scrivere un programma che:
 
 Suggerimento: usare try-except-else.
 
-### 10.2 Esercizio - Divisione Sicura
+### 11.2 Esercizio - Divisione Sicura
 
 Scrivere un programma che:
 1. chiede due numeri (dividendo e divisore).
@@ -235,7 +343,7 @@ Scrivere un programma che:
 3. gestisce i casi di input non numerico e divisione per zero.
 4. stampa sempre un messaggio finale "Operazione terminata".
 
-### 10.3 Esercizio -Eccezione Personalizzata
+### 11.3 Esercizio -Eccezione Personalizzata
 
 Crea una classe di eccezione "EtaNonValidaError" e scrivere un programma che:
 

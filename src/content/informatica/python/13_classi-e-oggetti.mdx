@@ -1,7 +1,7 @@
 ---
 title: "Classi e Oggetti"
 draft: false
-lastUpdateDate: "2025-11-04"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "oop", "classi", "oggetti", "medio"]
@@ -37,8 +37,6 @@ L'OOP consente di:
 - organizzare il codice in modo modulare e riutilizzabile;
 - rappresentare entità reali (es. persona, automobile, studente) come oggetti nel programma;
 - mantenere il codice più leggibile e scalabile.
-
----
 
 ## 2. Creazione di una Classe
 
@@ -221,9 +219,117 @@ conto.mostra_saldo()
 Gli attributi “privati” non sono veramente nascosti, ma resi meno accessibili (`_ContoBancario__saldo`). Python si basa sulla **fiducia del programmatore**, non su regole rigide.
 </Aside>
 
-## 8. Esercizi
+## 8. Quiz a risposta multipla
 
-### 8.1 Esercizio - Rettangolo
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) In Python, cosa rappresenta una classe?",
+    answers: {
+      a: "Un singolo valore o dato",
+      b: "Un tipo di funzione speciale",
+      c: "Un modello o schema per creare oggetti",
+      d: "Un insieme di variabili globali"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "2) Che cos'è un oggetto in Python?",
+    answers: {
+      a: "Un file Python che contiene codice",
+      b: "Una variabile temporanea",
+      c: "Un'istanza di una classe",
+      d: "Una funzione definita dentro una classe"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "3) Qual è il ruolo del metodo __init__?",
+    answers: {
+      a: "Viene chiamato per distruggere un oggetto",
+      b: "Serve per inizializzare un oggetto quando viene creato",
+      c: "Viene usato per stampare le informazioni della classe",
+      d: "Definisce un attributo statico della classe"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "4) A cosa serve il parametro 'self' nei metodi di una classe?",
+    answers: {
+      a: "Indica che il metodo è statico",
+      b: "Rappresenta la classe stessa",
+      c: "Rappresenta l'istanza corrente dell'oggetto",
+      d: "Serve solo come convenzione estetica"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "5) Qual è la differenza tra attributo di classe e attributo di istanza?",
+    answers: {
+      a: "L'attributo di classe appartiene a tutti gli oggetti, quello di istanza a uno solo",
+      b: "Non esiste differenza, sono sinonimi",
+      c: "L'attributo di classe può essere modificato solo da funzioni esterne",
+      d: "L'attributo di istanza è sempre privato"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "6) Cosa fa il metodo __str__ in una classe?",
+    answers: {
+      a: "Ritorna una rappresentazione leggibile dell'oggetto come stringa",
+      b: "Distrugge l'oggetto dopo la stampa",
+      c: "Serve per sommare due oggetti",
+      d: "Crea automaticamente gli attributi dell'oggetto"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "7) Come si accede a un attributo privato in Python (solo per scopi di debug)?",
+    answers: {
+      a: "attr.__privato__",
+      b: "Classe.attributo_privato",
+      c: "_NomeClasse__attributo",
+      d: "self.__attributo"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "8) Se si modifica un attributo di classe direttamente su un'istanza (es. s1.scuola = 'Nuovo Nome'), cosa accade?",
+    answers: {
+      a: "Cambia il valore per tutte le istanze della classe",
+      b: "Genera un errore di tipo",
+      c: "Crea un nuovo attributo di istanza che maschera quello di classe",
+      d: "Elimina automaticamente l'attributo di classe"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "9) Quale metodo speciale permette di personalizzare l'operatore + tra oggetti?",
+    answers: {
+      a: "__sum__",
+      b: "__plus__",
+      c: "__add__",
+      d: "__concat__"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "10) Cosa rappresenta l'incapsulamento nella programmazione a oggetti?",
+    answers: {
+      a: "La possibilità di creare più oggetti dallo stesso file",
+      b: "La capacità di nascondere i dati interni di una classe",
+      c: "Un modo per collegare più moduli Python",
+      d: "La condivisione automatica di tutti gli attributi tra le istanze"
+    },
+    correctAnswer: "b"
+  }
+]} />
+
+
+## 9. Esercizi
+
+### 9.1 Esercizio - Rettangolo
 
 Creare una classe `Rettangolo` che abbia:
 

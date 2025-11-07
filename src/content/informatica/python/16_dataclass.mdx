@@ -1,7 +1,7 @@
 ---
 title: "Dataclass"
 draft: false
-lastUpdateDate: "2025-11-03"
+lastUpdateDate: "2025-11-07"
 subject: "Python"
 category: "Informatica"
 tags: ["python", "programmazione", "dataclass", "class", "medio"]
@@ -241,3 +241,111 @@ Creare una `@dataclass` chiamata "Libro" con:
 - prezzo (float)
 - metodo `__post_init__` che calcola `prezzo_ivato` con IVA al 10%
 - proprietà `descrizione` che restituisce una stringa tipo `"Titolo di Autore - Prezzo: XX€"`
+
+## 9. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) Qual è lo scopo principale del decoratore @dataclass in Python?",
+    answers: {
+      a: "Creare automaticamente un database",
+      b: "Generare automaticamente metodi speciali come __init__ e __repr__",
+      c: "Velocizzare l'esecuzione del codice",
+      d: "Rendere la classe astratta"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "2) Quale modulo è necessario importare per usare le dataclass?",
+    answers: {
+      a: "from collections import dataclass",
+      b: "from typing import dataclass",
+      c: "from dataclasses import dataclass",
+      d: "import dataclass"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "3) Quale dei seguenti metodi viene generato automaticamente da @dataclass?",
+    answers: {
+      a: "__init__",
+      b: "__repr__",
+      c: "__eq__",
+      d: "Tutti i precedenti"
+    },
+    correctAnswer: "d"
+  },
+  {
+    question: "4) Cosa fa il parametro repr=False nel campo definito con field()?",
+    answers: {
+      a: "Nasconde l'attributo dalla rappresentazione testuale dell'oggetto",
+      b: "Esclude l'attributo dal costruttore",
+      c: "Evita che l'attributo venga confrontato con == ",
+      d: "Rimuove l'attributo dalla memoria"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "5) Come si esclude un attributo dal costruttore automatico di una dataclass?",
+    answers: {
+      a: "init=False nel field()",
+      b: "private=True nel field()",
+      c: "exclude=True nel field()",
+      d: "readonly=True nel field()"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "6) Qual è lo scopo del metodo __post_init__ in una dataclass?",
+    answers: {
+      a: "Viene eseguito prima della creazione dell'istanza",
+      b: "Serve per modificare o completare l'inizializzazione dopo __init__",
+      c: "Sostituisce il costruttore __init__",
+      d: "Rende la classe immutabile"
+    },
+    correctAnswer: "b"
+  },
+  {
+    question: "7) Quale opzione del decoratore dataclass rende un oggetto immutabile?",
+    answers: {
+      a: "immutable=True",
+      b: "readonly=True",
+      c: "frozen=True",
+      d: "lock=True"
+    },
+    correctAnswer: "c"
+  },
+  {
+    question: "8) Quando è utile usare ClassVar all'interno di una dataclass?",
+    answers: {
+      a: "Quando si vogliono creare attributi condivisi tra tutte le istanze",
+      b: "Quando si vogliono escludere gli attributi dal confronto",
+      c: "Quando si vogliono generare automaticamente costruttori",
+      d: "Quando si desidera rendere la classe immutabile"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "9) Quale parametro del decoratore dataclass genera anche i metodi di ordinamento (<, <=, >, >=)?",
+    answers: {
+      a: "order=True",
+      b: "compare=True",
+      c: "sort=True",
+      d: "cmp=True"
+    },
+    correctAnswer: "a"
+  },
+  {
+    question: "10) Quale vantaggio offre l'uso di @dataclass rispetto a una classe tradizionale?",
+    answers: {
+      a: "Non è necessario importare typing",
+      b: "Meno codice ripetitivo e maggiore leggibilità",
+      c: "Le classi diventano automaticamente asincrone",
+      d: "Gli oggetti sono sempre ordinabili"
+    },
+    correctAnswer: "b"
+  }
+]} />
+
