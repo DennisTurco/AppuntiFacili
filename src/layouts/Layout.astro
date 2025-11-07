@@ -2,6 +2,7 @@
 import { SEO } from "astro-seo";
 import Footer from "@/components/footer.astro";
 import Navbar from "@/components/navbar/navbar.astro";
+import Donation from "@/components/donation.astro";
 import "@fontsource-variable/inter/index.css";
 import "@fontsource-variable/bricolage-grotesque";
 import { ViewTransitions } from 'astro:transitions';
@@ -73,6 +74,7 @@ export interface Props {
 
   </head>
   <body>
+    <Donation />
     <Navbar />
     <ToasterProvider client:load>
     <slot />
