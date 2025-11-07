@@ -6,4 +6,4 @@
 - To check for the sitemap:
   1. Build the project
   2. `npm run preview`
-  3. go to site: http://localhost:4321/sitemap-index.xml
+  3. go to site: [localhost](http://localhost:4321/sitemap-index.xml)

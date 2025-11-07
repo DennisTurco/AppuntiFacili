@@ -9,19 +9,20 @@ import type { User } from '@supabase/supabase-js';
 
 // menuitems definiti qui
 const menuitems = [
-  { title: "Home", path: "/" },
+  { title: "Home", path: "/", icon: "fa6-solid:house" },
   {
     title: "Materie",
     path: "#",
+    icon: "fa6-solid:book-open",
     children: [
       { title: "Informatica", path: "/informatica" },
       { title: "Matematica", path: "/matematica" },
     ],
   },
-  { title: "Insegnanti", path: "/insegnanti" },
-  { title: "Contattami", path: "/contact" },
-  { title: "Video Lezioni", badge: true, path: "/videolezioni" },
-  { title: "Portfolio", path: "https://dennisturco.com/" },
+  { title: "Insegnanti", path: "/insegnanti", icon: "fa6-solid:chalkboard-user" },
+  { title: "Contattami", path: "/contact", icon: "fa6-solid:envelope" },
+  { title: "Video Lezioni", badge: true, path: "/videolezioni", icon: "fa6-solid:video" },
+  { title: "Portfolio", path: "https://dennisturco.com/", icon: "fa6-solid:briefcase" },
 ];
 
 let user: User | null = null;
@@ -62,22 +63,28 @@ const logout = async () => {
                 {item.children && (
                   <Dropdown
                     title={item.title}
+                    icon={item.icon}
                     children={item.children}
                     lastItem={index === menuitems.length - 1}
                   />
+
                 )}
 
                 {!item.children && (
                   <li>
                     <a
                       href={item.path}
-                      class="flex lg:px-3 py-2 items-center text-gray-600 hover:text-gray-900">
-                      <span> {item.title}</span>
-                      {item.badge && (
+                      class="flex items-center gap-1 lg:px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      {item.icon && (
+                        <Icon name={item.icon} class="w-4 h-4 text-gray-500" />
+                      )}
+                      <span>{item.title}</span>
+                      {/* {item.badge && (
                         <span class="ml-1 px-2 py-0.5 text-[10px] animate-pulse font-semibold uppercase text-white bg-indigo-600 rounded-full">
                           New
                         </span>
-                      )}
+                      )} */}
                     </a>
                   </li>
                 )}
