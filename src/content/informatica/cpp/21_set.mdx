@@ -1,0 +1,310 @@
+---
+title: "Set"
+order: 22
+draft: false
+lastUpdateDate: "2025-11-08"
+subject: "C++"
+category: "Programmazione"
+difficulty: "medio"
+tags: ["c++", "set", "stl", "collezioni", "programmazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+La **classe `std::set`** della libreria standard C++ (`<set>`) rappresenta un **contenitore associativo ordinato** che memorizza **elementi unici** in **ordine crescente** (per impostazione predefinita).
+
+<Aside variant="info">
+Un `set` è simile a un insieme matematico: non contiene duplicati e gli elementi sono automaticamente ordinati.
+</Aside>
+
+## 2. Caratteristiche principali
+
+- Gli elementi sono **univoci** (nessun duplicato).
+- L'inserimento mantiene gli elementi **ordinati automaticamente**.
+- L'accesso diretto tramite indice **non è possibile** (usa iteratori).
+- Basato su una **struttura ad albero bilanciato** (tipicamente un Red-Black Tree).
+
+## 3. Creazione e inserimento
+
+Esempio: si crea un insieme di numeri interi, si inseriscono alcuni valori e si stampa il contenuto.
+Il secondo inserimento dello stesso valore viene ignorato, poiché un `set` non ammette duplicati.
+
+```cpp
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> numeri;
+
+    numeri.insert(5);
+    numeri.insert(2);
+    numeri.insert(8);
+    numeri.insert(5); // duplicato, non verrà inserito
+
+    for (int n : numeri)
+        cout << n << " ";
+
+    // Output: 2 5 8
+    return 0;
+}
+```
+
+L'ordine finale sarà automatico (ordinamento crescente).
+
+## 4. Metodi principali
+
+| Metodo | Descrizione |
+|--------|--------------|
+| `insert(val)` | Inserisce un elemento |
+| `erase(val)` | Rimuove un elemento |
+| `find(val)` | Restituisce un iteratore all'elemento, o `end()` se non trovato |
+| `count(val)` | Restituisce 1 se presente, 0 se assente |
+| `size()` | Numero di elementi |
+| `empty()` | True se vuoto |
+| `clear()` | Svuota il set |
+
+Esempio: si dichiara un set di stringhe, si controlla la presenza di un nome, se ne elimina un altro e si stampa il risultato.
+
+```cpp
+set<string> nomi = {"Luca", "Anna", "Marco"};
+
+if (nomi.count("Anna"))
+    cout << "Presente!" << endl;
+
+nomi.erase("Marco");
+
+for (auto& n : nomi)
+    cout << n << " ";
+
+// Output: Anna Luca
+```
+
+## 5. Ricerca con `find()`
+
+Il metodo `find()` restituisce un iteratore all'elemento cercato, oppure `end()` se l'elemento non è presente.
+
+```cpp
+set<int> s = {3, 6, 9};
+
+auto it = s.find(6);
+if (it != s.end())
+    cout << "Trovato: " << *it << endl;
+else
+    cout << "Non trovato!" << endl;
+```
+
+## 6. Iteratori
+
+Un set può essere attraversato sia con iteratori espliciti sia con il ciclo `for` basato su intervallo.
+
+```cpp
+for (auto it = s.begin(); it != s.end(); ++it)
+    cout << *it << " ";
+```
+
+oppure
+
+```cpp
+for (int n : s)
+    cout << n << " ";
+```
+
+## 7. Ordinamento personalizzato
+
+È possibile modificare l'ordinamento predefinito del `set` fornendo un **comparatore personalizzato**.
+Ad esempio, si può creare un set che ordina in **ordine decrescente**.
+
+```cpp
+#include <iostream>
+#include <set>
+#include <functional>
+using namespace std;
+
+int main() {
+    set<int, greater<int>> numeri; // ordine decrescente
+
+    numeri.insert(5);
+    numeri.insert(1);
+    numeri.insert(3);
+
+    for (int n : numeri)
+        cout << n << " ";
+
+    // Output: 5 3 1
+    return 0;
+}
+```
+
+## 8. `std::unordered_set`
+
+`unordered_set` (contenuto in `<unordered_set>`) è una variante **non ordinata**, ma con **ricerca più veloce** grazie all'uso di una **tabella hash** invece di un albero bilanciato.
+
+```cpp
+#include <unordered_set>
+#include <iostream>
+using namespace std;
+
+int main() {
+    unordered_set<int> s = {10, 5, 20};
+    s.insert(15);
+
+    for (int n : s)
+        cout << n << " "; // Ordine casuale
+
+    cout << endl;
+    cout << "Presente 10? " << s.count(10) << endl;
+}
+```
+
+| Caratteristica | `set` | `unordered_set` |
+|----------------|-------|----------------|
+| Ordinato |  Sì |  No |
+| Ricerca | O(log n) | O(1) media |
+| Struttura interna | Albero | Hash Table |
+| Duplicati |  No |  No |
+
+## 9. Esempio pratico
+
+Eliminare duplicati da un vettore: usando un `set`, si ottengono automaticamente valori **unici e ordinati**.
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <set>
+using namespace std;
+
+int main() {
+    vector<int> v = {3, 1, 2, 3, 2, 5, 1};
+    set<int> unici(v.begin(), v.end());
+
+    for (int n : unici)
+        cout << n << " ";
+    // Output: 1 2 3 5
+}
+```
+
+<Aside variant="info">
+In una sola operazione puoi rimuovere duplicati e ottenere i valori ordinati!
+</Aside>
+
+## 10. Esercizi
+
+### 10.1 Esercizio - Parole Uniche
+
+Scrivi un programma che legga da tastiera una serie di parole (finché non viene digitato `"stop"`) e le memorizzi in un `std::set<string>`.
+
+Al termine, stampa:
+1. Tutte le parole inserite in ordine alfabetico.
+2. Quante parole diverse sono state inserite.
+
+**Esempio di esecuzione:**
+
+```text
+Inserisci parola: ciao
+Inserisci parola: mondo
+Inserisci parola: ciao
+Inserisci parola: stop
+Parole uniche: ciao mondo
+Totale: 2
+```
+
+### 10.2 Esercizio - Intersezione di insiemi
+
+Crea due `std::set<int>` e calcola la loro **intersezione** (cioè gli elementi presenti in entrambi).
+
+**Esempio:**
+
+```text
+Set A = {1, 2, 3, 4}
+Set B = {3, 4, 5, 6}
+```
+
+**Output atteso:**
+
+```text
+Intersezione: 3 4
+```
+
+<Aside variant="tip">
+Suggerimento: puoi usare `std::set_intersection` da `<algorithm>`.
+</Aside>
+
+### 10.3 Esercizio - Uso di unordered_set
+
+Crea un `unordered_set<string>` per memorizzare i nomi degli studenti presenti a lezione.
+Il programma deve:
+
+1. Inserire nomi finché l'utente non digita `"fine"`.
+2. Controllare se un certo nome è presente.
+3. Stampare l'elenco completo dei nomi (ordine indifferente).
+
+**Esempio di output:**
+
+```text
+Inserisci nome: Luca
+Inserisci nome: Anna
+Inserisci nome: fine
+Cerca: Anna
+Presente!
+Elenco: Anna Luca
+```
+
+## 11. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è la principale caratteristica di un std::set?",
+answers: {
+a: "Permette duplicati",
+b: "Gli elementi sono ordinati e unici",
+c: "Gli elementi non sono ordinati",
+d: "Supporta chiavi duplicate"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Cosa restituisce set.find(x) se l'elemento non esiste?",
+answers: {
+a: "nullptr",
+b: "0",
+c: "end()",
+d: "-1"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Qual è la complessità media della ricerca in un unordered_set?",
+answers: {
+a: "O(1)",
+b: "O(log n)",
+c: "O(n)",
+d: "O(n²)"
+},
+correctAnswer: "a"
+},
+{
+question: "4) Cosa accade se si inserisce un elemento già presente in un set?",
+answers: {
+a: "Sostituisce quello vecchio",
+b: "Genera un errore",
+c: "Viene ignorato",
+d: "Si aggiunge un duplicato"
+},
+correctAnswer: "c"
+},
+{
+question: "5) Come sono ordinati gli elementi in un set personalizzato?",
+answers: {
+a: "In ordine crescente fisso",
+b: "In ordine casuale",
+c: "Secondo il comparatore passato come secondo parametro template",
+d: "Secondo l'ordine di inserimento"
+},
+correctAnswer: "c"
+}
+]} />

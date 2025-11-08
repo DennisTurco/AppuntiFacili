@@ -1,0 +1,350 @@
+---
+title: "Map"
+order: 21
+draft: false
+lastUpdateDate: "2025-11-08"
+subject: "C++"
+category: "Programmazione"
+difficulty: "medio"
+tags: ["c++", "map", "stl", "collezioni", "programmazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+La **classe `std::map`** della libreria standard C++ (`<map>`) rappresenta un **contenitore associativo ordinato** che memorizza coppie **chiave → valore**, con **chiavi univoche**.
+
+<Aside variant="info">
+Una `map` può essere vista come un dizionario: ad ogni chiave corrisponde un valore.
+</Aside>
+
+## 2. Caratteristiche principali
+
+- Gli elementi sono memorizzati come **coppie chiave-valore** (`pair<const Key, T>`).
+- Le **chiavi sono uniche**: se si inserisce una chiave già esistente, il valore non viene sovrascritto automaticamente.
+- Gli elementi sono **ordinati** in base alla chiave (in modo crescente per default).
+- Implementata tramite **albero binario bilanciato** (Red-Black Tree).
+
+## 3. Creazione e inserimento
+
+Esempio concettuale: si crea una `map` che associa il nome di uno studente al suo voto.
+Si inseriscono alcune coppie chiave-valore e si stampa il contenuto.
+
+```cpp
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, int> voti;
+
+    voti["Mario"] = 28;
+    voti["Luca"] = 30;
+    voti["Giulia"] = 25;
+
+    for (auto& elemento : voti) {
+        cout << elemento.first << " → " << elemento.second << endl;
+    }
+
+    return 0;
+}
+```
+
+Risultato: le chiavi (nomi) sono ordinate automaticamente in ordine alfabetico.
+
+## 4. Accesso ai valori
+
+Si può accedere al valore associato a una chiave tramite l'operatore `[]`.
+Se la chiave non esiste, viene **creata automaticamente** con un valore di default.
+
+```cpp
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<string, int> mappa;
+    mappa["uno"] = 1;
+    mappa["due"] = 2;
+
+    cout << "Valore di 'due': " << mappa["due"] << endl;
+    cout << "Valore di 'tre' (creato automaticamente): " << mappa["tre"] << endl;
+
+    return 0;
+}
+```
+
+## 5. Metodi principali
+
+| Metodo | Descrizione |
+|--------|--------------|
+| `insert({chiave, valore})` | Inserisce una nuova coppia |
+| `erase(chiave)` | Rimuove una coppia dato il valore della chiave |
+| `find(chiave)` | Restituisce un iteratore all'elemento o `end()` se non esiste |
+| `count(chiave)` | Restituisce 1 se la chiave è presente, 0 se assente |
+| `size()` | Numero di coppie contenute |
+| `empty()` | True se la mappa è vuota |
+| `clear()` | Svuota la mappa |
+
+Esempio descritto: si dichiara una `map<string, int>` per rappresentare prodotti e quantità.
+Si inseriscono dati, si verifica la presenza di una chiave, si elimina un elemento e si stampa il risultato.
+
+```cpp
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<string, int> prodotti;
+
+    prodotti.insert({"Mela", 10});
+    prodotti.insert({"Pera", 15});
+    prodotti["Banana"] = 20;
+
+    if (prodotti.count("Mela"))
+        cout << "Mela presente!\n";
+
+    prodotti.erase("Pera");
+
+    cout << "Prodotti rimanenti:\n";
+    for (auto& [nome, qta] : prodotti)
+        cout << nome << " → " << qta << endl;
+
+    return 0;
+}
+```
+
+## 6. Iteratori
+
+Gli elementi di una `map` possono essere attraversati con iteratori o con il ciclo `for` basato su intervallo.
+
+```cpp
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<int, string> studenti = {{1, "Anna"}, {2, "Marco"}, {3, "Luca"}};
+
+    for (auto it = studenti.begin(); it != studenti.end(); ++it)
+        cout << it->first << ": " << it->second << endl;
+
+    cout << "\nCon for basato su range:\n";
+    for (auto& [id, nome] : studenti)
+        cout << id << ": " << nome << endl;
+
+    return 0;
+}
+```
+
+## 7. Aggiornamento dei valori
+
+Poiché le chiavi sono univoche, se si assegna un valore a una chiave già esistente, questo **viene sovrascritto**.
+
+```cpp
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<string, int> punti = {{"Alice", 50}, {"Bob", 60}};
+
+    punti["Bob"] = 90; // Aggiorna valore esistente
+    punti["Carla"] = 70; // Aggiunge nuovo elemento
+
+    for (auto& [nome, val] : punti)
+        cout << nome << ": " << val << endl;
+
+    return 0;
+}
+```
+
+## 8. Ordinamento personalizzato delle chiavi
+
+È possibile specificare un **comparatore personalizzato** come secondo parametro del template.
+Ad esempio, si può creare una mappa che ordina le chiavi in **ordine decrescente**.
+
+```cpp
+#include <iostream>
+#include <map>
+#include <string>
+#include <functional>
+using namespace std;
+
+int main() {
+    map<string, int, greater<string>> punteggi; // Ordinamento decrescente
+
+    punteggi["Luca"] = 80;
+    punteggi["Anna"] = 90;
+    punteggi["Marco"] = 70;
+
+    for (auto& [nome, voto] : punteggi)
+        cout << nome << " → " << voto << endl;
+
+    return 0;
+}
+```
+
+## 9. `std::unordered_map`
+
+`unordered_map` (contenuto in `<unordered_map>`) è una versione **non ordinata** ma **più veloce** grazie all'uso di **tabelle hash** invece di alberi bilanciati.
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+int main() {
+    unordered_map<string, int> inventario;
+
+    inventario["pane"] = 10;
+    inventario["latte"] = 5;
+    inventario["uova"] = 12;
+
+    for (auto& [prodotto, qta] : inventario)
+        cout << prodotto << " → " << qta << endl;
+
+    return 0;
+}
+```
+
+| Caratteristica | `map` | `unordered_map` |
+|----------------|-------|----------------|
+| Ordinato | Sì | No |
+| Ricerca | O(log n) | O(1) media |
+| Struttura interna | Albero | Hash Table |
+| Duplicati | No | No |
+
+## 10. Esempio pratico
+
+Si vuole contare quante volte compare ogni parola in un testo.
+Utilizzando una `map<string, int>`, è possibile incrementare il contatore associato ad ogni parola.
+
+```cpp
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, int> contatore;
+    string testo = "ciao ciao mondo come stai ciao come";
+
+    stringstream ss(testo);
+    string parola;
+    while (ss >> parola) {
+        contatore[parola]++;
+    }
+
+    for (auto& [p, freq] : contatore)
+        cout << p << ": " << freq << endl;
+
+    return 0;
+}
+```
+
+Output concettuale:
+
+```text
+ciao: 3
+mondo: 1
+come: 2
+stai: 1
+```
+
+## 11. Esercizi
+
+### 11.1 Esercizio - Rubrica telefonica
+
+Crea un programma che gestisca una **rubrica** usando `std::map<string, string>`, dove:
+- la chiave è il **nome** della persona,
+- il valore è il **numero di telefono**.
+
+Il programma deve permettere di:
+1. Inserire nuove coppie nome-numero,
+2. Cercare un numero dato un nome,
+3. Stampare l'intera rubrica in ordine alfabetico.
+
+### 11.2 Esercizio - Frequenza delle parole
+
+Dato un testo fornito dall'utente, calcola quante volte appare ciascuna parola utilizzando una `std::map<string, int>`.
+Stampa poi le parole in ordine alfabetico con la loro frequenza.
+
+Esempio:
+
+```text
+Input: "ciao ciao mondo"
+Output:
+ciao: 2
+mondo: 1
+```
+
+### 11.3 Esercizio - Inventario di magazzino
+
+Crea una `map<string, int>` che rappresenti l'inventario di un negozio.
+Il programma deve permettere di:
+1. Aggiungere nuovi prodotti,
+2. Aggiornare la quantità,
+3. Eliminare un prodotto,
+4. Stampare tutti i prodotti con le relative quantità.
+
+## 12. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Cosa memorizza una std::map?",
+answers: {
+a: "Solo chiavi",
+b: "Solo valori",
+c: "Coppie chiave-valore",
+d: "Valori duplicati"
+},
+correctAnswer: "c"
+},
+{
+question: "2) Cosa succede se accedo a una chiave inesistente con operator[]?",
+answers: {
+a: "Errore di runtime",
+b: "Viene creata con valore di default",
+c: "Ritorna nullptr",
+d: "Viene ignorata"
+},
+correctAnswer: "b"
+},
+{
+question: "3) In che ordine sono memorizzate le chiavi in una std::map?",
+answers: {
+a: "In ordine di inserimento",
+b: "In ordine casuale",
+c: "In ordine crescente per default",
+d: "In ordine decrescente"
+},
+correctAnswer: "c"
+},
+{
+question: "4) Qual è la complessità media di ricerca in una map?",
+answers: {
+a: "O(1)",
+b: "O(log n)",
+c: "O(n)",
+d: "O(n²)"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Qual è la differenza principale tra map e unordered_map?",
+answers: {
+a: "map usa tabelle hash, unordered_map usa alberi",
+b: "map è ordinata, unordered_map no",
+c: "unordered_map supporta duplicati",
+d: "unordered_map ordina automaticamente"
+},
+correctAnswer: "b"
+}
+]} />
