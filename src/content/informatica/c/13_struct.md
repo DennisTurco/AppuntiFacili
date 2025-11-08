@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-09-13"
 subject: "C"
 category: "Informatica"
-tags: ["c", "programmazione", "struct", "medio"]
+difficulty: "difficile"
+tags: ["c", "programmazione", "struct"]
 author: "Dennis Turco"
 videoLesson: false
 ---

@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-28"
 subject: "C"
 category: "Informatica"
-tags: ["c", "programmazione", "introduzione", "facile"]
+difficulty: "facile"
+tags: ["c", "programmazione", "introduzione"]
 author: "Dennis Turco"
 videoLesson: false
 ---

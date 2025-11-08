@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-09-14"
 subject: "SQL"
 category: "Informatica"
-tags: ["sql", "programmazione", "base di dati", "concetti base", "medio"]
+difficulty: "medio"
+tags: ["sql", "programmazione", "base di dati"]
 author: "Dennis Turco"
 videoLesson: false
 ---

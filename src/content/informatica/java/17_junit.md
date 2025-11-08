@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-27"
 subject: "Java"
 category: "Informatica"
-tags: ["java", "programmazione", "junit", "test", "difficile"]
+difficulty: "medio"
+tags: ["java", "programmazione", "junit", "test"]
 author: "Dennis Turco"
 videoLesson: false
 ---

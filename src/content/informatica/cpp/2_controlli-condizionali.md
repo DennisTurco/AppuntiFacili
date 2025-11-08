@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-27"
 subject: "C++"
 category: "Informatica"
-tags: ["c++", "programmazione", "controllicondizionali", "facile"]
+difficulty: "facile"
+tags: ["c++", "programmazione", "controllicondizionali"]
 author: "Dennis Turco"
 videoLesson: false
 ---

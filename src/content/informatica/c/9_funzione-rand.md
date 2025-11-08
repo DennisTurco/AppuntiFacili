@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-10-09"
 subject: "C"
 category: "Informatica"
-tags: ["c", "programmazione", "funzioni", "rand", "facile"]
+difficulty: "medio"
+tags: ["c", "programmazione", "funzioni", "rand"]
 author: "Dennis Turco"
 videoLesson: false
 ---

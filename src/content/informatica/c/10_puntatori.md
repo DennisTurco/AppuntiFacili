@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-10-23"
 subject: "C"
 category: "Informatica"
-tags: ["c", "programmazione", "puntatori", "difficile"]
+difficulty: "difficile"
+tags: ["c", "programmazione", "puntatori"]
 author: "Dennis Turco"
 videoLesson: false
 ---

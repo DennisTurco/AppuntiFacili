@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-28"
 subject: "Java"
 category: "Informatica"
-tags: ["java", "programmazione", "eccezioni", "difficile"]
+difficulty: "medio"
+tags: ["java", "programmazione", "eccezioni"]
 author: "Dennis Turco"
 videoLesson: false
 ---

@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-28"
 subject: "Java"
 category: "Informatica"
-tags: ["java", "programmazione", "upcasting", "downcasting", "difficile"]
+difficulty: "difficile"
+tags: ["java", "programmazione", "upcasting", "downcasting"]
 author: "Dennis Turco"
 videoLesson: false
 ---

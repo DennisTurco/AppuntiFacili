@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-09-14"
 subject: "SQL"
 category: "Informatica"
-tags: ["sql", "programmazione", "base di dati", "trigger", "difficile"]
+difficulty: "complesso"
+tags: ["sql", "programmazione", "base di dati", "trigger"]
 author: "Dennis Turco"
 videoLesson: false
 ---

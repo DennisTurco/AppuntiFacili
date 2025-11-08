@@ -5,7 +5,8 @@ draft: false
 lastUpdateDate: "2025-08-28"
 subject: "Java"
 category: "Informatica"
-tags: ["java", "programmazione", "lista", "strutture dati", "complesso"]
+difficulty: "complesso"
+tags: ["java", "programmazione", "lista", "strutture dati"]
 author: "Dennis Turco"
 videoLesson: false
 ---
