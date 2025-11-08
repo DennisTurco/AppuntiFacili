@@ -1,5 +1,4 @@
 ---
-// Importazioni
 import Layout from "./Layout.astro";
 import { getFormattedDate } from "@/utils/all";
 import LessonSearch from "../components/LessonSearch";
@@ -10,27 +9,37 @@ import GoToTopButton from "../components/GoToTopButton.astro";
 import ActionButtons from "../components/ActionButtons.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 
-const {
-  frontmatter,
-  lessons: rawLessons,
-  backHref = "/",
-  sectionName = "Sezione"
-} = Astro.props;
+type LessonItem = {
+  title: string;
+  url: string;
+  order?: number;
+  subject?: string;
+};
 
-// Tipi
-type LessonItem = { title: string; url: string };
-type LessonSubject = { subject: string; lessons: LessonItem[] };
+type LessonSubject = {
+  subject: string;
+  lessons: LessonItem[];
+};
 
-// Trasformiamo rawLessons in array mantenendo l’ordine del file
-const lessonsArray: LessonSubject[] = Array.isArray(rawLessons)
-  ? rawLessons // se già è un array
-  : Object.keys(rawLessons || {}).map(subject => ({
-      subject,
-      lessons: (rawLessons as any)[subject], // prendi l’array così com’è
-    }));
+interface LessonLayoutProps {
+  frontmatter: any;
+  lessons: Record<string, LessonItem[]>;
+  backHref?: string;
+  sectionName?: string;
+}
+
+// **Tipizza Astro.props**
+const { frontmatter, lessons, backHref = "/", sectionName = "Sezione" } =
+  Astro.props as LessonLayoutProps;
+
+// Trasforma lessons in array ordinato
+const lessonsArray: LessonSubject[] = Object.entries(lessons)
+  .map(([subject, lessonList]) => ({
+    subject,
+    lessons: lessonList.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+  }))
+  .sort((a, b) => a.subject.localeCompare(b.subject));
 ---
-
-
 
 <Layout
   title={frontmatter.title}
@@ -40,34 +49,34 @@ const lessonsArray: LessonSubject[] = Array.isArray(rawLessons)
 >
   <div class="flex flex-col lg:flex-row max-w-[1250px] mx-auto mt-14 px-4 lg:px-0 gap-8">
 
-<!-- Sidebar lezioni -->
-{lessonsArray.length > 0 && (
-  <aside class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 pr-4">
-    <h2 class="text-xl font-bold mb-4">Lezioni</h2>
+    <!-- Sidebar lezioni -->
+    {lessonsArray.length > 0 && (
+      <aside class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 pr-4">
+        <h2 class="text-xl font-bold mb-4">Lezioni</h2>
 
-    <input type="text" placeholder="Cerca..." id="lesson-search"
-           class="w-full mb-4 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+        <input type="text" placeholder="Cerca..." id="lesson-search"
+               class="w-full mb-4 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"/>
 
-    <div id="lessons-list">
-      {lessonsArray.map(({ subject, lessons }) => (
-        <div class="mb-4" data-subject={subject}>
-          <h3 class="font-semibold">{subject}</h3>
-          <ul class="space-y-2 pl-2">
-            {lessons.map(lesson => (
-              <li data-title={lesson.title.toLowerCase()}>
-                <a href={lesson.url}
-                   class={`block px-2 py-1 rounded hover:bg-gray-100 transition
-                    ${lesson.url === frontmatter.url ? "bg-gray-200 font-semibold" : ""}`}>
-                  {lesson.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <div id="lessons-list">
+          {lessonsArray.map(({ subject, lessons }) => (
+  <div class="mb-4" data-subject={subject}>
+    <h3 class="font-semibold">{subject}</h3>
+    <ul class="space-y-2 pl-2">
+      {lessons.map(lesson => (
+        <li data-title={lesson.title.toLowerCase()}>
+          <a href={lesson.url}
+             class={`block px-2 py-1 rounded hover:bg-gray-100 transition
+              ${lesson.url === frontmatter.url ? "bg-gray-200 font-semibold" : ""}`}>
+            {lesson.title}
+          </a>
+        </li>
       ))}
-    </div>
-  </aside>
-)}
+    </ul>
+  </div>
+))}
+        </div>
+      </aside>
+    )}
 
     <!-- Contenuto principale -->
     <div class="flex-1 flex gap-8">

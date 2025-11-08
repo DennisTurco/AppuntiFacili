@@ -1,10 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import InformaticaLayout from "@/layouts/InformaticaLayout.astro";
-import { sidebar } from "@/data/sidebarInformatica.ts";
-import Aside from "../../components/Aside.astro";
 import Quiz from '../../components/Quiz.jsx';
-
+import Aside from '../../components/Aside.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection("informatica");
@@ -17,8 +15,37 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
+// Recupera **tutte le lezioni** per passarle alla sidebar
+const allLessons = await getCollection("informatica");
+
+const allLessonsFormatted = allLessons.map(lesson => ({
+  title: lesson.data.title,
+  slug: lesson.slug,
+  order: lesson.data.order ?? 0,
+  subject: lesson.data.subject ?? "Altro",
+  url: `/informatica/${lesson.slug}`
+}));
+
+const lessonsBySubject = Object.values(
+  allLessonsFormatted.reduce((acc, lesson) => {
+    const subject = lesson.subject;
+    if (!acc[subject]) acc[subject] = { subject, lessons: [] };
+    acc[subject].lessons.push(lesson);
+    return acc;
+  }, {} as Record<string, { subject: string; lessons: typeof allLessonsFormatted }>)
+);
+
+// Ordinare le lezioni all’interno di ogni subject
+lessonsBySubject.forEach(subjectGroup => {
+  subjectGroup.lessons.sort((a, b) => a.order - b.order);
+});
+
+// Ordinare i gruppi di subject alfabeticamente (opzionale)
+lessonsBySubject.sort((a, b) => a.subject.localeCompare(b.subject));
+
 const frontmatter = {
   title: entry.data.title,
+  order: entry.data.order,
   lastUpdateDate: entry.data.lastUpdateDate,
   subject: entry.data.subject,
   category: entry.data.category,
@@ -29,6 +56,10 @@ const frontmatter = {
 };
 ---
 
-<InformaticaLayout {frontmatter} lessons={sidebar}  {...entry.data}>
-  <Content components={{ Aside: Aside, Quiz: Quiz }} />
+<InformaticaLayout
+  {frontmatter}
+  {...entry.data}
+  lessons={lessonsBySubject}
+>
+  <Content components={{ Quiz: Quiz, Aside: Aside }} />
 </InformaticaLayout>

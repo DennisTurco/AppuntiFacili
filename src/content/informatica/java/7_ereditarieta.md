@@ -1,5 +1,6 @@
 ---
 title: "Ereditarietà"
+order: 7
 draft: false
 lastUpdateDate: "2025-08-28"
 subject: "Java"

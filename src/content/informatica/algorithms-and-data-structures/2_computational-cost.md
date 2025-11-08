@@ -1,5 +1,6 @@
 ---
 title: "Space and Time Computational Cost"
+order: 2
 draft: false
 lastUpdateDate: "2025-09-25"
 subject: "Algoritmi e strutture dati"

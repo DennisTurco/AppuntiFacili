@@ -1,5 +1,6 @@
 ---
 title: "List"
+order: 7
 draft: false
 lastUpdateDate: "2025-10-23"
 subject: "Python"

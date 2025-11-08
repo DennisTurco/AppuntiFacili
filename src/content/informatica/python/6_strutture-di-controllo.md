@@ -1,5 +1,6 @@
 ---
 title: "Strutture di Controllo"
+order: 6
 draft: true
 lastUpdateDate: "2025-10-23"
 subject: "Python"

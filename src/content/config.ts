@@ -22,6 +22,7 @@ const informaticaCollection = defineCollection({
   schema: z.object({
     draft: z.boolean(),
     title: z.string(),
+    order: z.number(),
     lastUpdateDate: z.string().transform(str => new Date(str)),
     author: z.string().default('Dennis Turco'),
     subject: z.string(),
@@ -35,6 +36,7 @@ const matematicaCollection = defineCollection({
   schema: z.object({
     draft: z.boolean(),
     title: z.string(),
+    order: z.number(),
     lastUpdateDate: z.string().transform(str => new Date(str)),
     author: z.string().default('Dennis Turco'),
     subject: z.string(),

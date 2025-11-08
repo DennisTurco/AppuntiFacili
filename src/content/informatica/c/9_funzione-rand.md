@@ -1,5 +1,6 @@
 ---
 title: "Funzione rand()"
+order: 9
 draft: false
 lastUpdateDate: "2025-10-09"
 subject: "C"

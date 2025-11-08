@@ -1,5 +1,6 @@
 ---
 title: "Puntatori"
+order: 10
 draft: false
 lastUpdateDate: "2025-10-23"
 subject: "C"

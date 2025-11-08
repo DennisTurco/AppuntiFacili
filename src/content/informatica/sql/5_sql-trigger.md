@@ -1,5 +1,6 @@
 ---
 title: "SQL: Trigger"
+order: 5
 draft: false
 lastUpdateDate: "2025-09-14"
 subject: "SQL"

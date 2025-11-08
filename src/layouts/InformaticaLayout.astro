@@ -3,12 +3,17 @@ import LessonLayout from "./LessonLayout.astro";
 import { getCollection } from "astro:content";
 
 const { frontmatter } = Astro.props;
-const allLessons = await getCollection("informatica"); // o "matematica"
+const allLessons = await getCollection("informatica");
 
 const lessons = allLessons.reduce((acc, entry) => {
   const subject = entry.data.subject || "Generale";
   if (!acc[subject]) acc[subject] = [];
-  acc[subject].push({ title: entry.data.title, url: `/${entry.collection}/${entry.slug}` });
+  acc[subject].push({
+    title: entry.data.title,
+    url: `/${entry.collection}/${entry.slug}`,
+    order: entry.data.order ?? 0,
+    subject: subject
+  });
   return acc;
 }, {});
 ---

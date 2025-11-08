@@ -1,5 +1,6 @@
 ---
 title: "Strings - Funzioni Numeriche"
+order: 7
 draft: false
 lastUpdateDate: "2025-08-28"
 subject: "C"

@@ -1,5 +1,6 @@
 ---
 title: "Installazione di Python"
+order: 2
 draft: false
 lastUpdateDate: "2025-10-23"
 subject: "Python"
