@@ -1,0 +1,423 @@
+---
+title: "Template"
+order: 20
+draft: false
+lastUpdateDate: "2025-11-08"
+subject: "C++"
+category: "Programmazione"
+difficulty: "medio"
+tags: ["c++", "template", "programmazione generica", "oop"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+I **template** in C++ sono uno strumento fondamentale per scrivere **codice generico**, riutilizzabile e flessibile.  
+Permettono di definire **funzioni e classi che operano su tipi diversi**, senza dover riscrivere lo stesso codice per ogni tipo di dato.
+
+![templates](https://media.geeksforgeeks.org/wp-content/uploads/20250926105944844875/420046719.webp)
+
+<Aside variant="info">
+*Definizione:*
+Un **template** è un modello che permette al compilatore di generare automaticamente versioni specifiche di funzioni o classi per i tipi richiesti.
+</Aside>
+
+### Perché usare i template?
+
+- **Eliminano la ridondanza:** un'unica funzione può operare su più tipi (es. `int`, `double`, `string`).
+- **Aumentano la sicurezza del tipo:** controlli avvengono in fase di compilazione.
+- **Migliorano la riusabilità:** lo stesso codice funziona per tipi diversi.
+- **Performance ottimizzate:** il compilatore genera codice specifico per ogni tipo, senza costi di runtime.
+
+### Come funziona la compilazione dei template
+
+Durante la compilazione:
+1. Il compilatore **non genera immediatamente** il codice per un template.
+2. Quando il template viene **usato con un tipo concreto**, il compilatore **istanzia** una versione specifica.
+3. Ogni istanziazione è **una copia indipendente** del codice adattata al tipo scelto.
+
+
+Esempio:
+
+```cpp
+somma(3, 4);       // genera somma<int>(int, int)
+somma(2.5, 1.5);   // genera somma<double>(double, double)
+```
+
+## 2. Template di Funzione
+
+Un **function template** permette di scrivere funzioni che lavorano con tipi diversi.
+
+### Esempio base
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <typename T>
+T somma(T a, T b) {
+return a + b;
+}
+
+int main() {
+cout << somma(3, 7) << endl; // int
+cout << somma(2.5, 3.5) << endl; // double
+return 0;
+}
+```
+
+- `template <typename T>` definisce un parametro di tipo generico.
+- Il compilatore genera automaticamente le versioni int, double, ecc.
+
+<Aside variant="tip">
+Possibile usare anche `template <class T>`, è equivalente.
+</Aside>
+
+
+## 3. Template di Classe
+
+Un **class template** consente di creare strutture dati generiche.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Scatola {
+private:
+    T contenuto;
+public:
+    Scatola(T c) : contenuto(c) {}
+    T get() { return contenuto; }
+};
+
+int main() {
+    Scatola<int> s1(42);
+    Scatola<string> s2("Ciao Template");
+    cout << s1.get() << endl;
+    cout << s2.get() << endl;
+
+    /*
+    Output:
+        42
+        Ciao Template
+    */
+}
+```
+
+<Aside variant="info">
+Ogni volta che si istanzia `Scatola<T>`, il compilatore crea una versione specifica per il tipo richiesto.
+</Aside>
+
+**Vantaggi dei class template**:
+
+1. Consentono la creazione di contenitori generici (`vector`, `map`, `set`).
+2. Permettono riuso e coerenza del codice.
+3. Offrono type safety: il tipo è verificato dal compilatore.
+
+## 4. Template con più parametri
+
+Puoi definire più parametri di tipo:
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <typename T, typename U>
+void stampa(T a, U b) {
+    cout << a << " e " << b << endl;
+}
+
+int main() {
+    stampa(10, 3.14);
+    stampa("C++", 2025);
+
+    /*
+    Output:
+        10 e 3.14
+        C++ e 2025
+    */
+}
+```
+
+## 5. Parametri di default nei Template
+
+È possibile definire **tipi di default** per i parametri template:
+
+```cpp
+template <typename T = int>
+class Valore {
+    T dato;
+public:
+    Valore(T d) : dato(d) {}
+    void mostra() { std::cout << dato << std::endl; }
+};
+
+int main() {
+    Valore<> v1(5);      // Usa int di default
+    Valore<double> v2(3.14);
+    v1.mostra();
+    v2.mostra();
+}
+```
+
+## 6. Specializzazione dei Template
+
+La **specializzazione** permette di personalizzare il comportamento per un tipo specifico.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <typename T>
+void mostra(T x) {
+    cout << "Generico: " << x << endl;
+}
+
+// Specializzazione per string
+template <>
+void mostra<string>(string x) {
+    cout << "Stringa: " << x << endl;
+}
+
+int main() {
+    mostra(10);
+    mostra(string("Ciao"));
+
+    /*
+    Output:
+        Generico: 10
+        Stringa: Ciao
+    */
+}
+```
+
+
+## 7. Template e Funzioni Membro
+
+Una classe template può avere **metodi template**:
+
+```cpp
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Wrapper {
+public:
+    T valore;
+    Wrapper(T v) : valore(v) {}
+
+    template <typename U>
+    void combina(U altro) {
+        cout << valore + altro << endl;
+    }
+};
+
+int main() {
+    Wrapper<int> w(10);
+    w.combina(5);      // 15
+    w.combina(2.5);    // 12.5
+}
+```
+
+## 8. Template Avanzati
+
+Con C++17 e C++20, i template sono diventati ancora più potenti.
+
+### 8.1 Template Template Parameters
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template <template <typename, typename> class Container, typename T>
+class Gestore {
+    Container<T, allocator<T>> dati;
+public:
+    void aggiungi(T val) { dati.push_back(val); }
+    void mostra() {
+        for (auto& el : dati) cout << el << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    Gestore<vector, int> g;
+    g.aggiungi(1);
+    g.aggiungi(2);
+    g.mostra();
+}
+```
+
+### 8.2 Concepts (C++20)
+
+I **concepts** permettono di specificare vincoli sui tipi nei template:
+
+```cpp
+#include <concepts>
+#include <iostream>
+using namespace std;
+
+template <std::integral T>
+T quadrato(T x) {
+    return x * x;
+}
+
+int main() {
+    cout << quadrato(5) << endl;     // OK
+    // cout << quadrato(3.14);       // Errore: non è integrale
+}
+```
+
+<Aside variant="tip">
+*I concepts rendono il codice più leggibile e i messaggi d'errore più chiari!*
+</Aside>
+
+## 9. Esempio pratico: Stack generico
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template <typename T>
+class Stack {
+    vector<T> elementi;
+public:
+    void push(T val) { elementi.push_back(val); }
+    void pop() { if(!elementi.empty()) elementi.pop_back(); }
+    T top() { return elementi.back(); }
+    bool vuoto() { return elementi.empty(); }
+};
+
+int main() {
+    Stack<int> s;
+    s.push(10);
+    s.push(20);
+    cout << s.top() << endl; // 20
+    s.pop();
+    cout << s.top() << endl; // 10
+}
+```
+
+## 10. Esercizi
+
+### 10.1 Esercizio - Funzione Generica `maxGenerico`
+
+Crea una **funzione template** `maxGenerico` che:
+
+1. prenda due parametri di tipo generico `T`,
+2. restituisca il valore maggiore tra i due,
+3. funzioni correttamente con tipi numerici e stringhe.
+
+**Esempio d'uso:**
+
+```cpp
+cout << maxGenerico(10, 25) << endl;        // 25
+cout << maxGenerico(3.5, 2.1) << endl;      // 3.5
+cout << maxGenerico(string("Ciao"), string("Mondo")) << endl; // Mondo
+```
+
+### 10.2 Esercizio - Classe Template Coppia
+
+Crea una classe template `Coppia<T1, T2>` che rappresenti una coppia di valori (di tipi potenzialmente diversi).
+
+La classe deve:
+
+1. avere due attributi privati primo e secondo,
+2. un costruttore per inizializzarli,
+3. un metodo `mostra()` che stampi i due valori,
+4. un metodo `scambia()` che inverta i valori (solo se `T1` e `T2` sono uguali).
+
+**Esempio d'uso**:
+
+```cpp
+Coppia<int, string> c1(5, "elementi");
+c1.mostra();        // (5, elementi)
+
+Coppia<int, int> c2(10, 20);
+c2.scambia();
+c2.mostra();        // (20, 10)
+```
+
+### 10.3 Esercizio - Stack Generico
+
+Crea una classe template `Stack<T>` che funzioni come una pila (LIFO).
+
+La classe deve fornire:
+
+1. un metodo `push(T)` per aggiungere un elemento,
+2. un metodo `pop()` per rimuovere l'ultimo elemento,
+3. un metodo `top()` per ottenere l'ultimo elemento inserito,
+4. un metodo `vuoto()` che restituisce true se lo stack è vuoto.
+
+**Esempio d'uso**:
+
+```cpp
+Stack<int> s;
+s.push(10);
+s.push(20);
+cout << s.top() << endl;  // 20
+s.pop();
+cout << s.top() << endl;  // 10
+```
+
+
+## 11. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Cosa permette di fare un template in C++?",
+answers: {
+a: "Scrivere codice solo per un tipo specifico",
+b: "Scrivere codice generico per tipi diversi",
+c: "Ottimizzare automaticamente la memoria",
+d: "Creare solo funzioni matematiche"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Qual è la sintassi corretta per dichiarare un template di funzione?",
+answers: {
+a: "template (typename T)",
+b: "template <typename T>",
+c: "function <T>()",
+d: "class template<T>"
+},
+correctAnswer: "b"
+},
+{
+question: "3) Cosa fa la specializzazione di un template?",
+answers: {
+a: "Rimuove un tipo dal template",
+b: "Permette un comportamento personalizzato per un tipo specifico",
+c: "Crea automaticamente una classe derivata",
+d: "Compila più velocemente"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Cosa restituisce find() in una std::map o std::set?",
+answers: {
+a: "Un iteratore all'elemento trovato o end() se non trovato",
+b: "Un booleano true/false",
+c: "Un indice numerico",
+d: "Un valore di default"
+},
+correctAnswer: "a"
+},
+{
+question: "5) Qual è lo scopo dei 'concepts' in C++20?",
+answers: {
+a: "Rendere i template più restrittivi e leggibili",
+b: "Accelerare l'esecuzione dei programmi",
+c: "Gestire la memoria dinamica",
+d: "Creare nuovi tipi di dato"
+},
+correctAnswer: "a"
+}
+]} />
