@@ -1,0 +1,166 @@
+---
+import { getCollection } from "astro:content";
+import { getFormattedDate } from "@/utils/all";
+import Container from "@/components/container.astro";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  collection: "matematica" | "informatica"; // definisci i nomi delle tue collezioni
+  title: string;
+  categoriesOrder: string[];
+  icons: Record<string, string>;
+  basePath: string;
+}
+
+const { collection, title, categoriesOrder, icons, basePath } = Astro.props;
+
+// Mappa di funzioni per collezione
+const collectionMap = {
+  matematica: () =>
+    getCollection("matematica", ({ data }) => !data.draft && data.lastUpdateDate < new Date()),
+  informatica: () =>
+    getCollection("informatica", ({ data }) => !data.draft && data.lastUpdateDate < new Date()),
+};
+
+// Recupera la collezione corrispondente
+let entries = await collectionMap[collection]();
+
+entries = entries.sort((a, b) => a.slug.localeCompare(b.slug, undefined, { numeric: true }));
+
+type LessonEntry = (typeof entries)[number];
+type ByCategory = Record<string, LessonEntry[]>;
+
+const byCategory: ByCategory = entries.reduce((acc, entry) => {
+  const [cat] = entry.slug.split("/");
+  if (!acc[cat]) acc[cat] = [];
+  acc[cat].push(entry);
+  return acc;
+}, {} as ByCategory);
+---
+
+
+<Container>
+  <div class="container mx-auto px-6 py-12 space-y-8 max-w-5xl">
+    <h1 class="text-3xl font-bold text-center mb-4">Appunti di {title}</h1>
+
+    <!-- Descrizione -->
+    <div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
+      <p class="text-gray-800 text-lg">
+        Ci tengo a precisare che non sono presenti tutte le lezioni, se manca qualcosa che vi serve,
+        non esitate a
+        <a
+          href="/contact"
+          class="text-blue-600 font-semibold underline hover:text-blue-800">
+          contattarmi
+        </a>
+        e aggiungo!
+      </p>
+    </div>
+
+    <!-- Campo di ricerca -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6 items-center">
+      <input
+        type="text"
+        id="lessonFilter"
+        placeholder="🔍 Cerca una lezione..."
+        class="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <select
+        id="languageFilter"
+        class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Tutte le categorie</option>
+        {
+          Object.keys(byCategory).map((cat) => (
+            <option value={cat}>{cat.toUpperCase()}</option>
+          ))
+        }
+      </select>
+    </div>
+
+    <!-- Pulsante espandi/comprimi -->
+    <div class="flex justify-between items-center mb-2">
+      <p class="text-sm text-gray-500">
+        Totale lezioni: <strong>{entries.length}</strong>
+      </p>
+      <button
+        id="toggleAll"
+        class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
+        Espandi/Comprimi tutti
+      </button>
+    </div>
+
+    <!-- Sezione lezioni -->
+    <div id="lessonList" class="space-y-4 mt-4">
+      {
+        categoriesOrder.map((category) => {
+          const lessons = byCategory[category];
+          if (!lessons) return null;
+
+          return (
+            <details
+              class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
+              data-lang={category}
+              open
+            >
+              <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
+                <Icon name={icons[category] || "fa6-solid:book"} class="text-gray-700" />
+                <span class="uppercase">{category}</span>
+                <span class="ml-auto text-sm text-gray-500">({lessons.length} lezioni)</span>
+              </summary>
+              <ul class="list-disc pl-6 space-y-1 mt-2">
+                {lessons.map((lesson) => (
+                  <li class="lesson-item">
+                    <a
+                      href={`${basePath}/${lesson.slug}`}
+                      class="text-blue-600 hover:underline">
+                      {lesson.data.title || lesson.slug}
+                    </a>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md ml-2">
+                      ultimo aggiornamento:{" "}
+                      {lesson.data.lastUpdateDate?.toLocaleDateString("it-IT") || ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          );
+        })
+      }
+
+      {
+        Object.keys(byCategory)
+          .filter((k) => !categoriesOrder.includes(k))
+          .sort()
+          .map((extra) => (
+            <details
+              class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
+              data-lang={extra}
+            >
+              <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
+                <Icon name="fa6-solid:book" class="text-gray-700" />
+                <span class="uppercase">{extra}</span>
+                <span class="ml-auto text-sm text-gray-500">({byCategory[extra].length} lezioni)</span>
+              </summary>
+              <ul class="list-disc pl-6 space-y-1 mt-2">
+                {byCategory[extra].map((lesson) => (
+                  <li class="lesson-item">
+                    <a
+                      href={`${basePath}/${lesson.slug}`}
+                      class="text-blue-600 hover:underline">
+                      {lesson.data.title || lesson.slug}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))
+      }
+    </div>
+
+    <p class="text-right text-sm text-gray-500 mt-6">
+      Ultimo aggiornamento: {getFormattedDate(new Date())}
+    </p>
+  </div>
+
+  <script src="../utils/lesson-filter.js"></script>
+</Container>

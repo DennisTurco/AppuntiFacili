@@ -2,7 +2,7 @@
 title: "Hello World"
 draft: false
 lastUpdateDate: "2025-09-13"
-subject: "C"
+subject: "C++"
 category: "Informatica"
 tags: ["c++", "programmazione", "introduzione", "facile"]
 author: "Dennis Turco"

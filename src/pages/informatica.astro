@@ -1,24 +1,19 @@
 ---
-import { getCollection } from "astro:content";
-import { getFormattedDate } from "@/utils/all";
 import Layout from "@/layouts/Layout.astro";
-import Container from "@/components/container.astro";
-import { Icon } from "astro-icon/components";
+import LessonsSection from "@/components/LessonsSection.astro";
 
-let entries = await getCollection("informatica", ({ data }) => {
-  return !data.draft && data.lastUpdateDate < new Date();
-});
+const categoriesOrder = [
+  "python",
+  "c",
+  "cpp",
+  "java",
+  "csharp",
+  "html",
+  "sql",
+  "algorithms-and-data-structures",
+];
 
-entries = entries.sort((a, b) => a.slug.localeCompare(b.slug, undefined, { numeric: true }));
-
-const byLanguage: Record<string, typeof entries> = entries.reduce((acc, entry) => {
-  const [lang] = entry.slug.split("/");
-  if (!acc[lang]) acc[lang] = [];
-  acc[lang].push(entry);
-  return acc;
-}, {} as Record<string, typeof entries>);
-
-const languageIcons = {
+const icons = {
   c: "fa6-solid:bookmark",
   cpp: "fa6-solid:bookmark",
   java: "fa6-brands:java",
@@ -31,154 +26,11 @@ const languageIcons = {
 ---
 
 <Layout title="Appunti di Informatica">
-  <Container>
-    <div class="container mx-auto px-6 py-12 space-y-8 max-w-5xl">
-      <h1 class="text-3xl font-bold text-center mb-4">Appunti di Informatica</h1>
-
-      <!-- Descrizione -->
-      <div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
-        <p class="text-gray-800 text-lg">
-          Non sono presenti tutte le lezioni, ma se manca qualcosa
-          <a href="/contact" class="text-blue-600 font-semibold underline hover:text-blue-800">
-            contattami
-          </a>
-          e la aggiungo!
-        </p>
-        <p class="text-gray-800 text-lg mt-2">
-          Tutti i programmi delle lezioni su:
-<a
-  target="_blank"
-  href="https://github.com/DennisTurco/AppuntiLezioni"
-  class="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:scale-105 transition"
->
-  <Icon name="fa6-brands:github" class="text-white text-xl" />
-  <span>GitHub</span>
-</a>
-        </p>
-      </div>
-
-      <!-- Sezione Progetti -->
-      <section>
-        <h2 class="text-2xl font-bold mb-4">Progetti ed esercizi</h2>
-        <ul class="list-disc pl-6 space-y-2 mb-8">
-          <li>
-            <a href="/informatica/altro/progetti" class="text-blue-600 hover:underline">
-              Progetti
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://www.geeksforgeeks.org/explore?page=2&difficulty=School,Basic,Easy&sortBy=submissions"
-              target="_blank"
-              class="text-blue-600 hover:underline"
-            >
-              Esercizi e sfide di programmazione (tutti i linguaggi)
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Campo di ricerca -->
-      <div class="flex flex-col sm:flex-row gap-3 mb-6 items-center">
-        <input
-          type="text"
-          id="lessonFilter"
-          placeholder="🔍 Cerca una lezione..."
-          class="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <select
-          id="languageFilter"
-          class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Tutti i linguaggi</option>
-          {Object.keys(byLanguage).map((lang) => (
-            <option value={lang}>{lang.toUpperCase()}</option>
-          ))}
-        </select>
-      </div>
-
-      <!-- Pulsante espandi/comprimi -->
-      <div class="flex justify-between items-center mb-2">
-        <p class="text-sm text-gray-500">
-          Totale lezioni: <strong>{entries.length}</strong>
-        </p>
-        <button
-          id="toggleAll"
-          class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition"
-        >
-          Espandi/Comprimi tutti
-        </button>
-      </div>
-
-      <!-- Sezione lezioni -->
-      <section>
-        <h2 class="text-2xl font-bold mt-6">Linguaggi</h2>
-        <div id="lessonList" class="space-y-4 mt-4">
-          {Object.entries(byLanguage).map(([lang, lessons]) => (
-            <details
-              class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
-              data-lang={lang}
-              open
-            >
-              <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
-                <Icon name={languageIcons[lang] || "fa6-solid:book"} class="text-gray-700" />
-                <span class="uppercase">{lang}</span>
-                <span class="ml-auto text-sm text-gray-500">
-                  ({lessons.length} lezioni)
-                </span>
-              </summary>
-              <ul class="list-disc pl-6 space-y-1 mt-2">
-                {lessons.map((lesson) => (
-                  <li class="lesson-item">
-                    <a
-                      href={`/informatica/${lesson.slug}`}
-                      class="text-blue-600 hover:underline"
-                    >
-                      {lesson.data.title || lesson.slug}
-                    </a>
-                    <span
-                      class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md ml-2"
-                    >
-                      ultimo aggiornamento: {lesson.data.lastUpdateDate.toLocaleDateString("it-IT") || ""}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      <!-- SEZIONE LIBRI CONSIGLIATI SOTTO -->
-      <section class="bg-gray-50 border border-gray-200 rounded-xl p-6 mt-10">
-        <h2 class="text-2xl font-bold mb-4">📚 Libri consigliati</h2>
-        <ul class="list-disc pl-5 space-y-2">
-          <li>
-            <a
-              href="https://github.com/DennisTurco/clean-code-summary"
-              target="_blank"
-              class="text-blue-600 hover:underline"
-            >
-              Clean Code Summary (English Version)
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://automatetheboringstuff.com/"
-              target="_blank"
-              class="text-blue-600 hover:underline"
-            >
-              Automate the Boring Stuff with Python
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <p class="text-right text-sm text-gray-500 mt-6">
-        Ultimo aggiornamento: {getFormattedDate(new Date())}
-      </p>
-    </div>
-  </Container>
-
-  <script src="../utils/lesson-filter.js"></script>
+  <LessonsSection
+    collection="informatica"
+    title="Informatica"
+    categoriesOrder={categoriesOrder}
+    icons={icons}
+    basePath="/informatica"
+  />
 </Layout>

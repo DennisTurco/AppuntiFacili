@@ -1,26 +1,6 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
-import Container from "@/components/container.astro";
-import { Icon } from "astro-icon/components";
-
-let entries = await getCollection("matematica", ({ data }) => {
-  return !data.draft && data.lastUpdateDate < new Date();
-});
-
-entries = entries.sort((a, b) => {
-  return a.slug.localeCompare(b.slug, undefined, { numeric: true });
-});
-
-type LessonEntry = typeof entries[number];
-type ByLanguage = Record<string, LessonEntry[]>;
-
-const byLanguage: ByLanguage = entries.reduce((acc, entry) => {
-  const [lang] = entry.slug.split("/");
-  if (!acc[lang]) acc[lang] = [];
-  acc[lang].push(entry);
-  return acc;
-}, {} as ByLanguage);
+import LessonsSection from "@/components/LessonsSection.astro";
 
 const categoriesOrder = [
   "numeri",
@@ -32,7 +12,7 @@ const categoriesOrder = [
   "altro",
 ];
 
-const icons: Record<string, string> = {
+const icons = {
   numeri: "fa6-solid:hashtag",
   polinomi: "fa6-solid:superscript",
   equazioni: "fa6-solid:equals",
@@ -43,46 +23,12 @@ const icons: Record<string, string> = {
 };
 ---
 
-<Layout title="Matematica">
-  <Container>
-
-    <div class="container mx-auto px-6 py-12 space-y-8">
-      <h1 class="text-3xl font-bold text-center mb-4">Appunti matematica</h1>
-
-      <!-- Descrizione -->
-      <div class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center">
-        <p class="text-gray-800 text-lg">
-          Ci tengo a precisare che non sono presenti tutte le lezioni, se manca qualcosa che vi serve, non esitate a
-          <a href="/contact" class="text-blue-600 font-semibold underline hover:text-blue-800">
-            contattarmi
-          </a>
-          e aggiungo!
-        </p>
-      </div>
-
-          {categoriesOrder.map((category) =>
-  byLanguage[category] && (
-    <div>
-      <h3 class="text-xl font-semibold flex items-center gap-2 mt-4">
-        <Icon name={icons[category]} class="text-gray-700" />
-        <span class="uppercase">{category}</span>
-      </h3>
-      <ul class="list-disc pl-6 space-y-2">
-        {byLanguage[category].map((lesson) => (
-          <li>
-            <a
-              href={`/matematica/${lesson.slug}`}
-              class="text-blue-600 hover:underline"
-            >
-              {lesson.data.title || lesson.slug}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-)}
-        </div>
-    </div>
-  </Container>
+<Layout title="Appunti di Matematica">
+  <LessonsSection
+    collection="matematica"
+    title="Matematica"
+    categoriesOrder={categoriesOrder}
+    icons={icons}
+    basePath="/matematica"
+  />
 </Layout>

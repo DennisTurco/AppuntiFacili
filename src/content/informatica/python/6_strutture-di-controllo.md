@@ -1,5 +1,5 @@
 ---
-title: "Installazione di Python"
+title: "Strutture di Controllo"
 draft: true
 lastUpdateDate: "2025-10-23"
 subject: "Python"

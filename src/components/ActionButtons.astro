@@ -1,0 +1,31 @@
+---
+import { Icon } from "astro-icon/components";
+
+const { href } = Astro.props;
+---
+
+<div class="flex justify-start gap-3 mt-4">
+    <a
+        href={href}
+        class="inline-flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm no-underline">
+        <Icon name="fa6-solid:arrow-left" class="h-5 w-5" />
+        Torna Indietro
+    </a>
+
+    <a
+        id="report-link"
+        href="#"
+        target="_blank"
+        class="inline-flex items-center gap-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition text-sm no-underline">
+        <Icon name="fa6-brands:github" class="h-5 w-5" />
+        Segnala errore
+    </a>
+
+    <script type="module">
+        const link = document.getElementById("report-link");
+        const currentURL = window.location.href;
+        const githubURL = `https://github.com/DennisTurco/AppuntiFacili/issues/new?title=Errore+nella+pagina&body=Pagina+${encodeURIComponent(currentURL)}`;
+        link.href = githubURL;
+    </script>
+    </div>
+</div>
