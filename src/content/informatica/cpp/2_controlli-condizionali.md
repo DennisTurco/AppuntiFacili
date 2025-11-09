@@ -77,9 +77,9 @@ Così si può comandare il flusso del programma decidendo di eseguire una parte 
 
 ## 4️⃣ In sintesi
 
-- Utilizzare l' `if`istruzione per specificare un blocco di codice C++ da eseguire se una condizione è `true`.
-- Utilizzare l' `else`istruzione per specificare un blocco di codice da eseguire se la condizione è `false`.
-- Utilizzare l' `else if`istruzione per specificare una nuova condizione se la prima condizione è `false`.
+- Utilizzare l' `if` istruzione per specificare un blocco di codice C++ da eseguire se una condizione è `true`.
+- Utilizzare l' `else` istruzione per specificare un blocco di codice da eseguire se la condizione è `false`.
+- Utilizzare l' `else if` istruzione per specificare una nuova condizione se la prima condizione è `false`.
 
 *esempio*:
 

@@ -100,45 +100,90 @@ const byCategory: ByCategory = entries.reduce((acc, entry) => {
       </button>
     </div>
 
-    <!-- Sezione lezioni -->
-    <div id="lessonList" class="space-y-4 mt-4">
-      {categoriesOrder.map((category) => {
-        const lessons = byCategory[category];
-        if (!lessons) return null;
+<!-- Sezione lezioni -->
+<div id="lessonList" class="space-y-4 mt-4">
+  {categoriesOrder.map((category) => {
+    const lessons = byCategory[category];
+    if (!lessons) return null;
 
-        return (
-          <details
-            class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
-            data-lang={category}
-            open
-          >
-            <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
-              <Icon name={icons[category] || "fa6-solid:book"} class="text-gray-700" />
-              <span class="uppercase">{category}</span>
-              <span class="ml-auto text-sm text-gray-500">({lessons.length} lezioni)</span>
-            </summary>
-            <ul class="list-disc pl-6 space-y-1 mt-2">
-              {lessons.map((lesson) => (
-                <li class="lesson-item">
-                  <a
-                    href={`${basePath}/${lesson.slug}`}
-                    class="text-blue-600 hover:underline"
-                  >
-                    {lesson.data.title || lesson.slug}
-                  </a>
-                  <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md ml-2">
-                    difficoltà: {lesson.data.difficulty || ""}
-                  </span>
-                  <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md ml-2">
-                    ultimo aggiornamento:{" "}
-                    {lesson.data.lastUpdateDate?.toLocaleDateString("it-IT") || ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        );
-      })}
+    return (
+      <details
+        class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
+        data-lang={category}
+        open
+      >
+        <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
+          <Icon name={icons[category] || "fa6-solid:book"} class="text-gray-700" />
+          <span class="uppercase">{category}</span>
+          <span class="ml-auto text-sm text-gray-500">({lessons.length} lezioni)</span>
+        </summary>
+
+        <div class="mt-2">
+          <!-- Intestazione tabella (solo su desktop) -->
+          <div class="hidden sm:grid grid-cols-3 font-semibold text-gray-600 text-sm border-b pb-1 mb-1">
+            <span>Lezione</span>
+            <span class="text-center">Difficoltà</span>
+            <span class="text-right">Ultima modifica</span>
+          </div>
+
+          <ul class="divide-y divide-gray-100">
+            {lessons.map((lesson) => (
+              <li class="lesson-item grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 py-2 items-center hover:bg-gray-100/60 transition rounded-md px-1">
+                <!-- Titolo -->
+                <a
+                  href={`${basePath}/${lesson.slug}`}
+                  class="text-blue-600 hover:underline truncate font-medium"
+                >
+                  {lesson.data.title || lesson.slug}
+                </a>
+
+                <!-- Difficoltà -->
+                <span class="text-sm text-gray-700 sm:text-center sm:block">
+                  {lesson.data.difficulty || "N/D"}
+                </span>
+
+                <!-- Ultima modifica -->
+                <span class="text-xs text-gray-500 sm:text-right sm:block">
+                  {lesson.data.lastUpdateDate?.toLocaleDateString("it-IT") || ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </details>
+    );
+  })}
+
+  {Object.keys(byCategory)
+    .filter((k) => !categoriesOrder.includes(k))
+    .sort()
+    .map((extra) => (
+      <details
+        class="bg-gray-50 rounded-lg border border-gray-200 p-3 lesson-group"
+        data-lang={extra}
+      >
+        <summary class="cursor-pointer text-lg font-semibold flex items-center gap-2">
+          <Icon name="fa6-solid:book" class="text-gray-700" />
+          <span class="uppercase">{extra}</span>
+          <span class="ml-auto text-sm text-gray-500">
+            ({byCategory[extra].length} lezioni)
+          </span>
+        </summary>
+        <ul class="list-disc pl-6 space-y-1 mt-2">
+          {byCategory[extra].map((lesson) => (
+            <li class="lesson-item">
+              <a
+                href={`${basePath}/${lesson.slug}`}
+                class="text-blue-600 hover:underline"
+              >
+                {lesson.data.title || lesson.slug}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    ))}
+</div>
 
       {Object.keys(byCategory)
         .filter((k) => !categoriesOrder.includes(k))
