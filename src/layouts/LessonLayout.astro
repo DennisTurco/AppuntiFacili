@@ -59,7 +59,7 @@ const nextLesson = currentIndex < flatLessons.length - 1 ? flatLessons[currentIn
   url={frontmatter.url}
   image={frontmatter.image}
 >
-<div class="w-full max-w-[2000px] flex flex-col lg:flex-row mx-6 mt-14 px-2 lg:px-4 gap-6">
+<div class="w-full max-w-[2000px] flex flex-col lg:flex-row mx-auto mt-14 px-4 lg:px-6 gap-6">
 
     <!-- Sidebar lezioni -->
     {filteredLessonsArray.length > 0 && (
@@ -157,33 +157,33 @@ const nextLesson = currentIndex < flatLessons.length - 1 ? flatLessons[currentIn
         <!-- Contenuto MD/MDX -->
         <slot />
 
-        {(prevLesson || nextLesson) && (
-  <div class="mt-12 flex justify-between gap-4">
+{(prevLesson || nextLesson) && (
+  <div class="mt-12 flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
     {prevLesson ? (
       <a
         href={prevLesson.url}
-        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-100 transition flex items-center no-underline"
+        class="w-full sm:flex-1 border border-gray-300 rounded-lg px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-100 transition flex items-center no-underline text-sm sm:text-base"
       >
-        <span class="text-xl mr-3">←</span>
+        <span class="text-lg sm:text-xl mr-2 sm:mr-3">←</span>
         <div class="flex flex-col">
-          <span class="text-xs text-gray-500">Precedente</span>
+          <span class="text-[10px] sm:text-xs text-gray-500">Precedente</span>
           <span class="font-semibold text-gray-800 truncate">{prevLesson.title}</span>
         </div>
       </a>
-    ) : <div class="flex-1" />}
+    ) : <div class="hidden sm:flex-1" />}
 
     {nextLesson ? (
       <a
         href={nextLesson.url}
-        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-100 transition flex items-center justify-end no-underline"
+        class="w-full sm:flex-1 border border-gray-300 rounded-lg px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-100 transition flex items-center justify-end no-underline text-sm sm:text-base"
       >
         <div class="flex flex-col items-end">
-          <span class="text-xs text-gray-500">Successiva</span>
+          <span class="text-[10px] sm:text-xs text-gray-500">Successiva</span>
           <span class="font-semibold text-gray-800 truncate">{nextLesson.title}</span>
         </div>
-        <span class="text-xl ml-3">→</span>
+        <span class="text-lg sm:text-xl ml-2 sm:ml-3">→</span>
       </a>
-    ) : <div class="flex-1" />}
+    ) : <div class="hidden sm:flex-1" />}
   </div>
 )}
 
