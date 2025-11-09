@@ -98,10 +98,16 @@ const logout = async () => {
           <UserMenu client:load />
         </div>
 
-        <!-- Icona Discord -->
-        <div class="ml-4 hidden lg:flex">
-          <a href="https://discord.com/invite/9Jb4Gt3HhB" target="_blank" rel="noopener noreferrer">
-            <Icon name="fa6-brands:discord" class="h-8 w-8" />
+        <!-- Icona Discord (uniformata) -->
+        <div class="ml-4 hidden lg:flex items-center">
+          <a
+            href="https://discord.com/invite/9Jb4Gt3HhB"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center rounded-md p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            aria-label="Discord"
+          >
+            <Icon name="fa6-brands:discord" class="w-5 h-5 text-gray-500" />
           </a>
         </div>
       </MenuItems>
