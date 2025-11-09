@@ -218,6 +218,36 @@ const byCategory: ByCategory = entries.reduce((acc, entry) => {
         <p class="text-right text-sm text-gray-500 mt-6">
           Ultimo aggiornamento: {getFormattedDate(new Date())}
         </p>
+
+        {/* SEZIONE LIBRI CONSIGLIATI SOLO PER INFORMATICA */}
+      {collection === "informatica" && (
+        <section class="bg-gray-50 border border-gray-200 rounded-xl p-6 mt-10">
+          <h2 class="text-2xl font-bold mb-4">Libri consigliati</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>
+              <a
+                href="https://github.com/DennisTurco/clean-code-summary"
+                target="_blank"
+                class="text-blue-600 hover:underline"
+              >
+                Clean Code Summary (English Version)
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://automatetheboringstuff.com/"
+                target="_blank"
+                class="text-blue-600 hover:underline"
+              >
+                Automate the Boring Stuff with Python
+              </a>
+            </li>
+          </ul>
+        </section>
+      )}
+    </div>
+
+        
     </div>
   </div>
 

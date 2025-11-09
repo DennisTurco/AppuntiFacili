@@ -1,8 +1,8 @@
 ---
 title: "Progetti"
 order: 1
-draft: true # deve essere true perchè lo carico tramite link diretto e non in modo dinamico
-lastUpdateDate: "2025-08-28"
+draft: false
+lastUpdateDate: "2025-11-09"
 subject: "Progetti"
 category: "Informatica"
 difficulty: ""
@@ -37,11 +37,12 @@ Se scegliete di lavorare in gruppo, è consigliabile utilizzare un sistema come 
 | Gioco dell'Oca | Python (pygame) | 🟢 2 |  | Simulazione di gioco da tavolo classico con dado e percorsi. | Buon progetto introduttivo con struttura base. |
 | Risiko | Python (pygame) | 🔴 5 | ✅ | Strategico con mappe, turni, truppe, battaglie e obiettivi. | Richiede struttura dati complesse e gestione grafica avanzata. |
 | Previsioni Finanziarie Personali | Python | 🔴 5 | ✅ | Inserisci spese, investimenti e ottieni 30 simulazioni patrimoniali con inflazione e rendimento stimato. | Unisce matematica, statistica, modelli predittivi e visualizzazioni interattive. |
+| Discord Tutor Bot | Python | 🔴 5 | ✅ | Bot Discord per supporto a lezioni private: quiz, spiegazioni, esercizi, gestione studenti e reminder. | Ottimo per imparare integrazione API, gestione database, GUI/UX bot e logica avanzata. |
 | Installer Automatico con Chocolatey | C++ (o C#) | 🟢 2 | ✅ | App che installa/rimuove software leggendo un file, integrando Chocolatey e il sistema. | Ottimo per imparare automazione, scripting, gestione file e chiamate a processo. |
 | Gestione Password con generatore sicuro | Java / C# | 🟠 3 |  | Generatore e archivio sicuro di password con GUI, salvataggio criptato. | Utile per esercitarsi su GUI, file JSON e crittografia base. |
 | Gestione Finanze Personali | Java / C# | 🟠 3 | ✅ | CRUD di entrate/uscite con categorizzazione e statistiche mensili in grafico. |  |
 
-## 🟨 4. Python
+## 4. 🟨 Python
 
 <Aside variant="info">
 **Descrizione**
@@ -79,11 +80,11 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
     - Desktop: tkinter / **customtkinter**
     - Web: **Streamlit**
 
-### 💽 4.2 Applicazioni di analisi dei dati
+### 4.2 💽 Applicazioni di analisi dei dati
 
 Questi progetti forniranno una buona introduzione all'analisi dei dati e allo sviluppo di interfacce grafiche, oltre a essere divertenti e istruttivi.
 
-### 4.2.1 Analisi dei Dati Meteo
+#### 4.2.1 Analisi dei Dati Meteo
 
 - **Difficoltà:** 🟢 **2/5**
 - Motivo: Ottimo per principianti, utilizza dataset semplici e librerie standard.
@@ -113,7 +114,7 @@ Scarica un dataset di dati meteorologici (ad esempio, temperature giornaliere, p
         - Generazione e Visualizzazione del Grafico;
         - Salvataggio del Grafico;
 
-### 4.2.2 Analisi dei Dati sui Social Media
+#### 4.2.2 Analisi dei Dati sui Social Media
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: Integrazione con API, analisi testuale, GUI intermedia.
@@ -158,7 +159,7 @@ Scaricare ed analizzare i dati relativi a tweet o post su un certo argomento per
 - Clustering dei tweet per individuare "topic nascosti".
 - Previsione del numero di tweet futuri su una tematica con modelli time series.
 
-### 4.2.3 Simulatore di Previsioni Finanziarie Personali con Random Walk
+#### 4.2.3 Simulatore di Previsioni Finanziarie Personali con Random Walk
 
 **Difficoltà:** 🔴 5/5
 
@@ -239,9 +240,9 @@ Usare un modello **stocastico** per generare **30+ scenari differenti** di cresc
     - Seguire tutorial online su **`pandas`**, **`matplotlib`**, **`seaborn`**, **`tkinter` / `customtkinter` / `streamlit`** per familiarizzarsi con queste librerie.
     - Consultare la documentazione ufficiale per esempi e spiegazioni dettagliate.
 
-### 🕹 4.6 Giochi da tavolo
+### 4.4 🕹 Giochi da tavolo
 
-### 4.6.1 Dama (Checkers)
+#### 4.4.1 Dama (Checkers)
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: Richiede gestione eventi, grafica, logica di gioco e turni.
@@ -262,7 +263,7 @@ Un gioco da tavolo per due giocatori dove ogni giocatore cerca di catturare tutt
 - Aggiunta di un *giocatore automatico intelligente*
 - Il bot può migliorare usando *reinforcement learning*.
 
-### 4.6.2 Gioco dell'Oca
+#### 4.4.2 Gioco dell'Oca
 
 - **Difficoltà:** 🟢 **2/5**
 - Motivo: Logica più semplice, ottimo per principianti.
@@ -276,7 +277,7 @@ Un gioco da tavolo classico dove i giocatori avanzano su un percorso tirando un 
 - **Logica del gioco:** Movimento dei pezzi, gestione degli eventi speciali sulle caselle, e controllo per la vittoria.
 - **Dado virtuale:** Implementazione di un dado che i giocatori possono tirare.
 
-### 4.6.3 Risiko (Risk)
+#### 4.4.3 Risiko (Risk)
 
 - **Difficoltà:** 🔴 **5/5**
 - Motivo: Strategia complessa, mappe, gestione turni e IA base.
@@ -295,7 +296,66 @@ Un gioco strategico dove i giocatori conquistano territori e cercano di controll
 - Aggiunta di un *giocatore automatico intelligente*
 - Il bot può migliorare usando *reinforcement learning*.
 
-## 🟩 5. Java / C#
+### 4.5 🤖 Bot
+
+#### 4.5.1 Discord Tutor Bot
+
+- **Difficoltà:** 🔴 5/5
+- **Motivo:** Richiede gestione di bot Discord, integrazione AI, database, GUI opzionale e logica complessa.
+
+**Descrizione:**
+Un bot Discord dedicato a studenti e insegnanti, con funzionalità educative avanzate per rendere le lezioni più interattive e personalizzate. Può servire come supporto per esercizi, spiegazioni e gestione del percorso di studio.
+
+**Funzionalità principali:**
+
+1. **Supporto didattico**
+   - `/explain <topic>` → spiegazioni semplificate con esempi.
+   - Quiz e test interattivi (domande multiple-choice, vero/falso, riempi spazi).
+   - Flashcards per memorizzare concetti chiave.
+   - Esercizi randomici con soluzioni passo-passo.
+   - Suggerimenti personalizzati di studio in base alle performance.
+
+2. **Funzioni matematico-scientifiche**: Realizzare una sorta di [WolframAlpha](https://www.wolframalpha.com/) testuale
+   - Risoluzione di problemi matematici passo-passo.
+   - Grafici e plot interattivi (matematica/fisica/statistica).
+   - Conversione e gestione di formule matematiche.
+   - Statistiche e simulazioni (es. probabilità, random walk).
+
+3. **Programmazione e tecnologia**
+   - Analisi e debug automatico di snippet di codice.
+   - Generatore di codice e pseudocodice per principianti.
+   - Esercizi di programmazione generati automaticamente.
+
+4. **Gestione studenti e studio**
+   - Reminder per compiti, lezioni e scadenze.
+   - Gestione note e appunti salvabili.
+   - Agenda lezioni con calendario integrato.
+   - Promemoria grafico e avanzamento degli studenti.
+
+5. **Interazione e motivazione**
+   - Leaderboard e punteggi per quiz completati.
+   - Badge e achievements virtuali.
+   - Mini-giochi educativi e sfide giornaliere.
+
+6. **Funzioni avanzate**
+   - Integrazione AI per spiegazioni più dettagliate.
+   - Text-to-Speech per leggere spiegazioni ad alta voce.
+   - Analisi dei progressi degli studenti con grafici.
+   - Multi-server support per usare lo stesso bot in diversi server Discord.
+
+**Tecnologie consigliate:**
+- **Python:** `discord.py`, `pandas`, `matplotlib`, `numpy`
+- **JavaScript:** `discord.js`, Node.js, eventualmente `Chart.js` per grafici web
+- **Database:** SQLite o MongoDB per memorizzare progressi, note e punteggi.
+- **Eventuale AI:** OpenAI API per spiegazioni e analisi avanzate.
+
+**Suggerimenti per la realizzazione:**
+- Iniziare dal bot base che risponde a comandi semplici (`/hello`, `/help`).
+- Integrare quiz e esercizi statici, poi avanzare verso quiz dinamici con logica.
+- Implementare database per gestire progressi degli studenti.
+- Infine, aggiungere grafici, AI e funzioni avanzate.
+
+## 5. 🟩 Java / C#
 
 <Aside variant="info">
 
@@ -323,7 +383,7 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
 </Aside>
 
 <Aside variant="info">
-ℹ️ Per migliorare il design dell'interfaccia in Java, usare [FlatLaf](https://www.formdev.com/flatlaf/) $\rightarrow$
+Per migliorare il design dell'interfaccia in Java, usare [FlatLaf](https://www.formdev.com/flatlaf/) $\rightarrow$
 [Tutorial](https://www.youtube.com/watch?v=Gxf4T-4Ix-w&ab_channel=RaVen)
 
 </Aside>
@@ -341,7 +401,7 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
 
 ### 5.2 💽 Applicazioni
 
-### 5.2.1 Gestore Password con generatore randomico
+#### 5.2.1 Gestore Password con generatore randomico
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: Interfaccia ricca, file handling, crittografia.
@@ -383,7 +443,7 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
             - Criptazione e Decriptazione;
             - Feedback / Log;
 
-### 5.2.2 Applicazione di Gestione delle Finanze Personali
+#### 5.2.2 Applicazione di Gestione delle Finanze Personali
 
 - **Difficoltà:** 🟠 **3/5**
 - Motivo: CRUD su dati, grafici, GUI ordinata ma gestibile.
@@ -433,7 +493,7 @@ N.B. *I progetti elencati sono pensati anche per coloro che non hanno mai progra
             - Configurazione e Impostazioni;
             - Feedback / Log;
 
-## 🟨 6. C/C++
+## 6. 🟨 C/C++
 
 <Aside variant="info">
 
@@ -453,7 +513,7 @@ Per chi vuole programmare in C / C++
 
 </Aside>
 
-### 6.1 Installatore Automatico con Chocolatey
+#### 6.1 Installatore Automatico con Chocolatey
 
 - **Linguaggio consigliato:** C++ (più sfidante, ma didattico), alternativa in C# per GUI.
 - **Difficoltà:** 🟢 2**/5**
@@ -483,13 +543,13 @@ Un'applicazione (con o senza GUI) che legge un file di testo (`software.txt`) e 
 - Gestione di processi
 - Approccio a tool esterni come **Chocolatey**.
 
-## 🟦 7. Unity / Godot
+## 7. 🟦 Unity / Godot
 
 <Aside variant="info">
 
 **Descrizione**
 
-Per chi vuole provare a sviluppare un gioco come fanno i veri professionisti! 
+Per chi vuole provare a sviluppare un gioco come fanno i veri professionisti!
 
 - Unity ha una sintassi del codice tipica di c#;
 - Godot ha una sintassi del codice “simile” a python;
