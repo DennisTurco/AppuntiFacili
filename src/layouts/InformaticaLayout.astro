@@ -12,6 +12,7 @@ const lessons = allLessons.reduce((acc, entry) => {
     title: entry.data.title,
     url: `/${entry.collection}/${entry.slug}`,
     order: entry.data.order ?? 0,
+    draft: entry.data.draft,
     subject: subject
   });
   return acc;

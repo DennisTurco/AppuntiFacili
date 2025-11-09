@@ -15,6 +15,7 @@ type LessonItem = {
   url: string;
   order?: number;
   subject?: string;
+  draft: boolean;
 };
 
 type LessonSubject = {
@@ -33,13 +34,23 @@ interface LessonLayoutProps {
 const { frontmatter, lessons, backHref = "/", sectionName = "Sezione" } =
   Astro.props as LessonLayoutProps;
 
-// Trasforma lessons in array ordinato
-const lessonsArray: LessonSubject[] = Object.entries(lessons)
+// Filtra le lezioni non pubblicate (draft === true)
+const filteredLessonsArray: LessonSubject[] = Object.entries(lessons)
   .map(([subject, lessonList]) => ({
     subject,
-    lessons: lessonList.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    lessons: lessonList
+      .filter(lesson => !lesson.draft) // <-- filtra draft
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
   }))
+  .filter(subject => subject.lessons.length > 0) // rimuove soggetti senza lezioni
   .sort((a, b) => a.subject.localeCompare(b.subject));
+
+// Flatten per prev/next
+const flatLessons: LessonItem[] = filteredLessonsArray.flatMap(l => l.lessons);
+const currentIndex = flatLessons.findIndex(l => l.url === frontmatter.url);
+
+const prevLesson = currentIndex > 0 ? flatLessons[currentIndex - 1] : null;
+const nextLesson = currentIndex < flatLessons.length - 1 ? flatLessons[currentIndex + 1] : null;
 ---
 
 <Layout
@@ -48,10 +59,10 @@ const lessonsArray: LessonSubject[] = Object.entries(lessons)
   url={frontmatter.url}
   image={frontmatter.image}
 >
-  <div class="w-full max-w-[1600px] flex flex-col lg:flex-row mx-auto mt-14 px-6 lg:px-12 gap-8">
+<div class="w-full max-w-[2000px] flex flex-col lg:flex-row mx-auto mt-14 px-2 lg:px-4 gap-6">
 
     <!-- Sidebar lezioni -->
-    {lessonsArray.length > 0 && (
+    {filteredLessonsArray.length > 0 && (
       <aside class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 pr-4">
   <h2 class="text-xl font-bold mb-4">Lezioni</h2>
 
@@ -63,8 +74,11 @@ const lessonsArray: LessonSubject[] = Object.entries(lessons)
   />
 
   <div id="lessons-list" class="space-y-2">
-    {lessonsArray.map(({ subject, lessons }) => (
-      <details class="group border border-gray-100 rounded-md overflow-hidden">
+    {filteredLessonsArray.map(({ subject, lessons }) => (
+      <details
+        class="group border border-gray-100 rounded-md overflow-hidden"
+        open={frontmatter.subject === subject}
+      >
         <summary
           class="px-3 py-2 cursor-pointer font-semibold bg-gray-50 hover:bg-gray-100 flex justify-between items-center"
         >
@@ -142,6 +156,36 @@ const lessonsArray: LessonSubject[] = Object.entries(lessons)
 
         <!-- Contenuto MD/MDX -->
         <slot />
+
+        {(prevLesson || nextLesson) && (
+  <div class="mt-12 flex justify-between gap-4">
+    {prevLesson ? (
+      <a
+        href={prevLesson.url}
+        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-100 transition flex items-center no-underline"
+      >
+        <span class="text-xl mr-3">←</span>
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">Precedente</span>
+          <span class="font-semibold text-gray-800 truncate">{prevLesson.title}</span>
+        </div>
+      </a>
+    ) : <div class="flex-1" />}
+
+    {nextLesson ? (
+      <a
+        href={nextLesson.url}
+        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-100 transition flex items-center justify-end no-underline"
+      >
+        <div class="flex flex-col items-end">
+          <span class="text-xs text-gray-500">Successiva</span>
+          <span class="font-semibold text-gray-800 truncate">{nextLesson.title}</span>
+        </div>
+        <span class="text-xl ml-3">→</span>
+      </a>
+    ) : <div class="flex-1" />}
+  </div>
+)}
 
         <GoToTopButton />
         <BookLessonButton />
