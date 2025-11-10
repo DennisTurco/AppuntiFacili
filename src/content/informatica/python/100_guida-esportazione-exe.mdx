@@ -1,0 +1,51 @@
+---
+title: "Esportazione a .exe"
+order: 100
+draft: false
+lastUpdateDate: "2025-11-10"
+subject: "Python"
+category: "Informatica"
+difficulty: "facile"
+tags: ["python", "programmazione", "esportazione", ".ece"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+# Ottenere il file requirements.txt
+
+Questo file conterrà tutte le librerie utilizzate dal nostro progetto. È possibile generarlo attraverso una libreria di python che si chiama *pipreqs*
+
+- installare la libreria pipreqs: `pip install pipreqs`
+- partendo dalla root del progetto lanciare il seguente comando: `pipreqs .`
+
+    <Aside variant="info">
+
+    Se dovesse dare il seguente errore:
+    `UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb1 in position 81: invalid start byte` allora eseguire il seguente comando: `pipreqs . --ignore .venv,*.txt,*.md,*.png --encoding latin1`
+
+    </Aside>
+
+
+La comodità di avere un file requirements.txt all'interno del proprio progetto python consiste nella possibilità di poter installare tutti i pacchetti necessari al corretto funzionamento del progetto tramite il comando `pip install -r requirements.txt`
+
+# Ottenere il file .exe
+
+Prima di generare il file .exe è buona norma scrivere il file `requirements.txt` seguendo il processo precedente.
+
+1. istallare il programma per automatizzare il processo: [auto-py-to-exe](https://pypi.org/project/auto-py-to-exe/)
+2. eseguirlo: [GUIDA Youtube](https://www.youtube.com/watch?v=Y0HN9tdLuJo&ab_channel=PythonSimplified)
+
+<Aside variant="info">
+N.B: dopo la prima volta che viene esguita l'ioperazione 1, verrà generato un file .spec. Da questo file sarà possibile modificare alcuni parametri a piacimento e sarà utile per evitare di rieseguire tutte le volte che si effettuano modifiche al progetto il punto 1, poichè per ri-ottenere il file .exe basterà digitare nel terminale il comando `pyinstaller file.spec`
+
+N.B: se compare un messaggio di windows defender o di un altro antivirus durante la conversione, è necessario disabilitare l'antivirus.
+
+Nel caso di windows defender è possibile disabilitarlo seguendo la procedura:
+
+1. Step One: Open the Settings app in the Start Menu.
+2. Step Two: Select “Update & Security” in the Settings app.
+3. Step Three: Choose “Windows Security” from the left sidebar.
+4. Step Four: Tap “Virus & threat protection” under Windows Security.
+5. Step Five: Hit “Manage settings” under Virus & threat protection settings.
+6. Step Six: Turn off Real-time protection by moving the switch to the off position.
+</Aside>

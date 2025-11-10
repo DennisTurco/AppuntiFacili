@@ -1,0 +1,150 @@
+---
+title: "Logging"
+order: 18
+draft: false
+lastUpdateDate: "2025-11-10"
+subject: "Python"
+category: "Informatica"
+difficulty: "facile"
+tags: ["python", "programmazione", "logging"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Il **logging** è un modo per tracciare eventi e messaggi che si verificano durante l'esecuzione del programma.
+A differenza del semplice `print()`, il logging offre un modo più professionale, scalabile e controllato per monitorare il comportamento del codice.
+
+In particolare, con logging è possibile:
+
+- Registrare messaggi di diverso livello di importanza, come `DEBUG`, `INFO`, `WARNING`, `ERROR` e `CRITICAL`;
+- Controllare dove vengono scritti i messaggi di log, ad esempio su console, file, socket, o anche su server remoti;
+- Formattare i messaggi di log per includere informazioni come data, ora, nome del modulo, livello di gravità e molto altro;
+- Gestire i log in modo centralizzato, combinando più logger e handler per tenere traccia del comportamento dell'intera applicazione;
+- Filtrare i messaggi per registrare solo quelli che ti interessano, migliorando così le prestazioni e la leggibilità;
+- Diagnosticare e debuggare il codice in maniera più professionale e scalabile rispetto all'uso di semplici `print()`.
+
+<Aside variant="info">
+Esempio pratico:
+Se un'applicazione desktop con interfaccia grafica dovesse andare in crash, grazie al logging potremmo salvare automaticamente su un file .log
+tutti gli eventi che hanno portato all'errore, facilitando la diagnosi del problema.
+
+![esempio](https://images.ctfassets.net/em6l9zw4tzag/4s0fWlp7YWsr4tAP571KPC/265b2967991a65ba8a6448e7f4ecb229/logging-in-python-image11.png?w=1290&h=707&q=50&fm=png)
+</Aside>
+
+## 2. Tipi di logging
+
+La libreria `logging` di Python prevede 5 livelli principali di gravità dei messaggi:
+
+| **Livello di Log** | **Funzione**         | **Descrizione**                                                                                      |
+| ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| **DEBUG**          | `logging.debug()`    | Fornisce informazioni dettagliate utili per il debug e lo sviluppo.                                  |
+| **INFO**           | `logging.info()`     | Fornisce informazioni generali su ciò che sta accadendo nel programma.                               |
+| **WARNING**        | `logging.warning()`  | Indica che c'è qualcosa che merita attenzione, ma il programma può continuare a funzionare.          |
+| **ERROR**          | `logging.error()`    | Segnala un problema imprevisto che si è verificato durante l'esecuzione del programma.               |
+| **CRITICAL**       | `logging.critical()` | Indica un errore grave che potrebbe compromettere o interrompere il funzionamento dell'applicazione. |
+
+
+## 3. Utilizzo base
+
+Ecco un esempio di utilizzo base del modulo `logging`:
+
+```python
+import logging
+
+# Configurazione base
+logging.basicConfig(level=logging.DEBUG)
+
+logging.debug("Messaggio di debug - utile per capire il flusso del programma")
+logging.info("Messaggio informativo - il programma sta funzionando correttamente")
+logging.warning("Attenzione - qualcosa potrebbe non andare come previsto")
+logging.error("Errore - qualcosa è andato storto")
+logging.critical("Errore critico - il programma potrebbe arrestarsi")
+```
+
+<Aside variant="info">
+Di default, il livello di logging impostato è `WARNING`, quindi verranno mostrati solo i messaggi di livello `WARNING`, `ERROR` e `CRITICAL`.
+Per vedere anche i messaggi `DEBUG` e `INFO`, occorre impostare `level=logging.DEBUG`.
+</Aside>
+
+## 4. Salvare i log su file
+
+È possibile scrivere i messaggi di log anche su un file, utile per tracciare gli eventi nel tempo:
+
+```python
+import logging
+
+logging.basicConfig(
+    filename="app.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logging.info("Programma avviato correttamente.")
+logging.warning("Connessione lenta.")
+logging.error("Impossibile aprire il file richiesto.")
+```
+
+Questo codice genererà un file chiamato `app.log` contenente i messaggi con data, ora, livello e testo.
+
+
+## 5. Formattazione dei messaggi di log
+
+Il parametro `format` permette di personalizzare il formato del messaggio.
+
+| **Variabile**   | **Descrizione**                                       |
+| --------------- | ----------------------------------------------------- |
+| `%(asctime)s`   | Data e ora del log                                    |
+| `%(levelname)s` | Livello del messaggio                                 |
+| `%(message)s`   | Testo del messaggio                                   |
+| `%(filename)s`  | Nome del file Python che ha generato il log           |
+| `%(lineno)d`    | Numero di riga del file                               |
+| `%(name)s`      | Nome del logger (utile con più logger personalizzati) |
+
+Esempio:
+
+```python
+logging.basicConfig(
+    format="%(asctime)s - [%(levelname)s] (%(filename)s:%(lineno)d) - %(message)s",
+    level=logging.DEBUG
+)
+```
+
+## 6. Creazione di logger personalizzati
+
+In applicazioni più complesse, è buona pratica creare `logger personalizzati`, invece di usare la configurazione globale.
+
+```python
+import logging
+
+# Creazione di un logger
+logger = logging.getLogger("app_logger")
+logger.setLevel(logging.DEBUG)
+
+# Creazione di un handler per la console
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# Creazione di un handler per il file
+file_handler = logging.FileHandler("dettagli.log")
+file_handler.setLevel(logging.DEBUG)
+
+# Formattazione
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# Aggiunta degli handler al logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+# Esempio di log
+logger.debug("Questo messaggio va solo nel file.")
+logger.info("Questo messaggio appare su console e file.")
+logger.error("Errore critico!")
+```
+
+<Aside variant="info">
+Questa tecnica è molto utile per progetti complessi, dove diversi moduli del programma generano log separati ma centralizzati.
+</Aside>
