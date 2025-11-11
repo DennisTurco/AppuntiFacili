@@ -2,7 +2,7 @@
 title: "Logging"
 order: 18
 draft: false
-lastUpdateDate: "2025-11-10"
+lastUpdateDate: "2025-11-11"
 subject: "Python"
 category: "Informatica"
 difficulty: "facile"
@@ -148,3 +148,164 @@ logger.error("Errore critico!")
 <Aside variant="info">
 Questa tecnica è molto utile per progetti complessi, dove diversi moduli del programma generano log separati ma centralizzati.
 </Aside>
+
+
+## 7. Esercizi
+
+### 7.1 Esercizio - Logging Base
+
+Scrivi un programma che:
+
+1. utilizzi `logging.basicConfig()` per impostare il livello a `DEBUG`;
+2. generi messaggi per ogni livello (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`);
+3. osserva quali livelli vengono mostrati modificando il parametro `level`.
+
+### 7.2 Esercizio - Log su File
+
+Crea uno script che:
+
+1. salvi i messaggi di log in un file chiamato `operazioni.log`;
+2. includa nel formato data, ora, livello e messaggio;
+3. registri eventi simulando il funzionamento di un'app (es. “Connessione stabilita”, “Errore di rete”, ecc.).
+
+Punti extra:
+
+4. Crea una classe `Applicazione` che:
+    1. contenga un metodo `esegui_operazione()` che simula varie azioni (es. connessione, caricamento file, elaborazione dati);
+    2. utilizzi il modulo logging per registrare ogni evento con il livello appropriato (`INFO`, `WARNING`, `ERROR`).
+5. Gestisci possibili eccezioni con un blocco `try-except`, ad esempio:
+    1. se viene simulato un errore (es. file mancante o connessione persa), catturalo con `except Exception as e`;
+    2. registra l'errore nel file di log con `logging.error(str(e))`.
+
+<Aside variant="info">
+Usa `random.choice()` per simulare eventi casuali positivi o di errore e osservali nel file `operazioni.log`.
+</Aside>
+
+### 7.3 Esercizio - Logger Personalizzato
+
+Crea un logger personalizzato chiamato `server_logger` che:
+
+1. invii i log `INFO` e superiori alla console;
+2. invii tutti i log (anche `DEBUG`) a un file `server_debug.log`;
+3. utilizzi un formato che includa `asctime`, `levelname`, `filename` e `message`.
+
+Punti extra:
+
+4. Crea una classe `Server` che:
+    1. definisca un attributo `logger` inizializzato nel costruttore;
+    2. contenga metodi come `avvia()`, `elabora_richiesta()` e `arresta()` che scrivono log con diversi livelli (`INFO`, `DEBUG`, `ERROR`).
+5. All'interno dei metodi della classe, utilizza `try-except` per gestire errori simulati (es. `ValueError`, `ConnectionError`) e registra:
+    1. un messaggio `ERROR` con la descrizione dell'eccezione;
+    2. un messaggio `CRITICAL` se l'errore è grave e il server deve essere arrestato.
+
+<Aside variant="info">
+Puoi creare un'eccezione personalizzata, ad esempio `ServerCrashError(Exception)`, e sollevarla (`raise`) quando vuoi simulare un errore critico.
+Nel blocco `except`, logga l'evento con `logger.critical("Arresto del server: errore critico!")`.
+</Aside>
+
+## 8. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è la funzione principale del modulo logging in Python?",
+answers: {
+a: "Sostituire la funzione print() con una più veloce",
+b: "Gestire i messaggi e gli eventi del programma in modo strutturato",
+c: "Creare finestre di output grafiche",
+d: "Cancellare automaticamente i file di log"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Qual è il livello di logging predefinito in Python?",
+answers: {
+a: "DEBUG",
+b: "INFO",
+c: "WARNING",
+d: "ERROR"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Cosa fa il parametro 'filename' in logging.basicConfig()?",
+answers: {
+a: "Definisce il nome del logger",
+b: "Imposta il nome del file su cui scrivere i log",
+c: "Specifica il livello minimo dei messaggi da registrare",
+d: "Stampa i log su schermo"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Quale livello di log si usa per messaggi di debug?",
+answers: {
+a: "INFO",
+b: "DEBUG",
+c: "ERROR",
+d: "CRITICAL"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Cosa succede se non imposti 'level=logging.DEBUG' nella configurazione?",
+answers: {
+a: "Non vengono registrati messaggi di nessun tipo",
+b: "Vengono registrati solo WARNING, ERROR e CRITICAL",
+c: "Vengono registrati tutti i messaggi",
+d: "Python solleva un'eccezione"
+},
+correctAnswer: "b"
+},
+{
+question: "6) A cosa serve un 'logger personalizzato'?",
+answers: {
+a: "A cambiare la sintassi del logging",
+b: "A gestire log diversi per parti diverse dell'applicazione",
+c: "A eliminare automaticamente i log vecchi",
+d: "A velocizzare l'esecuzione del programma"
+},
+correctAnswer: "b"
+},
+{
+question: "7) Cosa rappresenta '%(asctime)s' nel formato dei log?",
+answers: {
+a: "Il nome del file",
+b: "L'ora e la data del messaggio di log",
+c: "Il livello di gravità",
+d: "Il testo del messaggio"
+},
+correctAnswer: "b"
+},
+{
+question: "8) Come si definisce un formato personalizzato per i log?",
+answers: {
+a: "logging.setFormat()",
+b: "logging.basicConfig(format='...')",
+c: "logger.setLevel('format')",
+d: "log.format = '...'"
+},
+correctAnswer: "b"
+},
+{
+question: "9) Quale dei seguenti livelli è più grave?",
+answers: {
+a: "INFO",
+b: "DEBUG",
+c: "WARNING",
+d: "CRITICAL"
+},
+correctAnswer: "d"
+},
+{
+question: "10) Qual è una buona pratica nell'uso del logging?",
+answers: {
+a: "Usare sempre print() per semplicità",
+b: "Registrare solo messaggi DEBUG",
+c: "Usare formattazione chiara e livelli appropriati",
+d: "Cancellare i log a ogni esecuzione"
+},
+correctAnswer: "c"
+}
+]} />

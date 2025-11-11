@@ -1,12 +1,341 @@
 ---
 title: "File"
 order: 18
-draft: true
+draft: false
 lastUpdateDate: "2025-11-10"
 subject: "Python"
 category: "Informatica"
-difficulty: "facile"
+difficulty: "medio"
 tags: ["python", "programmazione", "file", "lettura", "scrittura"]
 author: "Dennis Turco"
 videoLesson: false
 ---
+
+## 1. Introduzione
+
+In Python è possibile effettuare operazioni sui **file**, come aprirli, crearli, scriverli, leggerli e chiuderli.
+
+Perché è utile lavorare con i file?
+
+1. Per salvare informazioni in modo **persistente**, anche dopo la terminazione del programma.
+2. Per **automatizzare processi**, come la lettura di configurazioni o il salvataggio dell'output di un programma.
+3. Per **accedere a file esterni** come `.txt`, `.csv`, `.json`, `.yaml`, ecc.
+
+## 2. Aprire un file
+
+Per aprire un file si utilizza la funzione integrata `open()`.
+
+Sintassi:
+
+```python
+file = open("percorso_file.txt", "modalità")
+```
+
+dove:
+
+- `percorso_file.txt`: il percorso del file da aprire;
+- `modalità`: specifica cosa si vuole fare (leggere, scrivere, ecc.).
+
+| **Modalità** | **Descrizione**                                                                               |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| **r**        | **read** - Permette di leggere il contenuto di un file. Solleva errore se il file non esiste. |
+| **w**        | **write** - Per scrivere su un file. Se il file esiste già, **viene sovrascritto**.           |
+| **a**        | **append** - Scrive in fondo al file senza sovrascriverlo.                                    |
+
+
+### 2.1 Esempio apertura file
+
+```python
+file = open("test.txt", "r")
+print(file)
+```
+
+<Aside variant="warning">
+Se si cerca di aprire un file che non esiste, Python solleva un'eccezione: `FileNotFoundError`.
+</Aside>
+
+## 3. Chiudere un file
+
+Quando si lavora con file, è importante chiuderli dopo l'utilizzo per liberare risorse.
+Per chiudere un file in python si usa la funzione `file.close()`.
+
+Esempio:
+
+```python
+file = open("test.txt", "r")
+file.close()
+```
+
+## 4. Leggere un file
+
+Per leggere il contenuto di un file, si usa `file.read()`.
+
+Esempio:
+
+```python
+file = open("test.txt", "r")
+content = file.read()
+print(content)
+file.close()
+```
+
+## 4.1 Altri metodi di lettura
+
+- `file.readline()` $\rightarrow$ legge una singola riga alla volta.
+- `file.readlines()` $\rightarrow$ restituisce una lista di tutte le righe del file.
+
+Esempio:
+
+```python
+file = open("test.txt", "r")
+for riga in file.readlines():
+    print(riga.strip())
+file.close()
+```
+
+## 5. Scrivere un file
+
+Per scrivere in un file in python, occorre utilizzare la funzione `file.write()`.
+
+Esempio:
+
+```python
+file = open("nuovo_file.txt", "w")
+file.write("Ciao mondo!\n")
+file.write("Questo è un secondo messaggio.")
+file.close()
+```
+
+<Aside variant="warning">
+Aprendo un file con `"w"`, se il file esiste già, **il contenuto verrà cancellato**.
+</Aside>
+
+### 5.1 Aggiungere (append) al file
+
+Per scrivere senza sovrascrivere:
+
+```python
+file = open("nuovo_file.txt", "a")
+file.write("\nAggiunta di una nuova riga.")
+file.close()
+```
+
+## 6. Proprietà di un file
+
+Python mette a disposizione anche alcune funzioni che permettono di leggere alcune **proprietà** di un file dopo la
+sua apertura:
+
+```python
+file = open("test.txt", "r")
+print(f"NomeFile: {file.name}")
+print(f"Modalità: {file.mode}")
+print(f"Chiuso?: {file.closed}")
+file.close()
+```
+
+dove:
+
+- `file.name`: restuituisce il nome del file.
+- `file.mode`: restituisce la modalità di apertura (`r`, `w`, `a`).
+- `file.closed`: restituisce `True` se il file è chiuso, `False` se è aperto.
+
+
+## 7. With Statement
+
+L'istruzione `with` permette di gestire automaticamente l'apertura e la chiusura dei file, anche in caso di errore.
+
+Esempio:
+
+```python
+with open("test.txt", "r") as file:
+    contenuto = file.read()
+    print(contenuto)
+# Il file viene chiuso automaticamente qui
+```
+
+<Aside variant="info">
+Usare `with` è una **buona pratica** perché evita dimenticanze nella chiusura dei file.
+</Aside>
+
+## 8. Gestione eccezioni durante la chiusura di un file
+
+Quando si lavora con file esterni, possono verificarsi errori (file mancanti, permessi negati, ecc.).
+È buona norma gestirli con `try-except`.
+
+Esempio:
+
+```python
+try:
+    with open("inesistente.txt", "r") as file:
+        contenuto = file.read()
+        print(contenuto)
+except FileNotFoundError:
+    print("Errore: il file non esiste!")
+except PermissionError:
+    print("Errore: permessi insufficienti per leggere il file.")
+else:
+    print("File letto correttamente.")
+finally:
+    print("Operazione terminata.")
+```
+
+## 9. Esercizi
+
+
+### 9.1 Esercizio - Lettura File
+
+Scrivi un programma che:
+
+1. chieda all'utente il nome di un file;
+2. apra e mostri il suo contenuto;
+3. gestisca con `try-except` l'eventuale errore `FileNotFoundError`.
+
+Punti extra:
+- Crea una **classe `LettoreFile`** con un metodo `leggi_file(nome_file)` che:
+  - apra il file in modalità lettura;
+  - gestisca eccezioni come `FileNotFoundError` e `PermissionError`;
+  - stampi messaggi di log informativi (es. “File trovato”, “File non trovato”).
+
+### 9.2 Esercizio - Scrittura su File
+
+Crea un programma che:
+
+1. chieda all'utente una frase;
+2. salvi la frase in un file chiamato `frasi.txt`;
+3. utilizzi il blocco `with` per la gestione del file.
+
+Punti extra:
+
+4. Crea una **classe `GestoreFile`** che contenga:
+   - un metodo `scrivi_testo(file, testo)` per scrivere il testo nel file specificato;
+   - un metodo `leggi_testo(file)` per leggerne il contenuto e mostrarlo a video.
+
+5. All'interno dei metodi, utilizza il blocco `try-except` per gestire eventuali errori:
+   - `FileNotFoundError` se il file non esiste;
+   - `PermissionError` se non si hanno i permessi di scrittura o lettura;
+   - eventuali altri errori generici con un messaggio chiaro per l'utente.
+
+6. Al termine dell'esecuzione, mostra un messaggio di conferma se la scrittura è andata a buon fine oppure un messaggio di errore personalizzato in caso contrario.
+
+### 9.3 Esercizio - Copia di File
+
+Scrivi un programma che:
+
+1. legga un file di testo chiamato `origine.txt`;
+2. copi il contenuto in un nuovo file chiamato `copia.txt`;
+3. utilizzi il costrutto `with` per entrambe le operazioni;
+4. gestisca eventuali errori con `try-except`.
+
+Punti extra:
+
+5. Crea una **classe `FileManager`** che includa:
+   - un metodo `copia_file(orig, dest)` che legga il contenuto del file sorgente e lo copi nel file di destinazione;  
+   - la registrazione dell'esito dell'operazione
+
+
+10. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è la funzione usata per aprire un file in Python?",
+answers: {
+a: "file.open()",
+b: "open()",
+c: "readfile()",
+d: "getfile()"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Cosa fa la modalità 'w' nella funzione open()?",
+answers: {
+a: "Legge un file",
+b: "Apre un file solo se esiste",
+c: "Scrive un file, sovrascrivendolo se esiste già",
+d: "Aggiunge testo in fondo a un file"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Qual è il vantaggio principale dell'uso di 'with' per aprire un file?",
+answers: {
+a: "Rende il codice più veloce",
+b: "Chiude automaticamente il file anche in caso di errore",
+c: "Permette di leggere solo la prima riga",
+d: "Evita l'uso di eccezioni"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Quale metodo legge tutto il contenuto di un file?",
+answers: {
+a: "file.readline()",
+b: "file.readlines()",
+c: "file.read()",
+d: "file.open()"
+},
+correctAnswer: "c"
+},
+{
+question: "5) Cosa succede se si apre un file inesistente in modalità 'r'?",
+answers: {
+a: "Viene creato un nuovo file vuoto",
+b: "Python ignora l'errore",
+c: "Viene sollevato un FileNotFoundError",
+d: "Il file viene aperto in modalità scrittura"
+},
+correctAnswer: "c"
+},
+{
+question: "6) Come si scrive una riga di testo in un file?",
+answers: {
+a: "file.add('testo')",
+b: "file.write('testo')",
+c: "file.put('testo')",
+d: "file.save('testo')"
+},
+correctAnswer: "b"
+},
+{
+question: "7) Quale di queste è una buona pratica nella gestione dei file?",
+answers: {
+a: "Lasciare i file aperti",
+b: "Usare sempre il costrutto with",
+c: "Ignorare le eccezioni",
+d: "Aprire file multipli senza chiuderli"
+},
+correctAnswer: "b"
+},
+{
+question: "8) Quale proprietà di un file indica se è chiuso?",
+answers: {
+a: "file.status",
+b: "file.closed",
+c: "file.isopen",
+d: "file.mode"
+},
+correctAnswer: "b"
+},
+{
+question: "9) Qual è il metodo per leggere una singola riga da un file?",
+answers: {
+a: "file.readline()",
+b: "file.read()",
+c: "file.line()",
+d: "file.getline()"
+},
+correctAnswer: "a"
+},
+{
+question: "10) Cosa fa la modalità 'a' in open()?",
+answers: {
+a: "Apre il file in lettura",
+b: "Apre il file per scrittura cancellando tutto",
+c: "Aggiunge nuove righe in fondo al file",
+d: "Crea un file temporaneo"
+},
+correctAnswer: "c"
+}
+]} />
