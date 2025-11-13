@@ -1,0 +1,344 @@
+---
+title: "File JSON"
+order: 20
+draft: false
+lastUpdateDate: "2025-11-13"
+subject: "Python"
+category: "Informatica"
+difficulty: "medio"
+tags: ["python", "json", "file", "dati", "serializzazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Il formato **JSON (JavaScript Object Notation)** è uno dei più usati per **rappresentare e scambiare dati** tra applicazioni, soprattutto sul web (API REST, configurazioni, file di dati, ecc.).
+
+JSON è un formato **testuale leggero**, **leggibile da umani**, e **facile da interpretare dalle macchine**.
+È basato su coppie **chiave-valore**, molto simili a un dizionario Python, e supporta:
+
+```json
+{
+  "nome": "Luca",
+  "età": 25,
+  "linguaggi": ["Python", "C++", "JavaScript"],
+  "isAdmin": false
+}
+```
+
+## 2. Il modulo json in Python
+
+Python fornisce il modulo integrato `json`, che permette di convertire facilmente tra **oggetti Python** e **JSON**.
+
+| Operazione               | Funzione       | Descrizione                                           |
+| ------------------------ | -------------- | ----------------------------------------------------- |
+| Leggere un file JSON     | `json.load()`  | Converte un file JSON in un oggetto Python            |
+| Scrivere un file JSON    | `json.dump()`  | Converte un oggetto Python in JSON e lo salva su file |
+| Leggere una stringa JSON | `json.loads()` | Converte una stringa JSON in un oggetto Python        |
+| Creare una stringa JSON  | `json.dumps()` | Converte un oggetto Python in una stringa JSON        |
+
+
+Per importarlo: `import json`
+
+## 3. Leggere un file JSON
+
+Per leggere un file JSON e trasformarlo in un oggetto Python (di solito un dizionario o una lista):
+
+```python
+import json
+
+with open("dati.json", "r") as file:
+    dati = json.load(file)
+
+print(dati)
+print(dati["nome"])
+```
+
+<Aside variant="info">
+`json.load()` converte automaticamente il contenuto del file JSON in un oggetto Python.
+</Aside>
+
+## 4. Scrivere un file JSON
+
+Per scrivere (o creare) un file JSON a partire da un oggetto Python:
+
+```python
+import json
+
+persona = {
+    "nome": "Giulia",
+    "età": 30,
+    "linguaggi": ["Python", "Go"],
+    "isAdmin": True
+}
+
+with open("persona.json", "w") as file:
+    json.dump(persona, file)
+```
+
+<Aside variant="warning">
+`json.dump()` sovrascrive il file se esiste già.
+</Aside>
+
+## 5. Formattazione leggibile (indentazione)
+
+Per creare un file JSON più leggibile, è possibile aggiungere parametri a `json.dump()`:
+
+```python
+json.dump(persona, file, indent=4, ensure_ascii=False, sort_keys=True)
+```
+
+- `indent=4` → aggiunge spazi per l'indentazione (leggibilità);
+- `ensure_ascii=False` → conserva i caratteri speciali (es. lettere accentate)
+- `sort_keys=True` → ordina le chiavi in ordine alfabetico
+
+Esempio di output formattato:
+
+```json
+{
+    "età": 30,
+    "isAdmin": true,
+    "linguaggi": [
+        "Python",
+        "Go"
+    ],
+    "nome": "Giulia"
+}
+```
+
+## 6. Convertire stringhe JSON
+
+Puoi anche convertire stringhe JSON in oggetti Python e viceversa:
+
+```python
+import json
+
+# Da stringa JSON → dizionario Python
+json_string = '{"nome": "Anna", "età": 22}'
+dati = json.loads(json_string)
+print(dati["nome"])
+
+# Da dizionario Python → stringa JSON
+nuova_stringa = json.dumps(dati, indent=2)
+print(nuova_stringa)
+```
+
+## 7. Differenze tra oggetti Python e JSON
+
+| Tipo Python      | Equivalente JSON |
+| ---------------- | ---------------- |
+| `dict`           | `object`         |
+| `list`, `tuple`  | `array`          |
+| `str`            | `string`         |
+| `int`, `float`   | `number`         |
+| `True` / `False` | `true` / `false` |
+| `None`           | `null`           |
+
+<Aside variant="tip">
+Attenzione: Python e JSON non sono identici! Le **tuple** diventano **liste**, e gli **oggetti complessi** (es. date, set, classi) devono essere convertiti manualmente.
+</Aside>
+
+## 8. Gestione eccezioni
+
+Durante la lettura/scrittura di file JSON possono verificarsi errori:
+
+- File mancante (`FileNotFoundError`)
+- Permessi negati (`PermissionError`)
+- Formato JSON non valido (`json.JSONDecodeError`)
+
+Esempio:
+
+```python
+import json
+
+try:
+    with open("config.json", "r", encoding="utf-8") as file:
+        dati = json.load(file)
+except FileNotFoundError:
+    print("Errore: il file non esiste!")
+except json.JSONDecodeError:
+    print("Errore: il file non contiene un JSON valido!")
+except PermissionError:
+    print("Errore: permessi insufficienti per leggere il file.")
+else:
+    print("File JSON letto correttamente.")
+finally:
+    print("Operazione terminata.")
+```
+
+## 9. Aggiornare un file JSON
+
+Spesso serve leggere, modificare, poi riscrivere il file:
+
+```python
+import json
+
+with open("utenti.json", "r", encoding="utf-8") as file:
+    utenti = json.load(file)
+
+utenti["nuovo_utente"] = {"nome": "Sara", "età": 29}
+
+with open("utenti.json", "w", encoding="utf-8") as file:
+    json.dump(utenti, file, indent=4, ensure_ascii=False)
+```
+
+## 10. Serializzazione avanzata
+
+Non tutti gli oggetti Python possono essere convertiti automaticamente in JSON.
+
+Esempio:
+
+```python
+import json
+from datetime import datetime
+
+dati = {"data": datetime.now()}
+json.dumps(dati)
+# Errore: TypeError: Object of type datetime is not JSON serializable
+```
+
+Soluzione: fornire una funzione personalizzata per la conversione.
+
+```python
+def converti(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()  # formato leggibile
+    raise TypeError(f"Tipo non supportato: {type(obj)}")
+
+json.dumps(dati, default=converti, indent=2)
+```
+
+## 11. Lettura di JSON complessi o annidati
+
+JSON può contenere **strutture annidate** (liste di dizionari o dizionari di liste):
+
+```python
+{
+  "utenti": [
+    {"nome": "Luca", "età": 25},
+    {"nome": "Anna", "età": 30}
+  ]
+}
+```
+
+In Python:
+
+```python
+import json
+
+with open("utenti.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+for utente in data["utenti"]:
+    print(utente["nome"], utente["età"])
+```
+
+## 12. Esercizi
+
+### 12.1 Esercizio - Lettura di un file JSON
+
+Scrivi un programma che:
+
+1. chieda all'utente il nome di un file `.json`;
+2. lo apra e mostri il contenuto;
+3. gestisca eventuali errori come `FileNotFoundError` o `JSONDecodeError`.
+
+Punti extra:
+
+- Crea una classe `LettoreJSON` con un metodo `leggi_json(file)` che restituisca i dati e stampi messaggi di log appropriati.
+
+### 12.2 Esercizio - Scrittura di un file JSON
+
+Crea un programma che:
+
+1. chieda all'utente alcune informazioni (es. nome, età, città);
+2. le salvi in un file `utente.json` in formato leggibile;
+3. gestisca errori di scrittura.
+
+Punti extra:
+
+- Crea una classe `GestoreJSON` con metodi:
+
+    - `scrivi_json(file, dati)`
+    - `leggi_json(file)`
+
+- Usa blocchi `try-except` per errori comuni (`FileNotFoundError`, `PermissionError`, `JSONDecodeError`).
+
+### 12.3 Esercizio - Aggiornare un file JSON
+
+Scrivi un programma che:
+
+1. apra un file `dati.json`;
+2. aggiunga un nuovo elemento (es. un nuovo utente o un nuovo campo);
+3. riscriva il file con indentazione.
+
+Punti extra:
+
+- Aggiungi un metodo `aggiorna_json(file, chiave, valore)` alla classe `GestoreJSON`.
+
+### 12.4 Esercizio - Analisi di un JSON complesso
+
+Crea un programma che:
+
+1. legga un file `studenti.json` contenente una lista di studenti e voti;
+2. calcoli la media di ciascuno studente;
+3. salvi i risultati in un nuovo file `medie.json`.
+
+
+13. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Quale modulo serve per lavorare con i file JSON in Python?",
+answers: { a: "json", b: "os", c: "csv", d: "pickle" },
+correctAnswer: "a"
+},
+{
+question: "2) Quale funzione legge un file JSON da disco?",
+answers: { a: "json.loads()", b: "json.load()", c: "json.read()", d: "open.json()" },
+correctAnswer: "b"
+},
+{
+question: "3) Quale funzione converte un oggetto Python in una stringa JSON?",
+answers: { a: "json.loads()", b: "json.dump()", c: "json.dumps()", d: "json.reads()" },
+correctAnswer: "c"
+},
+{
+question: "4) Cosa fa l'opzione 'indent' in json.dump()?",
+answers: { a: "Rimuove spazi", b: "Aggiunge spazi per rendere il file leggibile", c: "Ordina le chiavi", d: "Cripta il file" },
+correctAnswer: "b"
+},
+{
+question: "5) Cosa succede se il file JSON non è valido?",
+answers: { a: "Viene ignorato", b: "Viene creato un file vuoto", c: "Viene sollevato JSONDecodeError", d: "Python lo converte automaticamente" },
+correctAnswer: "c"
+},
+{
+question: "6) Come si scrive un oggetto Python in un file JSON?",
+answers: { a: "json.loads()", b: "json.dump()", c: "json.dumps()", d: "json.save()" },
+correctAnswer: "b"
+},
+{
+question: "7) Quale metodo converte una stringa JSON in un dizionario Python?",
+answers: { a: "json.dump()", b: "json.load()", c: "json.loads()", d: "json.read()" },
+correctAnswer: "c"
+},
+{
+question: "8) Quale parametro serve per scrivere caratteri accentati correttamente?",
+answers: { a: "ascii=False", b: "unicode=True", c: "ensure_ascii=False", d: "encoding='utf8'" },
+correctAnswer: "c"
+},
+{
+question: "9) Qual è una buona pratica per lavorare con file JSON?",
+answers: { a: "Usare il blocco with", b: "Aprirli sempre in modalità binaria", c: "Ignorare eccezioni", d: "Scrivere manualmente il formato" },
+correctAnswer: "a"
+},
+{
+question: "10) Quale eccezione viene sollevata se il contenuto del file non è un JSON valido?",
+answers: { a: "FileNotFoundError", b: "ValueError", c: "JSONDecodeError", d: "TypeError" },
+correctAnswer: "c"
+}
+]} />
