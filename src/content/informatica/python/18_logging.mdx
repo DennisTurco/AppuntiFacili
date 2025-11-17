@@ -2,7 +2,7 @@
 title: "Logging"
 order: 18
 draft: false
-lastUpdateDate: "2025-11-11"
+lastUpdateDate: "2025-11-17"
 subject: "Python"
 category: "Informatica"
 difficulty: "facile"
@@ -150,9 +150,111 @@ Questa tecnica è molto utile per progetti complessi, dove diversi moduli del pr
 </Aside>
 
 
-## 7. Esercizi
+## 7. Logging unico in OOP
 
-### 7.1 Esercizio - Logging Base
+In un progetto medio-grande, specialmente con approccio Object-Oriented, il logging è fondamentale per:
+
+- Tracciare l'esecuzione del codice
+- Registrare errori e warning
+- Analizzare lo stato dell'applicazione
+- Fare debug senza usare `print()`
+- Produrre log sia su console che su file
+
+Il problema è che **senza un servizio centralizzato**, ogni file rischia di creare logger non uniformi o duplicare handlers, generando log doppi e configurazioni incoerenti.
+
+Un **LogService** risolve tutto questo: una singola configurazione una sola volta, e poi in ogni modulo chiedi semplicemente:
+
+```python
+logger = LogService.get_logger(__name__)
+```
+
+Così hai:
+
+- formattazione uniforme
+- log su file e console
+- nessuna duplicazione di handler
+- configurazione eseguita una sola volta
+
+File: **LogService.py**:
+
+```python
+import logging
+from pathlib import Path
+from typing import Optional
+
+# Configurazioni globali
+log_level = "INFO"
+log_filename = "app.log"
+full_path = Path(__file__).parent / log_filename
+
+
+class LogService:
+    _is_configured = False
+
+    @classmethod
+    def get_logger(cls, name: Optional[str] = None):
+        if not cls._is_configured:
+            cls._configure()
+        return logging.getLogger(name)
+
+    @classmethod
+    def _configure(cls):
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.getLevelName(log_level.upper()))
+
+        formatter = logging.Formatter(
+            "%(asctime)s - [%(levelname)s] (%(filename)s:%(lineno)d) - %(message)s"
+        )
+
+        # Console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+
+        # File handler
+        file_handler = logging.FileHandler(full_path, encoding="utf-8")
+        file_handler.setFormatter(formatter)
+
+        # Evitiamo di aggiungere handler doppi
+        if not root_logger.handlers:
+            root_logger.addHandler(console_handler)
+            root_logger.addHandler(file_handler)
+
+        cls._is_configured = True
+```
+
+Esempio d'uso, file **mail.py**:
+
+```python
+from LogService import LogService
+
+class MailService:
+
+    def __init__(self):
+        self.logger = LogService.get_logger(__name__)
+
+    def send_email(self, to: str, subject: str, body: str):
+        self.logger.info(f"Invio email a: {to}")
+        try:
+            # simulazione invio email
+            if not to:
+                raise ValueError("Indirizzo email mancante")
+
+            # Log aggiuntivi
+            self.logger.debug(f"Oggetto: {subject}")
+            self.logger.debug(f"Corpo: {body}")
+
+            # Simulazione invio riuscito
+            self.logger.info("Email inviata con successo.")
+
+        except Exception as e:
+            self.logger.error(f"Errore nell'invio della mail: {e}")
+            raise
+```
+
+
+## 8. Esercizi
+
+### 8.1 Esercizio - Logging Base
 
 Scrivi un programma che:
 
@@ -160,7 +262,7 @@ Scrivi un programma che:
 2. generi messaggi per ogni livello (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`);
 3. osserva quali livelli vengono mostrati modificando il parametro `level`.
 
-### 7.2 Esercizio - Log su File
+### 8.2 Esercizio - Log su File
 
 Crea uno script che:
 
@@ -181,7 +283,7 @@ Punti extra:
 Usa `random.choice()` per simulare eventi casuali positivi o di errore e osservali nel file `operazioni.log`.
 </Aside>
 
-### 7.3 Esercizio - Logger Personalizzato
+### 8.3 Esercizio - Logger Personalizzato
 
 Crea un logger personalizzato chiamato `server_logger` che:
 
@@ -203,7 +305,7 @@ Puoi creare un'eccezione personalizzata, ad esempio `ServerCrashError(Exception)
 Nel blocco `except`, logga l'evento con `logger.critical("Arresto del server: errore critico!")`.
 </Aside>
 
-## 8. Quiz a risposta multipla
+## 9. Quiz a risposta multipla
 
 import Quiz from '../../../components/Quiz.jsx';
 
