@@ -1,0 +1,281 @@
+---
+title: "Guida Configurazione Database (SQLite)"
+order: 21
+draft: false
+lastUpdateDate: "2025-11-17"
+subject: "Python"
+category: "Informatica"
+difficulty: "medio"
+tags: ["python", "database", "sqlite", "sql", "programmazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Quando si lavora con un database, anche piccolo come SQLite, è importante organizzare in modo chiaro:
+
+- dove si trovano gli script SQL,
+- come si inizializza il database,
+- come si tengono traccia delle modifiche alla struttura (migrazioni),
+- come evitare operazioni duplicate o pericolose.
+
+Questa guida introduce un metodo semplice e professionale per configurare un database SQLite in un progetto Python.
+
+## 1.1 Perché SQLite non richiede installazione
+
+A differenza di MySQL, Postgres o Oracle, SQLite è:
+
+- incorporato in Python,
+- basato su file (nessun server da avviare),
+- altamente portabile.
+
+Il modulo `sqlite3` è già presente in tutte le installazioni moderne di Python.
+
+Verificare:
+
+```python
+python -c "import sqlite3; print(sqlite3.sqlite_version)"
+```
+
+Se non da errori, è tutto pronto.
+
+## 2. Concetti fondamentali
+
+### 2.1 Che cosa sono i migrations?
+
+I migrations (migrazioni) sono file che descrivono come deve essere strutturato il database, ad esempio:
+
+- creare tabelle,
+- aggiungere colonne,
+- rinominare campi,
+- creare indici,
+- rimuovere parti obsolete.
+
+Sono “istruzioni” che descrivono l'evoluzione del database nel tempo.
+
+### 2.2 Perché usare migrazioni (anche con SQLite)?
+
+SQLite è molto semplice, ma i problemi nascono comunque:
+
+- cosa succede se un collega avvia il progetto ma non ha le tabelle?
+- cosa succede se aggiorno la struttura del DB?
+- cosa se voglio replicare il progetto su un altro computer?
+- come faccio a ricordarmi cosa ho cambiato nel database?
+
+Le migrazioni risolvono esattamente questi problemi.
+
+### 2.3 Cos'è un approccio run once?
+
+“Run once” significa: esegui lo script solo la prima volta.
+
+Serve per evitare:
+
+- ricreare il database ogni volta,
+- sovrascrivere tabelle esistenti,
+- perdere dati,
+- eseguire due volte la stessa modifica.
+
+È un concetto essenziale quando:
+
+- il DB contiene dati che non devono essere cancellati,
+- ci sono più script di migrazione,
+- si lavora in team,
+- il progetto cresce nel tempo.
+
+SQLite non offre questa funzionalità, quindi la implementiamo noi (semplice e pulito).
+
+
+## 3. Come organizzare i file del progetto
+
+Per una configurazione pulita, si consiglia una struttura come:
+
+```text
+progetto/
+│-- config/
+│   └── settings.py        # configurazione database
+│-- migrations/
+│   └── init.sql           # script SQL di creazione tabelle
+│-- database/
+│   ├── connection.py
+│   ├── user_repository.py
+│-- models/
+│   └── user.py
+│-- main.py
+│-- miodb.db               # generato automaticamente
+```
+
+Separare questi file serve per evitare “spaghetti code” e per mantenere il database indipendente dalla logica Python.
+
+## 3.1 File di configurazione
+
+**config/settings.py**:
+
+```python
+DATABASE_PATH = "miodb.db"
+```
+
+Evita percorsi hard-coded e permette di cambiare posizione o nome del database rapidamente.
+
+## 4. Creare uno script SQL di inizializzazione (migrazione base)
+
+Sebbene SQLite non abbia un sistema di migrazioni integrato come Django o Alembic, è possibile creare un semplice file SQL con tutte le tabelle.
+
+**migrations/init.sql**:
+
+```sql
+CREATE TABLE IF NOT EXISTS utenti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS prodotti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    prezzo REAL NOT NULL
+);
+```
+
+Questo file rappresenta la **prima versione** della struttura del database.
+Grazie a `IF NOT EXISTS` può essere eseguito più volte senza danni.
+
+## 5. Script Python per eseguire le migrazioni una volta (“run once”)
+
+**database/setup.py**:
+
+```python
+import sqlite3
+from config.settings import DATABASE_PATH
+
+def run_migrations():
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+
+        # Legge lo script SQL
+        with open("migrations/init.sql", "r", encoding="utf-8") as f:
+            sql_script = f.read()
+
+        cursor.executescript(sql_script)
+
+        print("Migrazioni iniziali eseguite!")
+```
+
+La funzione `executescript()` permette di eseguire più comandi SQL in un colpo solo.
+
+
+## 6. Eseguire le migrazioni all'avvio
+
+**main.py**:
+
+```python
+from database.setup import run_migrations
+
+# Eseguo le migrazioni
+run_migrations()
+
+print("Applicazione avviata!")
+```
+
+Questo garantisce che il database sia sempre pronto all'uso.
+
+
+## 7. Come gestire migrazioni più complesse (approccio semplice)
+
+Se un giorno si vuole aggiungere script di migrazione multipli:
+
+```text
+migrations/
+│── 001_init.sql
+│── 002_add_column.sql
+│── 003_create_products.sql
+```
+
+Possibile creare un file che tiene traccia delle migrazioni applicate:
+
+### 6.1 Tabella di tracking
+
+Aggiungere all'inizio di `init.sql`:
+
+```sql
+CREATE TABLE IF NOT EXISTS _migrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
+```
+
+Questa tabella registra quali script sono già stati applicati.
+
+### 6.2 Loader delle migrazioni
+
+```python
+import os
+import sqlite3
+from config.settings import DATABASE_PATH
+
+MIGRATIONS_FOLDER = "migrations"
+
+def run_all_migrations():
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+
+        # Creo tabella per tracking
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS _migrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )
+        """)
+
+        # Leggo le migrazioni già applicate
+        cursor.execute("SELECT name FROM _migrations")
+        applied = {row[0] for row in cursor.fetchall()}
+
+        # Scorro i file
+        for fname in sorted(os.listdir(MIGRATIONS_FOLDER)):
+            if not fname.endswith(".sql"):
+                continue
+
+            if fname in applied:
+                continue  # già eseguita
+
+            print(f"Eseguo migrazione: {fname}")
+
+            with open(os.path.join(MIGRATIONS_FOLDER, fname), "r", encoding="utf-8") as f:
+                sql = f.read()
+                cursor.executescript(sql)
+
+            cursor.execute("INSERT INTO _migrations (name) VALUES (?)", (fname,))
+
+        print("Tutte le migrazioni applicate!")
+```
+
+Questo simula un sistema di migrazioni simile a framework più avanzati (Django, Flask-Migrate, etc.).
+
+## 8. Creazione del database solo se non esiste
+
+Questo approccio permette di non ricreare file `.db` accidentalmente:
+
+```python
+import os
+from database.setup import run_migrations
+
+if not os.path.exists("miodb.db"):
+    print("Database non trovato. Lo creo…")
+    run_migrations()
+else:
+    print("Database già presente. Nessuna migrazione necessaria.")
+```
+
+Questo è un approccio comune in applicazioni piccole e medie.
+
+
+## 9. Tabella riassuntiva dei Concetti
+
+| Concetto             | Significato                                  | Utilità                           |
+| -------------------- | -------------------------------------------- | --------------------------------- |
+| Migrazione           | File `.sql` che modifica la struttura del DB | Mantiene coerenza e versioning    |
+| Run once             | Eseguire gli script solo la prima volta      | Evita duplicazioni/danni          |
+| Tracking migrazioni  | Registra quali script sono stati applicati   | Necessario per progetti evolutivi |
+| Script SQL separati  | Struttura definita fuori dal codice          | Più chiaro e manutenibile         |
+| Struttura a cartelle | Divisione logica del progetto                | Pulizia e scalabilità             |

@@ -1,0 +1,440 @@
+---
+title: "Connessione a Database Locali con Python (SQLite)"
+order: 22
+draft: false
+lastUpdateDate: "2025-11-17"
+subject: "Python"
+category: "Informatica"
+difficulty: "medio"
+tags: ["python", "database", "sqlite", "sql", "programmazione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+In molte applicazioni reali è necessario **salvare dati** in modo persistente: utenti, prodotti, log, configurazioni, ecc.
+Python offre diversi modi per gestire database, ma il più semplice per iniziare è **SQLite**.
+
+SQLite è un database:
+
+- 🔌 **integrato** (non serve installare nulla)
+- 📂 **basato su file**
+- 💨 **veloce e leggero**
+- ⚙️ incluso *di default* in Python tramite il modulo `sqlite3`
+
+È ideale per prototipi, progetti didattici, piccole applicazioni e programmi desktop.
+
+<Aside variant="info">
+**Obiettivo della lezione:** imparare a creare, collegare e interrogare un database SQLite tramite Python.
+</Aside>
+
+## 2. Cos'è SQLite?
+
+SQLite è un **DBMS relazionale** che memorizza tutto in un singolo file `.db` o `.sqlite`.
+
+### Caratteristiche principali
+
+| Caratteristica           | Dettagli |
+|-------------------------|----------|
+| Tipo                    | Database relazionale |
+| Installazione           | Nessuna, integrato in Python |
+| Memorizzazione          | File locale `.db` |
+| Lingua                  | SQL standard |
+| Utilizzo                | Applicazioni locali, mobile, IoT |
+
+<Aside variant="info">
+SQLite è usatissimo: Android, iOS, Chrome, Firefox e tantissime app lo usano internamente.
+</Aside>
+
+## 3. Creare e collegarsi a un database
+
+Il modulo base è:
+
+```python
+import sqlite3
+```
+
+## 3.1 Creare/collegarsi ad un file .db
+
+```python
+import sqlite3
+
+conn = sqlite3.connect("miodb.db")  # crea il file se non esiste
+cursor = conn.cursor()
+
+print("Connessione avvenuta con successo!")
+```
+
+## 3.2 Chiudere la connessione
+
+```python
+conn.close()
+```
+
+<Aside variant="tip">
+Tienere sempre a mente di **chiudere la connessione** per liberare risorse.
+</Aside>
+
+## 4. Creare una tabella
+
+Esempio: tabella *utenti*.
+
+```python
+import sqlite3
+
+conn = sqlite3.connect("miodb.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS utenti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+)
+""")
+
+conn.commit()
+conn.close()
+```
+
+dove:
+
+* `CREATE TABLE IF NOT EXISTS`: crea la tabella solo se non esiste.
+* `id` autoincrementale.
+* `email` contrassegnata come unica.
+
+## 5. Inserire dati
+
+```python
+import sqlite3
+
+conn = sqlite3.connect("miodb.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+INSERT INTO utenti (nome, email)
+VALUES (?, ?)
+""", ("Mario Rossi", "mario@example.com"))
+
+conn.commit()
+conn.close()
+```
+
+**Perché `?` ?**: Serve a prevenire [SQL injection](https://it.wikipedia.org/wiki/SQL_injection) e rendere sicure le query parametrizzate.
+
+## 6. Leggere i dati
+
+### 6.1 Recuperare tutti gli utenti
+
+```python
+conn = sqlite3.connect("miodb.db")
+cursor = conn.cursor()
+
+cursor.execute("SELECT * FROM utenti")
+utenti = cursor.fetchall()
+
+for utente in utenti:
+    print(utente)
+
+conn.close()
+```
+
+### 6.2 Recuperare un singolo utente
+
+```python
+cursor.execute("SELECT * FROM utenti WHERE email = ?", ("mario@example.com",))
+utente = cursor.fetchone()
+print(utente)
+```
+
+## 7. Aggiornare dati
+
+```python
+cursor.execute("""
+UPDATE utenti SET nome = ?
+WHERE email = ?
+""", ("Mario R.", "mario@example.com"))
+
+conn.commit()
+```
+
+## 8. Eliminare dati
+
+```python
+cursor.execute("DELETE FROM utenti WHERE email = ?", ("mario@example.com",))
+conn.commit()
+```
+
+
+## 9. Usare with per scrivere codice più pulito
+
+Python permette di gestire automaticamente apertura/chiusura connessioni:
+
+```python
+import sqlite3
+
+with sqlite3.connect("miodb.db") as conn:
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM utenti")
+    print(cursor.fetchall())
+```
+
+<Aside variant="tip">
+Usare `with` è una **best practice**: più pulito, più sicuro, meno errori.
+</Aside>
+
+
+## 10. Gestione degli errori
+
+```python
+import sqlite3
+
+try:
+    conn = sqlite3.connect("miodb.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM utenti")
+    dati = cursor.fetchall()
+    print(dati)
+
+except sqlite3.Error as e:
+    print("Errore nel database:", e)
+
+finally:
+    if conn:
+        conn.close()
+```
+
+## 11. Struttura OOP Consigliata
+
+Una buona struttura per lavorare con un database in Python è:
+
+```text
+progetto/
+│-- database/
+│   │-- __init__.py
+│   │-- connection.py
+│   │-- user_repository.py
+│-- models/
+│   │-- user.py
+│-- main.py
+│-- miodb.db
+```
+
+### 11.1 Classe DatabaseConnection
+
+File: database/connection.py
+
+```python
+import sqlite3
+
+class DatabaseConnection:
+    def __init__(self, db_path="miodb.db"):
+        self.db_path = db_path
+
+    def __enter__(self):
+        self.conn = sqlite3.connect(self.db_path)
+        self.cursor = self.conn.cursor()
+        return self.cursor
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            self.conn.commit()
+        else:
+            print(f"Errore DB: {exc_value}")
+        self.conn.close()
+```
+
+per:
+
+- Gestire apertura/chiusura automatica
+- Gestire commit/rollback
+- Mantenere pulito il codice applicativo
+
+### 11.2 Modello User
+
+File: models/user.py
+
+```python
+class User:
+    def __init__(self, id: int | None, nome: str, email: str):
+        self.id = id
+        self.nome = nome
+        self.email = email
+```
+
+### 11.3 Repository per gli utenti (CRUD)
+
+File: database/user_repository.py
+
+```python
+from models.user import User
+from database.connection import DatabaseConnection
+
+class UserRepository:
+
+    @staticmethod
+    def create_table():
+        with DatabaseConnection() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS utenti (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    email TEXT UNIQUE NOT NULL
+                )
+            """)
+
+    @staticmethod
+    def add_user(user: User):
+        with DatabaseConnection() as cursor:
+            cursor.execute("""
+                INSERT INTO utenti (nome, email)
+                VALUES (?, ?)
+            """, (user.nome, user.email))
+
+    @staticmethod
+    def get_all_users():
+        with DatabaseConnection() as cursor:
+            cursor.execute("SELECT id, nome, email FROM utenti")
+            rows = cursor.fetchall()
+            return [User(id=r[0], nome=r[1], email=r[2]) for r in rows]
+
+    @staticmethod
+    def get_user_by_email(email: str):
+        with DatabaseConnection() as cursor:
+            cursor.execute("SELECT id, nome, email FROM utenti WHERE email = ?", (email,))
+            row = cursor.fetchone()
+            return User(id=row[0], nome=row[1], email=row[2]) if row else None
+
+    @staticmethod
+    def update_user_email(old_email, new_email):
+        with DatabaseConnection() as cursor:
+            cursor.execute("""
+                UPDATE utenti SET email = ?
+                WHERE email = ?
+            """, (new_email, old_email))
+
+    @staticmethod
+    def delete_user(email: str):
+        with DatabaseConnection() as cursor:
+            cursor.execute("DELETE FROM utenti WHERE email = ?", (email,))
+```
+
+### 11.4 main.py - Applicazione
+
+File: main.py
+
+```python
+from models.user import User
+from database.user_repository import UserRepository
+
+# Creazione tabella
+UserRepository.create_table()
+
+# Inserimento utenti
+UserRepository.add_user(User(id=None, nome="Mario", email="mario@example.com"))
+UserRepository.add_user(User(id=None, nome="Luigi", email="luigi@example.com"))
+
+# Lettura
+utenti = UserRepository.get_all_users()
+for u in utenti:
+    print(u)
+
+# Ricerca
+utente = UserRepository.get_user_by_email("mario@example.com")
+print("Trovato:", utente)
+
+# Aggiornamento
+UserRepository.update_user_email("mario@example.com", "mario_new@example.com")
+
+# Eliminazione
+UserRepository.delete_user("luigi@example.com")
+```
+
+## 12. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è il vantaggio principale di SQLite?",
+answers: {
+a: "È un database distribuito",
+b: "Non richiede installazione e usa file locali",
+c: "Funziona solo online",
+d: "Supporta solo linguaggi non SQL"
+},
+correctAnswer: "b"
+},
+{
+question: "2) In Python, quale modulo si usa per SQLite?",
+answers: {
+a: "mysql",
+b: "sqlite3",
+c: "psycopg2",
+d: "sqlalchemy"
+},
+correctAnswer: "b"
+},
+{
+question: "3) Quale comando crea una tabella?",
+answers: {
+a: "MAKE TABLE",
+b: "CREATE TABLE",
+c: "NEW TABLE",
+d: "INIT TABLE"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Perché si usano i placeholder '?' nelle query?",
+answers: {
+a: "Per rendere le query più corte",
+b: "Per evitare SQL injection",
+c: "Per indicare commenti",
+d: "Per sostituire il commit"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Qual è il metodo per eseguire una query?",
+answers: {
+a: "cursor.run()",
+b: "cursor.execute()",
+c: "cursor.query()",
+d: "conn.call()"
+},
+correctAnswer: "b"
+},
+{
+question: "6) Quale metodo recupera tutti i risultati?",
+answers: {
+a: "fetchone()",
+b: "fetchall()",
+c: "getall()",
+d: "read()"
+},
+correctAnswer: "b"
+},
+{
+question: "7) Cosa fa 'conn.commit()'?",
+answers: {
+a: "Chiude la connessione",
+b: "Salva le modifiche",
+c: "Cancella il database",
+d: "Esegue backup"
+},
+correctAnswer: "b"
+},
+{
+question: "8) Quale pratica è consigliata?",
+answers: {
+a: "Scrivere query senza parametri",
+b: "Non chiudere mai la connessione",
+c: "Usare il blocco 'with'",
+d: "Usare file .db dentro /tmp"
+},
+correctAnswer: "c"
+}
+]} />
