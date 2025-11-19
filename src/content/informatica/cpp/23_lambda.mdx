@@ -1,0 +1,266 @@
+---
+title: "Lambda in C++"
+order: 23
+draft: false
+lastUpdateDate: "2025-11-19"
+subject: "C++"
+category: "Informatica"
+difficulty: "facile"
+tags: ["c++", "programmazione", "lambda"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Le **lambda** in C++ sono funzioni anonime che possono essere definite direttamente all'interno del codice, senza dover dichiarare un nome.
+Sono particolarmente utili per:
+
+Passare funzioni come argomenti a funzioni standard (`std::sort`, `std::for_each`, ecc.);
+
+Definire piccoli comportamenti inline senza creare funzioni separate;
+
+Catturare variabili locali in modo flessibile.
+
+Le lambda sono state introdotte in **C++11** e sono diventate uno strumento fondamentale per scrivere codice moderno e conciso.
+
+<Aside variant="info">
+Esempio pratico: se vuoi ordinare un vettore di numeri in ordine decrescente senza scrivere una funzione separata, puoi usare una lambda direttamente dentro `std::sort`.
+</Aside>
+
+## 2. Sintassi base
+
+La sintassi di una lambda è:
+
+```text
+[capture](parameters) -> return_type { body }
+```
+
+Dove:
+
+- **capture**: indica quali variabili esterne alla lambda vogliamo usare;
+- **parameters**: lista dei parametri come in una normale funzione;
+- **return_type**: opzionale, specifica il tipo di ritorno;
+- **body**: corpo della funzione.
+
+Esempio semplice:
+
+```cpp
+#include <iostream>
+
+int main() {
+    auto somma = [](int a, int b) { return a + b; };
+    std::cout << somma(3, 5) << std::endl; // Output: 8
+}
+```
+
+## 3. Capture delle variabili
+
+Le lambda possono **catturare** variabili locali per poterle usare all'interno del loro corpo.
+
+| Modalità | Descrizione                                        | Esempio                            |
+| -------- | -------------------------------------------------- | ---------------------------------- |
+| `[=]`    | Cattura tutte le variabili esterne per valore      | `[=](int x){ return x + a; }`      |
+| `[&]`    | Cattura tutte le variabili esterne per riferimento | `[&](int x){ a++; return x + a; }` |
+| `[a]`    | Cattura solo la variabile `a` per valore           | `[a](int x){ return x + a; }`      |
+| `[&a]`   | Cattura solo la variabile `a` per riferimento      | `[&a](int x){ a++; return x; }`    |
+
+
+Esempio pratico:
+
+```cpp
+#include <iostream>
+
+int main() {
+    int a = 10;
+    int b = 5;
+
+    auto lambda1 = [=]() { return a + b; }; // cattura per valore
+    auto lambda2 = [&]() { a += b; return a; }; // cattura per riferimento
+
+    std::cout << lambda1() << std::endl; // 15
+    std::cout << lambda2() << std::endl; // 15, a diventa 15
+}
+```
+
+<Aside variant="info">
+La differenza tra cattura per valore e riferimento è importante: per valore copia le variabili, per riferimento le modifica direttamente.
+</Aside>
+
+## 4. Lambda con parametri e tipo di ritorno
+
+Se la lambda è complessa, possiamo specificare il tipo di ritorno usando `-> type`:
+
+```cpp
+#include <iostream>
+
+int main() {
+    auto max = [](int a, int b) -> int {
+        return (a > b) ? a : b;
+    };
+
+    std::cout << max(10, 20) << std::endl; // 20
+}
+```
+
+Se il tipo di ritorno è deducibile, possiamo omettere `-> type`.
+
+## 5. Lambda in STL
+
+Le lambda sono molto utili con le funzioni della Standard Template Library (STL), come `std::for_each`, `std::sort` e `std::find_if`.
+
+Esempio con `std::for_each`:
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+int main() {
+    std::vector<int> numeri = {1, 2, 3, 4, 5};
+
+    std::for_each(numeri.begin(), numeri.end(), [](int n){
+        std::cout << n * 2 << " ";
+    });
+    // Output: 2 4 6 8 10
+}
+```
+
+Esempio con `std::sort`:
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+int main() {
+    std::vector<int> numeri = {5, 2, 8, 1};
+
+    std::sort(numeri.begin(), numeri.end(), [](int a, int b) {
+        return a > b; // ordine decrescente
+    });
+
+    for (auto n : numeri) std::cout << n << " "; // 8 5 2 1
+}
+```
+
+## 6. Lambda con stati (mutable)
+
+Per default, le lambda che catturano per valore non possono modificare le variabili catturate.
+Usando `mutable`, possiamo modificarle internamente:
+
+```cpp
+#include <iostream>
+
+int main() {
+    int a = 5;
+    auto lambda = [a]() mutable {
+        a += 10;
+        return a;
+    };
+
+    std::cout << lambda() << std::endl; // 15
+    std::cout << a << std::endl;        // 5, fuori non cambia
+}
+```
+
+## 7. Esercizi
+
+### 7.1 Esercizio - Lambda base
+
+Scrivi un programma che:
+1. Definisca una lambda che sommi due numeri interi;
+2. Stampa il risultato;
+3. Modifica la lambda per sottrarre due numeri invece di sommarli.
+
+### 7.2 Esercizio - Capture variabili
+
+Crea un programma che:
+
+1. Definisca due variabili `x` e `y`;
+2. Definisca una lambda che sommi `x` e `y` usando la cattura per valore;
+3. Definisca una seconda lambda che incrementi `x` di `y` usando la cattura per riferimento;
+4. Mostra come cambiano i valori fuori dalla lambda.
+
+### 7.3 Esercizio - Lambda e STL
+
+1. Crea un `std::vector<int>` con valori casuali;
+2. Usa `std::for_each` con una lambda per stampare ogni valore moltiplicato per 3;
+3. Usa `std::sort` con una lambda per ordinare il vettore in ordine decrescente.
+
+### 7.4 Esercizio - Lambda mutable
+
+1. Definisci una variabile counter = 0;
+2. Crea una lambda che incrementi counter di 1 ogni volta che viene chiamata, usando mutable;
+3. Chiama la lambda 5 volte e stampa il valore interno ogni volta.
+
+<Aside variant="info">
+Questo esercizio aiuta a capire come le lambda possono mantenere uno stato interno senza modificare le variabili esterne.
+</Aside>
+
+## 8. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Cosa è una lambda in C++?",
+answers: {
+a: "Una classe speciale",
+b: "Una funzione anonima definita inline",
+c: "Un tipo di puntatore",
+d: "Una variabile globale"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Quale sintassi indica la cattura per riferimento?",
+answers: {
+a: "[=]",
+b: "[&]",
+c: "[a]",
+d: "->"
+},
+correctAnswer: "b"
+},
+{
+question: "3) Come si specifica il tipo di ritorno di una lambda?",
+answers: {
+a: "Con -> tipo",
+b: "Con : tipo",
+c: "Con `type()`",
+d: "Non è possibile"
+},
+correctAnswer: "a"
+},
+{
+question: "4) Qual è il comportamento di una lambda con cattura per valore?",
+answers: {
+a: "Può modificare le variabili esterne direttamente",
+b: "Copia le variabili esterne, modificandole solo internamente",
+c: "Non può usare variabili esterne",
+d: "Modifica le variabili esterne per default"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Come si usa una lambda con std::sort per ordinare un vettore in ordine decrescente?",
+answers: {
+a: "std::sort(v.begin(), v.end(), [](int a,int b){ return a < b; });",
+b: "std::sort(v.begin(), v.end(), [](int a,int b){ return a > b; });",
+c: "std::sort(v.begin(), v.end());",
+d: "v.sort([](int a,int b){ return a > b; });"
+},
+correctAnswer: "b"
+},
+{
+question: "6) Cosa fa l'opzione mutable in una lambda?",
+answers: {
+a: "Permette di catturare variabili per riferimento",
+b: "Permette di modificare le variabili catturate per valore internamente",
+c: "Fa diventare la lambda costante",
+d: "Converte la lambda in funzione globale"
+},
+correctAnswer: "b"
+}
+]} />

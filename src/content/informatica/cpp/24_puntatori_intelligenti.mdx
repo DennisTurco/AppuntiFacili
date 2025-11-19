@@ -1,0 +1,193 @@
+---
+title: "Puntatori Intelligenti in C++"
+order: 24
+draft: false
+lastUpdateDate: "2025-11-19"
+subject: "C++"
+category: "Informatica"
+difficulty: "facile"
+tags: ["c++", "programmazione", "puntatori", "smart pointer"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+I **puntatori intelligenti** (`smart pointer`) in C++ sono oggetti che gestiscono automaticamente la memoria, liberando le risorse quando non servono più.
+A differenza dei puntatori classici (`int* ptr`), non è necessario chiamare manualmente `delete`, riducendo il rischio di **memory leak**.
+
+In C++ moderno esistono tre tipi principali di puntatori intelligenti:
+
+- `unique_ptr`: possiede esclusivamente l'oggetto puntato;
+- `shared_ptr`: permette di condividere la proprietà dell'oggetto tra più puntatori;
+- `weak_ptr`: puntatore debole, non incrementa il conteggio di riferimenti di uno shared_ptr.
+
+## 2. unique_ptr (proprietà unica)
+
+Un `unique_ptr` può avere solo un proprietario alla volta. Non può essere copiato, ma può essere trasferito con `std::move`.
+
+Esempio:
+
+```cpp
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    unique_ptr<int> ptr = make_unique<int>(42);
+    cout << "Valore: " << *ptr << endl;
+
+    // unique_ptr<int> ptr_copy = ptr; // ERRORE: non copiabile
+
+    unique_ptr<int> new_ptr = move(ptr); // trasferimento della proprietà
+    // cout << *ptr << endl; // ERRORE: ptr non possiede più l'oggetto
+    cout << "Valore trasferito: " << *new_ptr << endl;
+
+    return 0;
+}
+```
+
+<Aside variant="info">
+`make_unique` è il modo consigliato per creare un `unique_ptr` perché garantisce sicurezza e ottimizzazione della memoria.
+</Aside>
+
+## 3. shared_ptr (proprietà condivisa)
+
+Un `shared_ptr` permette a più puntatori di condividere lo stesso oggetto. La memoria viene liberata solo quando l'ultimo `shared_ptr` che punta all'oggetto viene distrutto.
+
+Esempio:
+
+```cpp
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    shared_ptr<int> ptr1 = make_shared<int>(10);
+    shared_ptr<int> ptr2 = ptr1; // condividono la proprietà
+
+    cout << "p1: " << *ptr1 << ", p2: " << *ptr2 << endl;
+
+    // Quando ptr1 o ptr2 escono dallo scope, l'oggetto viene eliminato automaticamente
+    return 0;
+}
+```
+
+<Aside variant="info">
+`make_shared` è consigliato rispetto a `shared_ptr<int>(new int(10))` perché riduce il numero di allocazioni e migliora le performance.
+</Aside>
+
+## 4. weak_ptr (proprietà debole)
+
+Un `weak_ptr` non possiede l'oggetto ma può accedervi se esiste ancora uno `shared_ptr`:
+
+```cpp
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    shared_ptr<int> sp = make_shared<int>(50);
+    weak_ptr<int> wp = sp; // puntatore debole
+
+    if (auto temp = wp.lock()) { // converte weak_ptr in shared_ptr temporaneo
+        cout << "Valore: " << *temp << endl;
+    }
+
+    sp.reset(); // elimina lo shared_ptr
+    if (wp.expired()) {
+        cout << "L'oggetto non esiste più!" << endl;
+    }
+
+    return 0;
+}
+```
+
+`weak_ptr` è utile per evitare cicli di riferimento che impediscono la liberazione della memoria.
+
+## 5. Vantaggi dei puntatori intelligenti
+
+- Liberano automaticamente la memoria (`delete` non necessario);
+- Riduzione del rischio di memory leak;
+- Gestione semplice delle risorse dinamiche in STL e classi complesse;
+- Supportano lo stile RAII (Resource Acquisition Is Initialization).
+
+## 6. Esercizi
+
+### 6.1 Esercizio - unique_ptr
+
+1. Crea un `unique_ptr<int>` con valore 100;
+2. Stampa il valore;
+3. Trasferisci la proprietà a un nuovo unique_ptr usando std::move;
+4. Prova ad accedere al vecchio puntatore e osserva il comportamento.
+
+### 6.2 Esercizio - shared_ptr
+
+1. Crea un `shared_ptr<int>` con valore 200;
+2. Crea un secondo `shared_ptr` che condivide la proprietà;
+3. Modifica il valore tramite il secondo puntatore;
+4. Stampa il valore tramite il primo puntatore.
+
+### 6.3 Esercizio - weak_ptr
+
+1. Crea un `shared_ptr<int>` con valore 300;
+2. Crea un weak_ptr che punta allo stesso oggetto;
+3. Usa `lock()` per stampare il valore se l'oggetto esiste;
+4. Distruggi lo shared_ptr e verifica che `weak_ptr` segnala che l'oggetto non esiste più.
+
+## 7. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Cosa distingue un unique_ptr da un puntatore classico?",
+answers: {
+a: "Può essere copiato liberamente",
+b: "Gestisce automaticamente la distruzione dell'oggetto",
+c: "Non punta mai a nulla",
+d: "Può essere solo globale"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Quale operazione è necessaria per trasferire un unique_ptr?",
+answers: {
+a: "Copia semplice",
+b: "std::move",
+c: "Assegnazione diretta",
+d: "Non è possibile trasferirlo"
+},
+correctAnswer: "b"
+},
+{
+question: "3) Quando viene liberata la memoria di uno shared_ptr?",
+answers: {
+a: "Quando viene distrutto il primo shared_ptr",
+b: "Quando l'ultimo shared_ptr che punta all'oggetto viene distrutto",
+c: "Mai automaticamente",
+d: "Sempre subito dopo la creazione"
+},
+correctAnswer: "b"
+},
+{
+question: "4) A cosa serve un weak_ptr?",
+answers: {
+a: "Per condividere proprietà con altri shared_ptr",
+b: "Per accedere a un oggetto senza aumentare il conteggio dei riferimenti",
+c: "Per creare puntatori globali",
+d: "Non ha alcuna utilità pratica"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Quale funzione viene consigliata per creare uno smart pointer?",
+answers: {
+a: "new",
+b: "make_unique o make_shared",
+c: "malloc",
+d: "alloca"
+},
+correctAnswer: "b"
+}
+]} />
