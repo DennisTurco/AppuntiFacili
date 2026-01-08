@@ -4,7 +4,6 @@
 - `npm run build`: to build the project (generate also the sitemaps)
 - `pnpm install --no-frozen-lockfile`: to update pnpm-lock file
 
-
 - To check for the sitemap:
   1. Build the project
   2. `npm run preview`

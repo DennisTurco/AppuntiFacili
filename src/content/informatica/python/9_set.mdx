@@ -1,0 +1,274 @@
+---
+title: "Set"
+order: 9
+draft: false
+lastUpdateDate: "2026-01-07"
+subject: "Python"
+category: "Informatica"
+difficulty: "medio"
+tags: ["python", "programmazione", "collezioni", "set"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+I **set** in Python sono **collezioni non ordinate di elementi unici**.
+Vengono utilizzati quando è importante **evitare duplicati** e **verificare rapidamente la presenza di un valore**.
+
+```python
+animali = {"gatto", "cane", "pesce"}
+```
+
+<Aside variant="info">
+I set sono particolarmente utili in problemi di **analisi dati**, **filtraggio**, **confronto tra insiemi** e **logica matematica**.
+</Aside>
+
+## 2. Caratteristiche fondamentali dei set
+
+I set hanno alcune proprietà chiave che li distinguono dalle altre collezioni.
+
+| Caratteristica             | Descrizione                                 |
+| -------------------------- | ------------------------------------------- |
+| **Non ordinati**           | Gli elementi non hanno una posizione fissa  |
+| **Mutabili**               | È possibile aggiungere o rimuovere elementi |
+| **Senza duplicati**        | I valori ripetuti vengono ignorati          |
+| **Indicizzazione assente** | Non si può accedere con indici (`set[0]`)   |
+
+
+### 2.1 Esempio di duplicati ignorati
+
+```python
+numeri = {1, 2, 2, 3, 3, 3}
+print(numeri)   # Output possibile: {1, 2, 3}
+```
+
+<Aside variant="warning">
+Poiché i set non sono ordinati, **l'output può cambiare ordine a ogni esecuzione**.
+</Aside>
+
+## 3. Creazione di un set
+
+### 3.1 Set letterale
+
+```python
+colori = {"rosso", "verde", "blu"}
+```
+
+### 3.2 Creazione con set()
+
+```python
+numeri = set([1, 2, 3, 4])
+```
+
+<Aside variant="warning">
+Attenzione al set vuoto!
+
+```python
+sbagliato = {}      # dizionario!
+corretto = set()   # set vuoto
+```
+</Aside>
+
+## 4. Accesso agli elementi
+
+I set **non supportano l'accesso diretto tramite indice**.
+È necessario usare un ciclo `for`.
+
+```python
+animali = {"gatto", "cane", "pesce"}
+
+for a in animali:
+    print(a)
+```
+
+### 4.1 Verifica di appartenenza `in`
+
+```python
+print("cane" in animali)    # True
+print("leone" in animali)   # False
+```
+
+<Aside variant="tip">
+Il controllo di appartenenza in un set è **molto più veloce** rispetto a liste e tuple.
+</Aside>
+
+## 5. Aggiungere elementi
+
+### 5.1 Metodo `add()`
+
+```python
+animali.add("scimmia")
+```
+
+### 5.2 Metodo `update()`
+
+```python
+animali_tropicali = {"tucano", "canguro"}
+animali.update(animali_tropicali)
+```
+
+È possibile usare `update()` anche con liste o tuple:
+
+```python
+animali.update(["leone", "tigre"])
+```
+
+## 6. Rimuovere elementi
+
+| Metodo       | Descrizione                    |
+| ------------ | ------------------------------ |
+| `remove(x)`  | Rimuove `x`, errore se assente |
+| `discard(x)` | Rimuove `x`, nessun errore     |
+| `pop()`      | Rimuove un elemento casuale    |
+| `clear()`    | Svuota il set                  |
+| `del set`    | Elimina il set                 |
+
+Esempi
+
+```python
+animali.remove("cane")
+animali.discard("leone")
+elemento = animali.pop()
+animali.clear()
+```
+
+<Aside variant="warning">
+Usa `discard()` se non sei sicuro che l'elemento esista.
+</Aside>
+
+## 7. Operazioni tra set (insiemi)
+
+I set supportano operazioni matematiche molto potenti.
+
+### 7.1 Unione (`|` o `union()`)
+
+```python
+A = {1, 2, 3}
+B = {3, 4, 5}
+
+print(A | B)          # {1, 2, 3, 4, 5}
+```
+
+### 7.2 Intersezione (`&`)
+
+```python
+print(A & B)          # {3}
+```
+
+### 7.3 Differenza (`-`)
+
+```python
+print(A - B)          # {1, 2}
+```
+
+### 7.4 Differenza simmetrica (`^`)
+
+```python
+print(A ^ B)          # {1, 2, 4, 5}
+```
+
+<Aside variant="info">
+Queste operazioni rendono i set ideali per **confrontare dati**, come utenti comuni o elementi mancanti.
+</Aside>
+
+## 8. Set comprehension
+
+Simile alle list comprehension, ma restituisce un set.
+
+```python
+quadrati = {x**2 for x in range(1, 6)}
+print(quadrati)
+```
+
+Con condizione:
+
+```python
+pari = {x for x in range(10) if x % 2 == 0}
+```
+
+## 9. Confronto con altre collezioni
+
+| Collezione | Ordinata | Duplicati  | Modificabile |
+| ---------- | -------- | ---------- | ------------ |
+| Lista      | ✔️       | ✔️         | ✔️           |
+| Tupla      | ✔️       | ✔️         | ❌            |
+| Set        | ❌        | ❌          | ✔️           |
+| Dizionario | ✔️*      | ❌ (chiavi) | ✔️           |
+
+## 10. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è una caratteristica fondamentale dei set?",
+answers: {
+a: "Sono ordinati",
+b: "Ammmettono duplicati",
+c: "Non hanno elementi ripetuti",
+d: "Sono immutabili"
+},
+correctAnswer: "c"
+},
+{
+question: "2) Come si crea un set vuoto?",
+answers: {
+a: "{}",
+b: "[]",
+c: "set()",
+d: "()"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Quale metodo NON genera errore se l'elemento non esiste?",
+answers: {
+a: "remove()",
+b: "pop()",
+c: "discard()",
+d: "clear()"
+},
+correctAnswer: "c"
+},
+{
+question: "4) Cosa restituisce A & B?",
+answers: {
+a: "Unione",
+b: "Differenza",
+c: "Intersezione",
+d: "Differenza simmetrica"
+},
+correctAnswer: "c"
+},
+{
+question: "5) A cosa servono principalmente i set?",
+answers: {
+a: "Memorizzare dati ordinati",
+b: "Gestire chiavi-valore",
+c: "Evitare duplicati e confrontare insiemi",
+d: "Creare cicli"
+},
+correctAnswer: "c"
+}
+]} />
+
+
+## 11. Esercizi
+
+### 11.1 Esercizio - Eliminare duplicati
+
+Data una lista di numeri, trasformala in un set per eliminare i duplicati.
+
+### 11.2 Esercizio - Intersezione
+
+Crea due set di numeri e stampa solo quelli in comune.
+
+### 11.3 Esercizio - Differenza
+
+Dati due set di studenti iscritti a due corsi, stampa chi è iscritto solo al primo.
+
+### 11.4 Esercizio - Set comprehension
+
+Crea un set con tutti i numeri dispari da 1 a 50.
+
