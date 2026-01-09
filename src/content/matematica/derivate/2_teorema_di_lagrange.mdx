@@ -1,0 +1,139 @@
+---
+title: "Teorema di Lagrange"
+order: 1
+draft: false
+lastUpdateDate: "2026-01-09"
+subject: "derivate"
+category: "matematica"
+difficulty: "medio"
+tags: ["matematica", "derivate", "teorema", "lagrange"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Enunciato del Teorema di Lagrange
+
+Sia
+$
+f : [a, b] \rightarrow \mathbb{R}
+$
+
+Se sono verificate le seguenti **ipotesi**:
+
+1. $ f $ è **continua** nell'intervallo chiuso $[a, b]$
+2. $ f $ è **derivabile** nell'intervallo aperto $(a, b)$
+
+allora **esiste almeno un punto**
+$x_0 \in (a, b)$
+tale che:
+$f'(x_0) = \frac{f(b) - f(a)}{b - a}$
+
+---
+
+### Interpretazione geometrica
+
+Il teorema afferma che **esiste almeno un punto** in cui la **retta tangente** al grafico della funzione è **parallela alla retta secante** che unisce i punti  
+$(a, f(a))$ e $(b, f(b))$.
+
+---
+
+## 2. Schema per applicare il teorema
+
+Quando devi applicare il Teorema di Lagrange, segui sempre questi passaggi:
+
+1. **Individua l'intervallo $[a, b]$**
+2. **Controlla il dominio della funzione**
+3. **Verifica la continuità in $[a, b]$**
+4. **Verifica la derivabilità in $(a, b)$**
+5. **Calcola il rapporto incrementale**
+   $
+   \frac{f(b) - f(a)}{b - a}
+   $
+6. **Uguaglia il risultato alla derivata**
+7. **Risolvi l'equazione per trovare $x_0$**
+
+---
+
+## 3. Esempi
+
+### 3.1 Esempio 1
+
+Verificare se si può applicare il Teorema di Lagrange alla funzione
+$y = \sqrt[]{|x|} - 3$
+nell'intervallo $[0, 4]$ ed eventualmente trovare le ascisse dei punti garantiti dal teorema.
+
+
+#### **1. Dominio e continuità**
+
+La funzione:
+- $|x|$ è definito per ogni $x \in \mathbb{R}$
+- $\sqrt[]{|x|}$ è definita e continua per ogni $x \in \mathbb{R}$
+
+👉 La funzione è **continua in $[0, 4]$**
+
+
+#### **2. Derivabilità**
+
+Per $x > 0$ vale:
+$
+f(x) = \sqrt[]{x} - 3
+\quad \Rightarrow \quad
+f'(x) = \frac{1}{2\sqrt[]{x}}
+$
+
+La funzione **non è derivabile in $x = 0$**, ma il Teorema di Lagrange richiede la derivabilità **solo in $(a, b)$**.
+
+👉 La funzione è **derivabile in $(0, 4)$**
+
+Il teorema è applicabile
+
+
+#### **3. Calcolo del rapporto incrementale**
+
+$f(4) = \sqrt[]{4} - 3 = 2 - 3 = -1$
+$f(0) = \sqrt[]{0} - 3 = -3$
+
+$\frac{f(4) - f(0)}{4 - 0} = \frac{-1 - (-3)}{4} = \frac{2}{4} = \frac{1}{2}$
+
+
+#### **4. Uguagliamo alla derivata**
+
+$\frac{1}{2\sqrt[]{x}} = \frac{1}{2}$
+
+Moltiplichiamo per 2:
+$\frac{1}{\sqrt[]{x}} = 1$
+
+$\sqrt[]{x} = 1 \Rightarrow x = 1$
+
+
+**Conclusione**
+Il punto garantito dal Teorema di Lagrange ha ascissa:
+$
+\boxed{x_0 = 1}
+$
+
+
+### 3.2 Esempio 2
+
+Verificare se si può applicare il Teorema di Lagrange alla funzione
+$
+y = x^2 + 2\sqrt[]{x}
+$
+nell'intervallo $[-1, \sqrt[]{3}]$.
+
+
+#### **1. Dominio**
+
+La funzione contiene $\sqrt[]{x}$, quindi è definita solo per:
+$
+x \ge 0
+$
+
+L'intervallo assegnato $[-1, \sqrt[]{3}]$ **contiene valori negativi**.
+
+❌ La funzione **non è definita** in tutto l'intervallo
+❌ Non è continua in $[a, b]$
+
+**Conclusione**
+
+Il Teorema di Lagrange **non è applicabile** perché **non è verificata l'ipotesi di continuità** sull'intero intervallo.
