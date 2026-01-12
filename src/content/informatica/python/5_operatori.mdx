@@ -2,7 +2,7 @@
 title: "Operatori Aritmetici Logici"
 order: 5
 draft: false
-lastUpdateDate: "2025-10-23"
+lastUpdateDate: "2026-01-12"
 subject: "Python"
 category: "Informatica"
 difficulty: "facile"
@@ -58,28 +58,7 @@ L'operatore % restituisce il resto della divisione, utile per controllare la par
 1. Calcola l'area e il perimetro di un rettangolo di base 10 e altezza 4.
 2. Dato un numero, stampa se è pari o dispari usando l'operatore `%`.
 
-## 2. Operatori Logici
-
-Gli **operatori logici** servono per combinare condizioni booleane (`True` o `False`).
-Sono molto utilizzati nelle strutture di controllo (`if`, `while`, ecc.) per verificare più condizioni contemporaneamente.
-
-| Operatore | Descrizione                                        | Esempio          | Output  |
-| --------- | -------------------------------------------------- | ---------------- | ------- |
-| `and`     | Ritorna `True` se entrambe le condizioni sono vere | `True and False` | `False` |
-| `or`      | Ritorna `True` se almeno una condizione è vera     | `True or False`  | `True`  |
-| `not`     | Inverte il valore logico                           | `not True`       | `False` |
-
-<Aside variant="info">
-Gli operatori logici si usano spesso insieme a quelli di confronto per costruire condizioni più complesse.
-</Aside>
-
-### 2.1 Esercizi
-
-1. Scrivi un programma che controlli se una variabile `numero` è compresa tra 1 e 100.
-2. Dati due numeri, verifica se entrambi sono positivi oppure almeno uno lo è.
-
-
-## 3. Operatori di Confronto
+## 2. Operatori di Confronto
 
 Gli **operatori di confronto** servono per confrontare due valori e restituiscono un valore booleano (`True` o `False`).
 Sono fondamentali per prendere decisioni nei programmi.
@@ -123,43 +102,106 @@ print(5 < x < 15)  # True se x è compreso tra 5 e 15
 ```
 </Aside>
 
-### 3.1 Esercizi
+### 2.1 Esercizi
 
-1. Scrivi un programma che chieda l'età all'utente e stampi `True` se è maggiorenne, `False` altrimenti.
-2. Verifica se una variabile `a` è uguale a `b` oppure se entrambe sono maggiori di 0.
+1. Confronta due numeri e stampa il risultato dei confronti (`\>`, `\<`, `==`).
+2. Dato un numero `eta`, stampa il risultato dell'espressione `eta >= 18`.
 
-## 4. Operatori Ternari
+## 3. Operatori Logici
 
-L'**operatore ternario** (o condizionale) permette di scrivere un `if` in una sola riga.
-È utile per assegnare un valore a una variabile in base a una condizione.
+Gli **operatori logici** servono per combinare condizioni booleane (`True` o `False`).
+Sono molto utilizzati nelle strutture di controllo (`if`, `while`, ecc.) per verificare più condizioni contemporaneamente.
 
-Sintassi:
+| Operatore | Descrizione                                        | Esempio          | Output  |
+| --------- | -------------------------------------------------- | ---------------- | ------- |
+| `and`     | Ritorna `True` se entrambe le condizioni sono vere | `True and False` | `False` |
+| `or`      | Ritorna `True` se almeno una condizione è vera     | `True or False`  | `True`  |
+| `not`     | Inverte il valore logico                           | `not True`       | `False` |
 
-$$
-\text{valore\_se\_vero \ if \ condizione \ else \ valore\_se\_falso}
-$$
-
-Esempio:
-
-```py
-x = 10
-messaggio = "Positivo" if x > 0 else "Negativo"
-print(messaggio)  # Output: Positivo
-```
-
-Altro esempio:
-
-```py
-eta = 18
-status = "Maggiorenne" if eta >= 18 else "Minorenne"
-print(status)  # Output: Maggiorenne
-```
 
 <Aside variant="info">
-L'operatore ternario è una forma compatta dell'istruzione `if-else`, utile quando si vuole scrivere codice più leggibile e sintetico, ma va usato con moderazione per non compromettere la chiarezza.
+Gli operatori logici si usano spesso insieme a quelli di confronto per costruire condizioni più complesse.
 </Aside>
 
-### 4.1 Esercizi
 
-1. Dato un numero `n`, stampa `"Pari"` se è pari altrimenti `"Dispari"` usando un operatore ternario.
-2. Chiedi all'utente un voto (0-30) e assegna `"Promosso"` se è ≥ 18, `"Bocciato"` altrimenti.
+### 3.1 Esempi
+
+```python
+print(True and True) # True
+print(True and False) # False
+print(True or False) # True
+print(not False) # True
+```
+
+Esempio con confronti:
+
+```python
+x = 10
+print(x > 5 and x < 20) # True
+print(x < 0 or x > 5) # True
+```
+
+### 3.1 Esercizi
+
+1. Verifica il risultato delle seguenti espressioni:
+  - `True and False`
+  - `True or False`
+  - `not (5 > 3)`
+2. Dato un numero `x`, stampa il risultato dell'espressione `x >= 1 and x \<= 100`.
+
+## 4. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Qual è il risultato dell'espressione 7 // 3 in Python?",
+answers: {
+a: "2.333",
+b: "2",
+c: "1",
+d: "3"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Quale operatore restituisce il resto di una divisione?",
+answers: {
+a: "/",
+b: "//",
+c: "%",
+d: "**"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Qual è il risultato di 5 > 3 and 2 < 1?",
+answers: {
+a: "True",
+b: "False",
+c: "5",
+d: "Errore"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Cosa restituisce l'espressione not (10 == 10)?",
+answers: {
+a: "True",
+b: "False",
+c: "10",
+d: "Errore"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Quale delle seguenti espressioni restituisce True se x = 8?",
+answers: {
+a: "x < 5 and x > 10",
+b: "x >= 1 and x <= 100",
+c: "x == 0",
+d: "x < 0 or x > 20"
+},
+correctAnswer: "b"
+}
+]} />

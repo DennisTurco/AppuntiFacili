@@ -2,7 +2,7 @@
 title: "Input e Output"
 order: 4
 draft: false
-lastUpdateDate: "2025-10-23"
+lastUpdateDate: "2026-01-12"
 subject: "Python"
 category: "Informatica"
 difficulty: "facile"
@@ -143,9 +143,66 @@ x = 3.14
 print(type(x))  # Output: <class 'float'>
 ```
 
-## 5. Esercizi
+## 5. Quiz a risposta multipla
 
-### 5.1 Esercizio
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Quale funzione si usa in Python per stampare un messaggio a schermo?",
+answers: {
+a: "input()",
+b: "write()",
+c: "print()",
+d: "output()"
+},
+correctAnswer: "c"
+},
+{
+question: "2) Qual è il tipo di dato restituito dalla funzione input()?",
+answers: {
+a: "int",
+b: "float",
+c: "bool",
+d: "str"
+},
+correctAnswer: "d"
+},
+{
+question: "3) Qual è il modo corretto per stampare una variabile usando le f-string?",
+answers: {
+a: "print('x is {x}')",
+b: "print(f'x is: {x}')",
+c: "print(format(x))",
+d: "print(%x)"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Cosa fa questa istruzione? eta = int(input('Inserisci età: '))",
+answers: {
+a: "Legge una stringa",
+b: "Legge un numero decimale",
+c: "Legge un numero intero convertendo l'input",
+d: "Stampa l'età"
+},
+correctAnswer: "c"
+},
+{
+question: "5) Quale tra questi è un tipo di dato booleano valido in Python?",
+answers: {
+a: "'true'",
+b: "1",
+c: "True",
+d: "False"
+},
+correctAnswer: "c"
+}
+]} />
+
+## 6. Esercizi
+
+### 6.1 Esercizio
 
 Scrivi un programma che:
 - Chieda all'utente il suo nome e la sua età

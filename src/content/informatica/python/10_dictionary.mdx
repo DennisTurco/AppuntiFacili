@@ -1,15 +1,163 @@
 ---
-title: "Set"
+title: "Dictionary"
 order: 10
-draft: true
-lastUpdateDate: "2026-01-07"
+draft: false
+lastUpdateDate: "2026-01-12"
 subject: "Python"
 category: "Informatica"
 difficulty: "medio"
-tags: ["python", "programmazione", "collezioni", "set"]
+tags: ["python", "programmazione", "collezioni", "dictionary"]
 author: "Dennis Turco"
 videoLesson: false
 ---
 
 ## 1. Introduzione
 
+I dizionari in Python sono una struttura dati che gestisce le informazioni tramite coppie **chiave : valore** (key : value).
+
+- Le **chiavi** devono essere **uniche** e **immutabili** (es. stringhe, numeri, tuple).
+- I **valori** possono essere di **qualsiasi tipo di dato** e possono anche essere duplicati.
+
+## 2. Creazione e stampa di un dizionario
+
+Un dizionario si crea usando le parentesi graffe `{}`:
+
+```python
+auto = {
+    "marca": "Fiat",
+    "modello": "Panda",
+    "anno": 2003,
+    "colori": ["bianco", "nero", "rosso"]
+}
+print(auto)
+```
+
+In questo esempio:
+
+- le **chiavi** sono: "marca", "modello", "anno", "colori"
+- i **valori** sono: "Fiat", "Panda", 2003, ["bianco", "nero", "rosso"]
+
+## 3. Accesso agli elementi
+
+L'accesso agli elementi di un dizionario avviene tramite la chiave.
+
+### 3.1 Accesso diretto con le parentesi quadre
+
+```python
+auto = {
+    "marca": "Fiat",
+    "modello": "Panda",
+    "anno": 2003
+}
+x = auto["modello"]
+print(x) # output: Panda
+```
+
+<Aside variant="warning">
+Se la chiave non esiste, Python genera un errore (`KeyError`).
+</Aside>
+
+### 3.2 Accesso con il metodo `get()`
+
+Un'alternativa più sicura è usare il metodo `get()`:
+
+```python
+x = auto.get("modello")
+print(x) # Output: Panda
+```
+
+Se la chiave non esiste, `get()` restituisce `None` (o un valore di default se specificato).
+
+## 4. Chiavi e valori
+
+È possibile ottenere:
+
+### 4.1 Tutte le chiavi
+
+```python
+chiavi = auto.keys()
+print(chiavi)
+```
+
+### 4.2 Tutti i valori
+
+Analogamente con i valori:
+
+```python
+valori = auto.values()
+print(valori)
+```
+
+Entrambi i metodi restituiscono delle **view**, utili per iterare sugli elementi del dizionario.
+
+## 5. Modifica, aggiunta e rimozione di elementi
+
+### 5.1 Modifica di un valore
+
+Per modificare un valore è sufficiente assegnarne uno nuovo alla chiave:
+
+```python
+auto["anno"] = 2010
+print(auto)
+```
+
+### 5.2 Aggiunta di una nuova coppia chiave-valore
+
+```python
+auto["alimentazione"] = "benzina"
+print(auto)
+```
+
+### 5.3 Rimozione di elementi
+
+- Con `del`:
+
+    ```python
+    del auto["anno"]
+    ```
+
+- Con `pop()`:
+
+    ```python
+    colore = auto.pop("colori")
+    ```
+
+## 6. Iterare su un dizionario
+
+È possibile scorrere un dizionario usando un ciclo `for`.
+
+### 6.1 Iterare sulle chiavi
+
+```python
+for chiave in auto:
+print(chiave)
+```
+
+### 6.2 Iterare sui valori
+
+```python
+for valore in auto.values():
+    print(valore)
+```
+
+### 6.3 Iterare su chiavi e valori
+
+```python
+for chiave, valore in auto.items():
+    print(chiave, valore)
+```
+
+## 7. Esercizi
+
+### 7.1 Esercizio - Dizionario Studente
+1. Crea un dizionario studente con le chiavi: nome, eta, voti (lista di numeri).
+2. Stampa solo il nome dello studente.
+3. Aggiungi una nuova chiave classe al dizionario.
+4. Modifica l'età dello studente.
+5. Usa un ciclo for per stampare tutte le coppie chiave-valore.
+
+## 8. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[ { question: "1) Cosa rappresenta una chiave in un dizionario Python?", answers: { a: "Un valore modificabile", b: "Un indice numerico", c: "Un identificatore unico", d: "Una lista" }, correctAnswer: "c" }, { question: "2) Cosa succede se accedi a una chiave inesistente con auto['x']?", answers: { a: "Restituisce None", b: "Restituisce False", c: "Genera un KeyError", d: "Ignora l'istruzione" }, correctAnswer: "c" }, { question: "3) Quale metodo restituisce sia chiavi che valori?", answers: { a: "keys()", b: "values()", c: "items()", d: "get()" }, correctAnswer: "c" }, { question: "4) Quale istruzione aggiunge una nuova coppia chiave-valore?", answers: { a: "auto.add()", b: "auto.append()", c: "auto['x'] = y", d: "auto.insert()" }, correctAnswer: "c" }, { question: "5) Cosa fa il metodo pop() su un dizionario?", answers: { a: "Cancella tutto il dizionario", b: "Rimuove e restituisce un valore", c: "Ritorna tutte le chiavi", d: "Duplica il dizionario" }, correctAnswer: "b" } ]} />

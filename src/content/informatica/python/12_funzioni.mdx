@@ -1,0 +1,538 @@
+---
+title: "Funzioni"
+order: 11
+draft: false
+lastUpdateDate: "2026-01-12"
+subject: "Python"
+category: "Informatica"
+difficulty: "difficile"
+tags: ["python", "programmazione", "funzioni"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Le **funzioni** in **Python**, e in generale in tutti i linguaggi di programmazione, sono sostanzialmente dei blocchi di codice riutilizzabili; possono essere pensate come dei “sottoprogrammi” richiamabili da altri programmi.
+Grazie alle funzioni è possibile definire dei blocchi di codice che vengono eseguiti unicamente quando vengono richiamati.
+Le funzioni servono per svolgere molteplici scopi:
+
+- **leggibilità**
+- **manutenibilità**
+- **evitare la duplicazione**
+
+Immaginiamo di dover eseguire la stessa operazione di conversione della temperatura da Fahrenheit a Celsius diverse volte nello stesso programma.
+
+Senza le funzioni scriveremmo:
+
+```python
+temp1 = 77
+celsius1 = (temp1 - 32) * 5 / 9
+print(celsius1)
+
+temp2 = 95
+celsius2 = (temp2 - 32) * 5 / 9
+print(celsius2)
+
+temp3 = 50
+celsius3 = (temp3 - 32) * 5 / 9
+print(celsius3)
+```
+
+Con le funzioni:
+
+```python
+def fahrenheit_to_celsius(fahrenheit):
+  return (fahrenheit - 32) * 5 / 9
+
+print(fahrenheit_to_celsius(77))
+print(fahrenheit_to_celsius(95))
+print(fahrenheit_to_celsius(50))
+```
+
+## 2. Sintassi
+
+La sintassi di una funzione in in generale è:
+
+```python
+def nome_funzione (elenco_parametri):
+   istruzioni
+   return valore_restituito
+```
+
+Dove:
+
+- **nome_funzione**  è il nome dato alla funzione, si raccomanda di seguire le stesse regole sintattiche per le variabili.
+- **elenco_parametri** può anche essere una lista vuota, oppure si elencano gli argomenti passati alla funzione detti anche parametri.
+- **return**: è l'istruzione per ritornare un certo risultato al chiamante. Questa istruzione non è obbligatoria.
+
+
+<Aside variant="info">
+È possibile creare una funzione vuota in python (perchè magari non sappiamo ancora come popolarla) usando la parola chiave: `pass`
+
+```python
+def funzione_vuota():
+    pass
+```
+
+</Aside>
+
+
+
+## 3. Valore di ritorno
+
+- Ogni funzione presenta un valore di ritorno che puo' essere di qualsiasi tipo predefinito o definito dell'utente.
+- Nel caso di funzione che compie un azione, ovvio non deve ritornare nessun valore, non deve effettuare nessun ritorno di valori.
+- Una funzione puo' avere o meno una lista di argomenti.
+
+
+## 4. Chiamare una funzione
+
+Per chiamare una funzione basta usare il nome della funzione seguita dalle parentesi:
+
+```python
+def saluta():
+    print("Hello World!")
+
+saluta()
+```
+
+
+## 5. Argomenti
+
+Possibile passare dei dati come input alla funzione che si vuole chiamare, a patto che li accetti, inserendoli come argomenti alla chiamata.
+
+```python
+def saluta(nome, eta):
+    print(f"Ciao {nome}, un uccellino mi ha detto che hai {eta} anni")
+
+saluta("Marco", 45)
+saluta("Marina", 77)
+```
+
+<Aside variant="warning">
+
+Nell'esempio precedente non sono stati specificati i tipi delle variabili "nome" e "eta", quindi il chiamante potrebbe passare qualsiasi cosa.
+Noi sappiamo per logica che nome dovrebbe essere una stringa e eta dovrebbe essere un valore intero, ma non c'è nessun tipo di forzatura sul tipo richiesto.
+
+Quindi il chiamante potrebbe fare una chiamata di questo tipo, senza beccare nessun tipo di errore:
+
+```python
+saluta(789, 'd')
+```
+
+Il che non avrebbe nessun senso logico.
+
+Per questa ragione è consigliato (ma non obbligatorio) inserire il tipo di valore (type hint) ai valori nella definizione della funzione:
+
+```python
+def saluta(nome: str, eta: int):
+    print(f"Ciao {nome}, un uccellino mi ha detto che hai {eta} anni")
+
+saluta("Marco", 45) # OK
+saluta(789, 'd')    # ERORRE
+```
+
+</Aside>
+
+### 5.1 Parametri e Argomenti
+
+Spesso i termini parametri e argomenti vengono confusi e inverti, ma è necessario al fine di capirsi, conoscere la distinzione.
+
+- **Parametro**: è la variabile listata nelle parentesi nella definizione della funzione.
+- **Argomento**: è il valore effettivo che viene passato nella chiamata della funzione.
+
+### 5.2 Numero di argomenti
+
+Per ora è stato dato per scontato, ma di default se la funzione richiede x numero di parametri, allore il chimante dovrà passarli tutti x nel medesimo ordine.
+Come fatto per l'esempio precedente della funzione `saluta()`
+
+### 5.3 Parametri di default
+
+È possibile però assegnare dei valori di default ai parametri della funzione. In questo caso se il chiamante non fornirà tali argomenti, la funzione assegnerà i valori di default.
+
+```python
+def saluta(nome: str, eta: int = 18):
+    print(f"Ciao {nome}, un uccellino mi ha detto che hai {eta} anni")
+
+saluta("Marco", 45) # OUTPUT: Ciao Marco, un uccellino mi ha detto che hai 45 anni
+saluta("Anna")      # OUTPUT: Ciao Anna, un uccellino mi ha detto che hai 18 anni
+```
+
+### 5.4 Argomenti per chiave
+
+È possibile anche chiamare una funzione **specificando esplicitamente il nome dei parametri**, **indipendentemente dall'ordine**.
+
+```python
+def saluta(nome: str, eta: int):
+    print(f"Ciao {nome}, hai {eta} anni")
+
+saluta(eta=30, nome="Luca")
+```
+
+Questo rende il codice:
+
+- più leggibile
+- meno soggetto a errori quando i parametri sono molti
+
+### 5.5 Argomenti solo posizionali
+
+In python è possibile forzare alcuni parametri ad essere **solo posizionali**, usando il simbolo `/`:
+
+```python
+def somma(a, b, /):
+    return a + b
+
+somma(3, 4)      # OK
+somma(a=3, b=4)  # ERRORE
+```
+
+Tutti i parametri **prima** di `/` devono essere passati per posizione.
+
+### 5.5 Argomenti solo per chiave
+
+Al contrario, possiamo forzare alcuni parametri ad essere passati **solo per chiave**, usando `*`.
+
+```python
+def login(*, username, password):
+    print(f"Login di {username}")
+
+login(username="admin", password="1234")  # OK
+login("admin", "1234")                    # ERRORE
+```
+
+Tutti i parametri **dopo** `*` devono essere specificati con il loro nome.
+
+## 6. *args e **kwargs
+
+Quando non sappiamo **quanti argomenti** verranno passati a una funzione, possiamo usare:
+
+- ***args** $\rightarrow$ argomenti posizionali (tupla)
+- ****kwargs** $\rightarrow$ argomenti per chiave (dizionario)
+
+### 6.1 *args
+
+```python
+def somma(*args):
+    totale = 0
+    for numero in args:
+        totale += numero
+    return totale
+
+print(somma(1, 2, 3))
+print(somma(5, 10, 15, 20))
+```
+
+### 6.2 **kwargs
+
+```python
+def stampa_dati(**kwargs):
+    for chiave, valore in kwargs.items():
+        print(f"{chiave}: {valore}")
+
+stampa_dati(nome="Anna", eta=25, citta="Roma")
+```
+
+## 7. Scope
+
+Lo **scope** definisce dove una variabile è accessibile.
+
+In genere è sempre preferibile avere variabili locali per avere maggiore controllo delle variabili.
+
+### 7.1 Variabili locali
+
+Le variabili definite **dentro una funzione** sono **locali**:
+
+```python
+def funzione():
+    x = 10
+    print(x)
+
+funzione()
+# print(x) → ERRORE
+```
+
+### 7.1 Variabili globali
+
+Le variabili definite **fuori dalle funzioni** sono **globali**:
+
+```python
+x = 5
+
+def funzione():
+    print(x)
+
+funzione()
+```
+
+<Aside variant="info">
+
+Per modificare una variabile globale dentro una funzione bisogna usare `global`:
+
+```python
+x = 5
+
+def cambia():
+    global x
+    x = 10
+
+cambia()
+print(x)  # 10
+```
+
+</Aside>
+
+## 8. Decoratori
+
+I **decoratori** sono funzioni che modificano il comportamento di altre funzioni.
+
+```python
+def mio_decoratore(funzione):
+    def wrapper():
+        print("Prima della funzione")
+        funzione()
+        print("Dopo la funzione")
+    return wrapper
+
+@mio_decoratore
+def saluta():
+    print("Ciao!")
+
+saluta()
+```
+
+Output:
+
+```bash
+Prima della funzione
+Ciao!
+Dopo la funzione
+```
+
+## 9. Funzioni Lambda
+
+Le **lambda** sono funzioni anonime, scritte in una sola riga.
+
+```python
+somma = lambda a, b: a + b
+print(somma(3, 4))
+```
+
+Sono utili per:
+
+- funzioni brevi
+- `map()`, `filter()`, `sorted()`
+
+Esempio:
+
+```python
+numeri = [1, 2, 3, 4]
+quadrati = list(map(lambda x: x**2, numeri))
+```
+
+## 10. Funzioni Ricorsive
+
+Una funzione è **ricorsiva** quando **chiama sé stessa**.
+
+Esempio: *fattoriale*
+
+```python
+def fattoriale(n):
+    if n == 0:
+        return 1
+    return n * fattoriale(n - 1)
+
+print(fattoriale(5))  # 120
+```
+
+Ogni funzione ricorsiva deve avere:
+
+- caso base (`return 1` nell'esempio sopra)
+- passo ricorsivo (`return n * fattoriale(n - 1)` nell'esempio sopra)
+
+## 11. Generatori
+
+I **generatori** permettono di produrre valori uno alla volta usando `yield`.
+
+```python
+def contatore(n):
+    for i in range(n):
+        yield i
+
+for numero in contatore(5):
+    print(numero)
+```
+
+Vantaggi:
+
+- meno memoria
+- ideali per grandi sequenze
+
+## 12. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) A cosa serve una funzione?",
+answers: {
+a: "Ripetere codice automaticamente",
+b: "Rendere il codice più leggibile e riutilizzabile",
+c: "Velocizzare Python",
+d: "Evitare l'uso delle variabili"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Cosa restituisce una funzione senza return?",
+answers: {
+a: "0",
+b: "False",
+c: "None",
+d: "Errore"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Cosa rappresenta *args?",
+answers: {
+a: "Un dizionario",
+b: "Una lista",
+c: "Una tupla di argomenti posizionali",
+d: "Un singolo valore"
+},
+correctAnswer: "c"
+},
+{
+question: "4) Qual è lo scopo di yield?",
+answers: {
+a: "Terminare una funzione",
+b: "Restituire più valori uno alla volta",
+c: "Stampare valori",
+d: "Creare variabili globali"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Una funzione ricorsiva deve avere:",
+answers: {
+a: "Un ciclo",
+b: "Un decoratore",
+c: "Un caso base",
+d: "Una lambda"
+},
+correctAnswer: "c"
+}
+]} />
+
+## 13. Esercizi
+
+### 13.1 Esercizio - Funzione Quadrato
+Scrivi una funzione che calcoli il quadrato di un numero.
+
+### 13.2 Esercizio - Funzione Media
+Scrivi una funzione che accetti un numero variabile di argomenti e ne calcoli la media.
+
+### 13.3 Esercizio - Funzione Ricorsiva
+Crea una funzione ricorsiva che calcoli la somma dei numeri da 1 a n.
+
+### 13.4 Esercizio - Funzione Generatore
+Scrivi un generatore che produca i numeri pari fino a un valore dato.
+
+### 13.5 Esercizio - Funzioni e Liste
+
+Scrivi una funzione chiamata "analizza_lista" che:
+
+- riceva una lista di numeri interi
+- restituisca:
+    - la somma degli elementi
+    - la media
+    - il valore massimo
+    - il valore minimo
+
+Esempio:
+
+```python
+numeri = [3, 7, 2, 9, 4]
+risultato = analizza_lista(numeri)
+print(risultato)
+```
+
+Output atteso: (25, 5.0, 9, 2)
+
+### 13.6 Esercizio - Funzioni e Dizionario
+
+Scrivi una funzione chiamata "statistiche_studenti" che:
+
+- riceva un **dizionario** nel formato:
+
+    ```python
+    studenti = {
+        "Anna": 28,
+        "Marco": 22,
+        "Luca": 30,
+        "Sara": 25
+    }
+    ```
+
+- restituisca:
+    - il nome dello studente con il voto più alto
+    - il nome dello studente con il voto più basso
+    - la media dei voti
+
+Output di esempio: ("Luca", "Marco", 26.25)
+
+
+### 13.7 Esercizio - Gestione avanzata con *args e **kwargs
+
+Scrivi una funzione "crea_profilo" che:
+
+- accetti:
+    - nome e cognome come parametri obbligatori
+    - un numero variabile di informazioni aggiuntive tramite `**kwargs`
+- restituisca un **dizionario** con tutte le informazioni
+
+Esempio:
+
+```python
+profilo = crea_profilo(
+    "Anna",
+    "Rossi",
+    eta=25,
+    citta="Roma",
+    hobby="pittura"
+)
+
+print(profilo)
+```
+
+### 13.8 Esercizio completo - Gioco del Tris (Tic-Tac-Toe)
+
+Realizza il **gioco del Tris** usando le funzioni.
+
+Requisiti minimi:
+1. Rappresenta la **griglia di gioco** come una lista di 9 elementi (3x3)
+2. Scrivi una funzione `stampa_griglia(griglia)` che mostri il campo di gioco
+3. Scrivi una funzione `mossa(griglia, posizione, simbolo)` che:
+    - controlli se la posizione è valida
+    - inserisca il simbolo (`X` o `O`)
+4. Scrivi una funzione `controlla_vittoria(griglia, simbolo)` che ritorni `True` se il giocatore ha vinto
+5. Alterna i turni tra due giocatori
+6. Termina la partita in caso di:
+    - vittoria
+    - pareggio
+Bonus:
+- Gestione input errato
+- Possibilità di rigiocare
+- Contatore delle vittorie
+- Versione contro il computer
+
+Esempio di griglia:
+
+```text
+X | O | X
+---------
+O | X |
+---------
+  | O | X
+```

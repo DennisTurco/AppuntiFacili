@@ -2,18 +2,21 @@
 title: "Strutture di Controllo"
 order: 6
 draft: false
-lastUpdateDate: "2025-10-23"
+lastUpdateDate: "2026-01-12"
 subject: "Python"
 category: "Informatica"
 difficulty: "difficile"
-tags: ["python", "programmazione", "operatori e controllo del flusso", "strutture di controllo", "if", "for", "cicli"]
+tags: ["python", "programmazione", "operatori e controllo del flusso", "strutture di controllo"]
 author: "Dennis Turco"
 videoLesson: false
 ---
 
 ## 1. Introduzione
 
-Le **strutture di controllo** in Python sono istruzioni che permettono di **modificare il flusso di esecuzione** di un programma, decidendo **quali istruzioni eseguire** e **quante volte**.
+Le **strutture di controllo** permettono di **decidere il flusso di esecuzione** di un programma:
+
+- quali istruzioni eseguire
+- quante volte eseguirle
 
 Esistono due grandi categorie di strutture di controllo:
 
@@ -27,11 +30,29 @@ Le strutture di controllo rendono i programmi **dinamici**, **flessibili** e **r
 Senza di esse, il codice eseguirebbe sempre le stesse istruzioni in modo lineare.
 </Aside>
 
-## 2. Struttura condizionale: `if`, `elif`, `else`
+## 2. Struttura condizionale `if`
 
-L'istruzione `if` consente di **verificare una condizione logica** ed eseguire un blocco di codice solo se essa è vera (`True`).
+L'istruzione `if` consente di **eseguire codice solo se una condizione è vera**.
 
-### Sintassi generale
+Sintassi base:
+
+```python
+if condizione:
+    istruzioni
+```
+
+La condizione è **un'espressione booleana** (`True` o `False`).
+
+Esempio:
+
+```python
+numero = int(input("Inserisci un numero: "))
+
+if numero > 0:
+    print("Il numero è positivo")
+```
+
+## 3. Struttura condizionale completa: `if`, `elif`, `else`
 
 ```python
 # Esempio base di struttura condizionale
@@ -45,8 +66,11 @@ else:
     print("Il numero è zero.")
 ```
 
-La clausola `elif` (else if) permette di aggiungere **altre condizioni alternative**.
-`else` viene eseguito **solo se tutte le precedenti sono false**.
+Regole importanti:
+
+- `if` è obbligatorio
+- `elif` è opzionale (può comparire più volte)
+- `else` è opzionale e finale
 
 ### Esempio pratico
 
@@ -67,38 +91,47 @@ La clausola `elif` (else if) permette di aggiungere **altre condizioni alternati
 Le condizioni in Python **non richiedono parentesi tonde**, ma devono essere seguite da `:` e un **rientro** del blocco successivo.
 </Aside>
 
-## 3. Condizioni composte e logiche
+## 4. Operatori Ternari
 
-È possibile combinare più condizioni tramite operatori logici.
+L'**operatore ternario** (o condizionale) permette di scrivere un `if` in una sola riga.
+È utile per assegnare un valore a una variabile in base a una condizione.
 
-| Operatore | Significato | Esempio               | Risultato |
-| ---------- | ------------ | -------------------- | ---------- |
-| `and`      | Entrambe vere | `x > 0 and x < 10`   | `True` se x è compreso tra 0 e 10 |
-| `or`       | Almeno una vera | `x < 0 or x > 10` | `True` se x è fuori dall'intervallo |
-| `not`      | Negazione   | `not(x == 5)`         | `True` se x è diverso da 5 |
+Sintassi:
 
-### Esempio di condizione multipla
+$$
+\text{valore\_se\_vero \ if \ condizione \ else \ valore\_se\_falso}
+$$
 
-```python
-eta = int(input("Inserisci la tua età: "))
+Esempio:
 
-if eta >= 18 and eta <= 65:
-    print("Sei un adulto.")
-elif eta < 18:
-    print("Sei un minorenne.")
-else:
-    print("Sei in età pensionabile.")
+```py
+x = 10
+messaggio = "Positivo" if x > 0 else "Negativo"
+print(messaggio)  # Output: Positivo
+```
+
+Altro esempio:
+
+```py
+eta = 18
+status = "Maggiorenne" if eta >= 18 else "Minorenne"
+print(status)  # Output: Maggiorenne
 ```
 
 <Aside variant="info">
-Gli operatori logici permettono di rendere il codice **più compatto** e **leggibile**, evitando annidamenti eccessivi di `if`.
+L'operatore ternario è una forma compatta dell'istruzione `if-else`, utile quando si vuole scrivere codice più leggibile e sintetico, ma va usato con moderazione per non compromettere la chiarezza.
 </Aside>
 
-## 4. Strutture iterative (Cicli)
+### 4.1 Esercizi
+
+1. Dato un numero `n`, stampa `"Pari"` se è pari altrimenti `"Dispari"` usando un operatore ternario.
+2. Chiedi all'utente un voto (0-30) e assegna `"Promosso"` se è ≥ 18, `"Bocciato"` altrimenti.
+
+## 5. Strutture iterative (Cicli)
 
 Le strutture iterative consentono di **ripetere un blocco di istruzioni** più volte, finché una condizione è verificata o per un certo numero di elementi.
 
-### 4.1 Il ciclo `for`
+### 5.1 Il ciclo `for`
 
 Il ciclo `for` in Python serve per **iterare su sequenze** (liste, stringhe, tuple, range, ecc.).
 
@@ -124,7 +157,7 @@ for i in range(1, 11, 2):
     print("Numero dispari:", i)
 ```
 
-### 4.2 Ciclo su sequenze
+### 5.2 Ciclo su sequenze
 
 ```python
 # Iterazione su una lista di nomi
@@ -139,11 +172,11 @@ Il ciclo `for` in Python **non è un ciclo “classico” come in C o Java**.
 Non serve un contatore: Python itera direttamente sugli elementi.
 </Aside>
 
-## 5. Ciclo `while`
+## 6. Ciclo `while`
 
 Il ciclo `while` ripete un blocco di istruzioni **finché una condizione rimane vera**.
 
-### Sintassi base
+### 6.1 Sintassi base
 
 ```python
 # Esempio base di ciclo while
@@ -154,7 +187,7 @@ while contatore < 5:
     contatore += 1
 ```
 
-### Esempio pratico
+### 6.2 Esempio pratico
 
 ```python
 # Ciclo che termina quando l'utente scrive "esci"
@@ -169,7 +202,7 @@ while parola != "esci":
 Attenzione ai **cicli infiniti**: se la condizione non diventa mai `False`, il programma non terminerà.
 </Aside>
 
-## 6. Istruzioni di controllo del ciclo
+## 7. Istruzioni di controllo del ciclo
 
 Python offre tre istruzioni speciali per **modificare il comportamento** dei cicli:
 
@@ -179,7 +212,7 @@ Python offre tre istruzioni speciali per **modificare il comportamento** dei cic
 | `continue` | Salta l'iterazione corrente e passa alla successiva |
 | `pass` | Non fa nulla; usata come segnaposto |
 
-### Esempi
+### 7.1 Esempi
 
 ```python
 # Uso di break, continue e pass
@@ -197,7 +230,7 @@ for i in range(1, 10):
 `pass` è utile quando si vuole **lasciare un blocco vuoto**, ad esempio durante la scrittura iniziale di una funzione o ciclo.
 </Aside>
 
-## 7. Cicli annidati
+## 8. Cicli annidati
 
 I cicli possono essere **inseriti uno dentro l'altro**.
 Ogni ciclo interno verrà eseguito completamente per ogni iterazione di quello esterno.
@@ -214,7 +247,7 @@ for i in range(1, 4):
 I cicli annidati sono usati spesso per **matrici, tabelle o algoritmi di ricerca combinata**.
 </Aside>
 
-## 8. Struttura `else` nei cicli
+## 9. Struttura `else` nei cicli
 
 In Python, i cicli `for` e `while` possono avere una clausola `else`.
 Il blocco `else` viene eseguito **solo se il ciclo termina normalmente**, cioè **senza essere interrotto da `break`**.
@@ -231,7 +264,7 @@ else:
 print("Fine del programma.")
 ```
 
-## 9. Riassunto generale
+## 10. Riassunto generale
 
 | Struttura | Descrizione breve | Esempio tipico |
 | ---------- | ---------------- | --------------- |
@@ -246,22 +279,48 @@ print("Fine del programma.")
 Le strutture di controllo permettono di creare **algoritmi complessi**, combinando **logica condizionale** e **ripetizione controllata**.
 </Aside>
 
-## 10. Esercizi
+## 11. Esercizi
 
-### 10.1 Esercizio - Numero positivo o negativo
+### 11.1 Esercizio - Numero positivo o negativo
 
 Scrivi un programma che chieda all'utente un numero e stampi se è positivo, negativo o zero.
 
-### 10.2 Esercizio - Somma dei numeri da 1 a N
+### 11.2 Esercizio - Somma dei numeri da 1 a N
 
 Chiedi un numero N e calcola la somma di tutti i numeri da 1 a N utilizzando un ciclo `for`.
 
-### 10.3 Esercizio - Contatore con `while`
+### 11.3 Esercizio - Contatore con `while`
 
 Crea un ciclo `while` che conti da 1 a 10 e si interrompa se raggiunge il numero 7.
 
+### 11.4 Esercizio - Numeri pari e dispari
 
-## 11. Quiz a risposta multipla
+Chiedi all'utente un numero intero positivo N.
+
+- Usa un ciclo for per scorrere tutti i numeri da 1 a N
+- Per ogni numero stampa:
+  - `Pari` se il numero è pari
+  - `Dispari` se il numero è dispari
+
+### 11.5 Esercizio - Somma selettiva
+
+Chiedi all'utente un numero N.
+
+- Usa un ciclo `for` da 1 a N
+- Somma solo i numeri multipli di 3
+- Alla fine stampa la somma totale
+
+### 12.6 Esercizio - Validazione dell'input (avanzato)
+
+Scrivi un programma che:
+
+1. Chieda all'utente un numero maggiore di 0
+2. Se il numero inserito non è valido, continui a richiederlo usando un ciclo `while`
+3. Quando l'utente inserisce un valore corretto:
+  - stampa tutti i numeri da 1 al numero inserito
+  - termina il programma
+
+## 12. Quiz a risposta multipla
 
 import Quiz from '../../../components/Quiz.jsx';
 
