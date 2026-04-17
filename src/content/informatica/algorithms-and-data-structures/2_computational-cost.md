@@ -3,7 +3,7 @@ title: "Space and Time Computational Cost"
 order: 2
 draft: false
 lastUpdateDate: "2025-09-25"
-subject: "Algoritmi e strutture dati"
+subject: "Algorithms and data structures"
 category: "Informatica"
 difficulty: "complesso"
 tags: ["programmazione", "costo computazionale", "costo spaziale", "costo temporale", "algoritmi", "strutture dati"]
