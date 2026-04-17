@@ -2,7 +2,7 @@
 title: "Funzioni"
 order: 8
 draft: false
-lastUpdateDate: "2025-09-13"
+lastUpdateDate: "2026-04-17"
 subject: "C"
 category: "Informatica"
 difficulty: "medio"
@@ -13,28 +13,31 @@ videoLesson: false
 
 ## 1. Descrizione
 
-Le **funzioni** in **C**, e in generale in tutti i linguaggi di programmazione, sono sostanzialmente dei blocchi di codice riutilizzabili; possono essere pensate come dei “sottoprogrammi” richiamabili da altri programmi.
+Le **funzioni** in C sono blocchi di codice riutilizzabili che permettono di:
 
-Lo scopo principale dell'uso delle funzioni è quello di poter **riutilizzare il codice** che si scrive (senza doverlo quindi riscrivere più volte!), inoltre l'utilizzo delle funzioni aumenta la **leggibilità** dei programmi che le richiamano snellendone il codice e aiuta a dividere la risoluzione di un problema in **sottoproblemi**.
+- evitare ripetizioni di codice
+- migliorare la leggibilità
+- suddividere un problema in sottoproblemi
+
+Possiamo immaginare una funzione come un “mini-programma” interno al programma principale.
 
 ## 2. Sintassi
 
 La sintassi di una funzione in in generale è:
 
-<Aside variant="info">
-```
+```c
 tipo_ritorno nome_funzione (elenco_parametri) {
    istruzioni;
    return valore_restituito;
 }
 ```
-</Aside>
 
 Dove:
 
 - **tipo_ritorno** è il valore di ritorno specificato come abbiamo detto prima.
 - **nome_funzione** è il nome dato alla funzione, si raccomanda di seguire le stesse regole sintattiche per le variabili.
 - **[elenco_parametri]** può anche essere una lista vuota, oppure si elencano gli argomenti passati alla funzione detti anche parametri.
+- **return** è il valore restituito.
 
 ## 3. Valore di ritorno
 
@@ -43,17 +46,68 @@ Dove:
 - Nel caso di funzione che compie un azione, ovvio non deve ritornare nessun valore, si usa il tipo predefinito `void` come valore di ritorno.
 - Una funzione puo' avere o meno una lista di argomenti.
 
-## 4. Parametri per Valore vs per Riferimento
+## 4. Tipi di funzioni
 
-### 4.1 funzioni con parametri per valore
+### 4.1 Funzioni con valore di ritorno
+
+```c
+#include <stdio.h>
+
+int somma(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int r = somma(3, 5);
+    printf("%d\n", r);
+    return 0;
+}
+```
+
+### 4.2 Funzioni void (senza ritorno)
+
+```c
+#include <stdio.h>
+
+void saluta() {
+    printf("Ciao!\n");
+}
+
+int main() {
+    saluta();
+    return 0;
+}
+```
+
+## 5. Parametri per Valore vs per Riferimento
+
+### 5.1 funzioni con parametri per valore
 
 **Parametri per valore**: i parametri passati per valore vanno specificati all'interno delle parentesi tonde dopo il nome della funzione specificando per ogni parametro il nome preceduto dalla sua tipologia; quando sono presenti più parametri vanno separati da virgola. Quando si passa un parametro in questo modo all'inizio dell'esecuzione della funzione il valore memorizzato all'interno della variabile passata come parametro viene copiato in una nuova variabile della funzione. I parametri passati per valore possono essere anche opzionali, ovvero si possono creare funzioni che possono ricevere un numero diverso di parametri; questo si fa assegnando ad alcuni parametri dei valori di default.
 
-### 4.2 Funzioni con parametri per riferimento (tramite puntatori)
+La funzione riceve una copia del valore.
+
+```c
+void incrementa(int x) {
+    x++;
+}
+```
+
+La variabile originale NON cambia.
+
+### 5.2 Funzioni con parametri per riferimento (tramite puntatori)
 
 **Parametri per riferimento**: in C non esistono i riferimenti come in C++; per ottenere lo stesso effetto si utilizza il passaggio di puntatori. Una funzione riceve quindi l'indirizzo di memoria della variabile e, dereferenziando il puntatore (*), può modificare direttamente il valore della variabile del programma chiamante.
 
-*Ad esempio:*
+In C si usa l'indirizzo di memoria.
+
+```c
+void incrementa(int *x) {
+    (*x)++;
+}
+```
+
+#### 5.2.1 Esempio completo
 
 ```c
 #include <stdio.h>
@@ -75,6 +129,208 @@ int main() {
 }
 ```
 
-## 5. Esercizi
+## 6. Passaggio di array alle funzioni
+
+In C, quando passi un array a una funzione:
+
+- NON viene copiato
+- viene passato come indirizzo del primo elemento
+
+### 6.1 Sintassi
+
+```c
+void funzione(int array[], int size)
+```
+
+oppure:
+
+```c
+void funzione(int *array, int size)
+```
+
+### 6.2 Esempio: stampa array
+
+```c
+#include <stdio.h>
+
+void stampaArray(int array[], int size) {
+    for(int i = 0; i < size; i++) {
+        printf("%d ", array[i]);
+    }
+}
+
+int main() {
+
+    int numeri[5] = {1, 2, 3, 4, 5};
+
+    stampaArray(numeri, 5);
+
+    return 0;
+}
+```
+
+### 6.3 Esempio: modifica array
+
+```c
+#include <stdio.h>
+
+void raddoppia(int array[], int size) {
+    for(int i = 0; i < size; i++) {
+        array[i] = array[i] * 2;
+    }
+}
+
+int main() {
+
+    int numeri[3] = {1, 2, 3};
+
+    raddoppia(numeri, 3);
+
+    return 0;
+}
+```
+
+Qui l'array originale viene modificato.
+
+## 7. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "Cosa sono le funzioni in C?",
+answers: {
+a: 'Variabili speciali',
+b: 'Blocchi di codice riutilizzabili',
+c: 'Tipi di dati',
+d: 'Cicli particolari'
+},
+correctAnswer: 'b'
+},
+{
+question: "Cosa succede quando passi un array a una funzione?",
+answers: {
+a: 'Viene copiato',
+b: 'Viene passato per riferimento (indirizzo)',
+c: 'Non può essere passato',
+d: 'Diventa una variabile locale'
+},
+correctAnswer: 'b'
+},
+{
+question: "Cosa fa il passaggio per valore?",
+answers: {
+a: 'Modifica la variabile originale',
+b: 'Copia il valore',
+c: 'Passa l’indirizzo',
+d: 'Elimina la variabile'
+},
+correctAnswer: 'b'
+},
+{
+question: "Cosa permette il puntatore in una funzione?",
+answers: {
+a: 'Creare cicli',
+b: 'Modificare la variabile originale',
+c: 'Stampare output',
+d: 'Creare array'
+},
+correctAnswer: 'b'
+},
+{
+question: "Qual è la sintassi corretta per un array in funzione?",
+answers: {
+a: 'int array()',
+b: 'array int[]',
+c: 'int array[]',
+d: 'array<int>'
+},
+correctAnswer: 'c'
+}
+]} />
+
+## 8. Esercizi
 
 [Esercizi con le funzioni in C/C++](https://ticoprof.wordpress.com/2020/09/24/esercizi-con-le-funzioni-in-cpp/)
+
+### 8.1 Somma array
+
+Scrivere una funzione che calcola la somma di un array.
+
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```c
+#include <stdio.h>
+
+int somma(int array[], int size) {
+
+    int s = 0;
+
+    for(int i = 0; i < size; i++) {
+        s += array[i];
+    }
+
+    return s;
+}
+
+int main() {
+
+    int numeri[4] = {1, 2, 3, 4};
+
+    printf("Somma = %d", somma(numeri, 4));
+
+    return 0;
+}
+```
+
+</details>
+
+### 8.2 Massimo array
+
+Scrivere una funzione che trova il valore massimo.
+
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```c
+#include <stdio.h>
+
+int massimo(int array[], int size) {
+
+    int max = array[0];
+
+    for(int i = 1; i <details size; i++) {
+        if(array[i] > max) {
+            max = array[i];
+        }
+    }
+
+    return max;
+}
+```
+</details>
+
+### 8.3 Inverti array
+
+Invertire un array tramite funzione.
+
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```c
+#include <stdio.h>
+
+void inverti(int array[], int size) {
+
+    int temp;
+
+    for(int i = 0; i < size / 2; i++) {
+        temp = array[i];
+        array[i] = array[size - 1 - i];
+        array[size - 1 - i] = temp;
+    }
+}
+```
+
+</details>
