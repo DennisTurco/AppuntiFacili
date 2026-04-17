@@ -20,7 +20,6 @@ videoLesson: false
 flowchart LR
     c1 & c2 --> eserciziFP
     d1 --> prove
-
 ```
 
 - Per convenzione, il nome di un package inizia con una lettera minuscola.

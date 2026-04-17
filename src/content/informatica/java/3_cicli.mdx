@@ -3,10 +3,10 @@ title: "Cicli"
 order: 3
 draft: false
 lastUpdateDate: "2026-04-17"
-subject: "C++"
+subject: "Java"
 category: "Informatica"
 difficulty: "medio"
-tags: ["c++", "programmazione", "cicli"]
+tags: ["java", "programmazione", "cicli"]
 author: "Dennis Turco"
 videoLesson: false
 ---
@@ -22,7 +22,7 @@ Sono fondamentali quando dobbiamo:
 - elaborare sequenze di dati
 - evitare codice ripetuto
 
-In C++ esistono tre principali tipi di ciclo:
+In Java esistono tre principali tipi di ciclo:
 
 - `for` $\rightarrow$ numero di ripetizioni noto
 - `while` $\rightarrow$ condizione controllata prima
@@ -34,7 +34,7 @@ Il ciclo **for** viene utilizzato quando **conosciamo quante volte** vogliamo ri
 
 ### 2.1 Sintassi
 
-```cpp
+```java
 for (inizializzazione; condizione; aggiornamento) {
     // istruzioni
 }
@@ -51,17 +51,14 @@ L'istruzione per richiamare il ciclo **for** si caratterizza è da 4 parti:
 
 Il seguente ciclo scrive per 10 volte sullo schermo la parola “ciao”.
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
-
-    for (int i = 0; i < 10; i++) {
-        cout << "ciao" << endl;
+        for (int i = 0; i < 10; i++) {
+            System.out.println("ciao");
+        }
     }
-
-    return 0;
 }
 ```
 
@@ -74,26 +71,25 @@ dove:
 
 ### 2.3 Esempio
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
+        int val2 = 0;
 
-    // il primo ciclo viene ripetuto 5 volte
-    // il secondo ciclo viene ripetuto 5 volte
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5 volte
 
-    int val2 = 0;
+        for (int i = 0; i < 5; i++) {
+            val2++;
+        }
 
-    for (int i = 0; i < 5; i++) {
-        val2++;
+        for (int a = 0; a < 5; a++) {
+            val2++;
+        }
+
+        System.out.println("Valore = " + val2);
     }
-
-    for (int a = 0; a < 5; a++) {
-        val2++;
-    }
-
-    cout << "Valore = " << val2 << endl << endl;
 }
 ```
 
@@ -103,51 +99,54 @@ int main() {
 
 #### 2.6.1 Esempio
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
+        int val = 1;
 
-    // il primo ciclo viene ripetuto 5 volte
-    // il secondo ciclo viene ripetuto 5 volte * 5 volte
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5*5 volte
 
-    int val = 1;
+        for (int i = 0; i < 5; i++) {
+            for (int a = 0; a < 5; a++) {
 
-    for (int i=0; i<5; i++) {
-        for (int a=0; a<5; a++) {
-            cout << "i = " << i << endl;
-            cout << "a = " << a << endl;
-            cout << "Valore = " << val << endl << endl;
-            val++; //  => val = val + 1;
+                System.out.println("i = " + i);
+                System.out.println("a = " + a);
+                System.out.println("Valore = " + val);
+                System.out.println();
+
+                val++;
+            }
         }
     }
-
 }
 ```
 
 #### 2.6.2 Esempio
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
+        int val3 = 1;
 
-    // il primo ciclo viene ripetuto 5 volte
-    // il secondo ciclo viene ripetuto 5*5 volte
-    // il terzo ciclo viene ripetuto 5*5*3 volte
+        // il primo ciclo viene ripetuto 5 volte
+        // il secondo ciclo viene ripetuto 5*5 volte
+        // il terzo ciclo viene ripetuto 5*5*3 volte
 
-    int val3 = 1;
+        for (int i = 0; i < 5; i++) {
+            for (int a = 0; a < 5; a++) {
+                for (int x = 0; x < 3; x++) {
 
-    for (int i = 0; i < 5; i++) {
-        for (int a = 0; a < 5; a++) {
-            for (int x = 0; x < 3; x++) {
-                cout << "i = " << i << endl;
-                cout << "a = " << a << endl;
-                cout << "x = " << x << endl;
-                cout << "Valore = " << val3 << endl << endl;
-                val3++; //  => val = val + 1;
+                    System.out.println("i = " + i);
+                    System.out.println("a = " + a);
+                    System.out.println("x = " + x);
+                    System.out.println("Valore = " + val3);
+                    System.out.println();
+
+                    val3++;
+                }
             }
         }
     }
@@ -155,7 +154,6 @@ int main() {
 ```
 
 Ogni ciclo interno viene eseguito completamente ad ogni iterazione del ciclo esterno.
-```
 
 ## 3. Ciclo While
 
@@ -172,7 +170,7 @@ Il ciclo potrebbe essere **infinito** se la condizione risultasse sempre vera. I
 
 L'utilizzo tipico del while prevede quasi sempre l'esecuzione di un blocco di istruzioni, quindi quasi sempre troviamo il costrutto espresso nella forma:
 
-```cpp
+```java
 while (condizione) {
     // Istruzioni da eseguire
 }
@@ -180,20 +178,19 @@ while (condizione) {
 
 ### 3.2 Esempio
 
-Generiamo i numeri da 0 a 10, a step di 2, utilizzando il ciclo while in C++
+Generiamo i numeri da 0 a 10, a step di 2, utilizzando il ciclo while in Java:
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
-    int count = 0;
-    while(count <= 10) {
-        cout << count << endl;
-        count = count + 2;
+        int count = 0;
+
+        while (count <= 10) {
+            System.out.println(count);
+            count = count + 2;
+        }
     }
-
-    return 0;
 }
 ```
 
@@ -218,7 +215,7 @@ La semantica del costrutto **do-while** è dunque la seguente:
 
 Troviamo il costrutto espresso nella forma:
 
-```cpp
+```java
 do {
     // istruzioni;
 } while (condizione);
@@ -228,19 +225,21 @@ do {
 
 Continuare a leggere numeri finché non viene inserito un valore negativo.
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+import java.util.Scanner;
 
-int main() {
-    int valore;
+public class Main {
+    public static void main(String[] args) {
 
-    do {
-        cout << "Inserire valore negativo: ";
-        cin >> valore;
+        Scanner input = new Scanner(System.in);
+        int valore;
+
+        do {
+            System.out.print("Inserire valore negativo: ");
+            valore = input.nextInt();
+        }
+        while (valore >= 0);
     }
-    while (valore >= 0);
-    // il ciclo continua fintanto che non si inserisce un valore negativo
 }
 ```
 
@@ -248,7 +247,7 @@ int main() {
 
 Durante l'esecuzione di un ciclo può essere necessario modificare il comportamento normale del flusso.
 
-C++ mette a disposizione due istruzioni fondamentali:
+Java mette a disposizione due istruzioni fondamentali:
 
 - `break`
 - `continue`
@@ -266,22 +265,21 @@ Quando viene eseguita:
 
 Interrompere il ciclo quando viene trovato il numero 5.
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
+        for (int i = 0; i < 10; i++) {
 
-    for (int i = 0; i < 10; i++) {
+            if (i == 5) {
+                break;
+            }
 
-        if (i == 5) {
-            break;
+            System.out.println(i);
         }
 
-        cout << i << endl;
+        System.out.println("Ciclo terminato");
     }
-
-    cout << "Ciclo terminato";
 }
 ```
 
@@ -296,19 +294,18 @@ L'istruzione continue non interrompe il ciclo.
 
 Stampare solo numeri dispari.
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+public class Main {
+    public static void main(String[] args) {
 
-int main() {
+        for(int i = 0; i < 10; i++) {
 
-    for (int i = 0; i < 10; i++) {
+            if(i % 2 == 0) {
+                continue;
+            }
 
-        if (i % 2 == 0) {
-            continue;
+            System.out.println(i);
         }
-
-        cout << i << endl;
     }
 }
 ```
@@ -368,7 +365,7 @@ answers: {
 a: 'Una variabile locale',
 b: 'Condizione sempre falsa',
 c: 'Condizione sempre vera',
-d: 'Uso di cout'
+d: 'Uso di System.out'
 },
 correctAnswer: 'c'
 },
@@ -382,7 +379,6 @@ d: 'ciclo ricorsivo'
 },
 correctAnswer: 'b'
 },
-,
 {
 question: "Cosa fa l'istruzione break?",
 answers: {
@@ -407,31 +403,32 @@ correctAnswer: 'c'
 
 ## 8. Esercizi
 
-[MIX esercizi if/for/while in C++](https://ticoprof.wordpress.com/mix-esercizi-if-for-while-cpp/)
+- [Esercizi con il for](https://codegrind.it/esercizi/java/ciclo-for)
+- [Esercizi Ciclo While e Do While Java](https://codegrind.it/esercizi/java/ciclo-while-e-do-while)
+- [Esercizi break e continue](https://codegrind.it/esercizi/java/break-e-continue)
 
 ### 8.1 Esercizio - Numeri da 1 a N
 
 Realizzare un programma che chiede un numero `N` e stampa i numeri da 1 a N.
 
 <details>
-
 <summary>💡 Mostra soluzione </summary>
 
-```cpp
-#include <iostream>
-using namespace std;
+```java
+import java.util.Scanner;
 
-int main() {
+public class Main {
+    public static void main(String[] args) {
 
-    int n;
-    cout << "Inserisci N: ";
-    cin >> n;
+        Scanner input = new Scanner(System.in);
 
-    for(int i = 1; i <= n; i++){
-        cout << i << endl;
+        System.out.print("Inserisci N: ");
+        int n = input.nextInt();
+
+        for(int i = 1; i <= n; i++){
+            System.out.println(i);
+        }
     }
-
-    return 0;
 }
 ```
 
@@ -442,28 +439,29 @@ int main() {
 Calcolare la somma dei numeri da 1 a N usando il ciclo while.
 
 <details>
+<summary>💡 Mostra soluzione</summary>
 
-<summary>💡 Mostra soluzione </summary>
+```java
+import java.util.Scanner;
 
-```cpp
-#include <iostream>
-using namespace std;
+public class Main {
+    public static void main(String[] args){
 
-int main(){
+        Scanner input = new Scanner(System.in);
 
-    int n, i = 1, somma = 0;
+        System.out.print("Inserisci N: ");
+        int n = input.nextInt();
 
-    cout << "Inserisci N: ";
-    cin >> n;
+        int i = 1;
+        int somma = 0;
 
-    while(i <= n){
-        somma += i;
-        i++;
+        while(i <= n){
+            somma += i;
+            i++;
+        }
+
+        System.out.println("Somma = " + somma);
     }
-
-    cout << "Somma = " << somma;
-
-    return 0;
 }
 ```
 
@@ -474,25 +472,24 @@ int main(){
 Il programma continua a chiedere un numero finché l'utente non inserisce 0.
 
 <details>
+<summary>💡 Mostra soluzione</summary>
 
-<summary>💡 Mostra soluzione </summary>
+```java
+import java.util.Scanner;
 
-```cpp
-#include <iostream>
-using namespace std;
+public class Main {
+    public static void main(String[] args){
 
-int main(){
+        Scanner input = new Scanner(System.in);
+        int numero;
 
-    int numero;
+        do {
+            System.out.print("Inserisci un numero (0 per uscire): ");
+            numero = input.nextInt();
+        } while(numero != 0);
 
-    do {
-        cout << "Inserisci un numero (0 per uscire): ";
-        cin >> numero;
-    } while(numero != 0);
-
-    cout << "Programma terminato";
-
-    return 0;
+        System.out.println("Programma terminato");
+    }
 }
 ```
 

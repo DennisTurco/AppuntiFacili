@@ -1,8 +1,8 @@
 ---
-title: "Controlli Condizionali: if-esle"
+title: "Controlli Condizionali: if-else"
 order: 2
 draft: false
-lastUpdateDate: "2025-08-27"
+lastUpdateDate: "2026-04-17"
 subject: "C++"
 category: "Informatica"
 difficulty: "facile"
@@ -11,79 +11,95 @@ author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 1️⃣ Descrizione
+## 1. Descrizione
 
-Un'istruzione if-else controlla il ramo condizionale. Le istruzioni nell'oggetto vengono eseguite solo se l'oggetto `if-branchcondition` restituisce un valore diverso da zero (o **`true`**). Se il valore di `condition` è diverso da zero, l'istruzione seguente viene eseguita e l'istruzione che segue viene ignorata **`else`**. In caso contrario, l'istruzione seguente viene ignorata e, se è presente un'istruzione **`else`** che segue, **`else`** viene eseguita.
+L'istruzione **if-else** permette di controllare il flusso di esecuzione di un programma.
 
-## 2️⃣ Sintassi
+Il codice contenuto nel blocco `if` viene eseguito **solo se la condizione è vera (`true`)**.
 
-The syntax of the `if` statement is:
+- Se la `condizione` è vera → viene eseguito il blocco `if`
+- Se la `condizione` è falsa → viene eseguito il blocco `else` (se presente)
 
-LA sintassi dell' `if` statement è:
-
-```c
-if (condizione) {
-  // corpo dell'if statement
-}
-```
-
-L' `if` statement valuta la `condizione` dentro alle parentesi `( )`.
-
-- Se la `condizione` risulta `true`, il codice dentro al corpo dell' `if` viene *eseguito*.
-- Se la `condizione` risulta `false`, il codice dentro al corpo dell' `if` viene *evitato*.
-
-**Nota:** Il codice dentro `{ }` è il corpo dell' `if` statement.
-
-## 3️⃣ Funzionamento
-
-L'istruzione **if** permette di verificare determinate condizioni ed ha la seguente sintassi:
-
-```c
-//...
-
-if(condizione){
-    //....
-}
-
-//...
-```
-
-In questo caso **se** l'espressione risulta **vera**, fa eseguire l'istruzione immediatamente successiva, **altrimenti** (se la condizione è **falsa**) si salta l'istruzione (od il blocco di istruzioni) e si procede nell'esecuzione delle istruzioni successive, che possono essere la prosecuzione del programma o un semplice **else**, ad indicare la possibile alternativa all'if:
-
-```c
-f(condizione){
-    //....
-} else {
-    //...
-}
-```
-
-o un **else if** che permette di verificare una o più condizioni:
-
-```c
-if(condizione1){
-    //....
-}
-else if(condizione2){
-    //...
-} else {
-    //...
-}
-```
-
-Così si può comandare il flusso del programma decidendo di eseguire una parte di codice oppure no (nel caso del solo **if**), di fare una scelta tra due parti di codice (nel caso **if**– **else**) o di fare una scelta tra più parti di codice (nel caso **if** – **else if**– **else**).
+In C++ una condizione è considerata vera quando restituisce un valore diverso da `0`.
 
 ![Controlli](../../../assets/for_pages/controllicondizionali.png)
 
-## 4️⃣ In sintesi
+## 2. Sintassi
 
-- Utilizzare l' `if` istruzione per specificare un blocco di codice C++ da eseguire se una condizione è `true`.
-- Utilizzare l' `else` istruzione per specificare un blocco di codice da eseguire se la condizione è `false`.
-- Utilizzare l' `else if` istruzione per specificare una nuova condizione se la prima condizione è `false`.
+Sintassi base dell’istruzione `if`:
 
-*esempio*:
+```cpp
+if (condizione) {
+  // istruzioni eseguite se la condizione è vera
+}
+```
 
-```c
+L'`if` statement valuta la `condizione` dentro alle parentesi `( )`.
+
+- Se la `condizione` risulta `true`, il codice dentro al corpo dell'`if` viene *eseguito*.
+- Se la `condizione` risulta `false`, il codice dentro al corpo dell'`if` viene *evitato*.
+
+<Aside variant="info">
+Il codice tra `{ }` prende il nome di corpo dell'istruzione if
+</Aside>
+
+## 3. Funzionamento
+
+### 3.1 If semplice
+L'istruzione **if** permette di verificare determinate condizioni ed ha la seguente sintassi:
+
+```cpp
+//...
+
+if (condizione) {
+    //....
+}
+
+//...
+```
+
+In questo caso **se** l'espressione risulta **vera**, fa eseguire l'istruzione immediatamente successiva, **altrimenti** (se la condizione è **falsa**) si salta l'istruzione (o il blocco di istruzioni)
+e si procede nell'esecuzione delle istruzioni successive.
+
+### 3.2 If - Else
+
+Permette di scegliere tra due alternative.
+
+```cpp
+if (condizione) {
+    // caso vero
+} else {
+    // caso falso
+}
+```
+
+### 3.3 If - Else If - Else
+
+Permette di controllare più condizioni.
+
+```cpp
+if(condizione1) {
+    // codice
+}
+else if(condizione2) {
+    // codice
+} else {
+    // caso finale
+}
+```
+
+Così si può comandare il flusso del programma decidendo di eseguire una parte di codice oppure no (nel caso del solo **if**),
+di fare una scelta tra due parti di codice (nel caso **if - else**) o di fare una scelta tra più parti di codice (nel caso **if - else if - else**).
+
+## 4. In sintesi
+
+- Utilizzare l'`if` istruzione per specificare un blocco di codice da eseguire se una condizione è `true`.
+- Utilizzare l'`else` istruzione per specificare un blocco di codice da eseguire se la condizione è `false`.
+- Utilizzare l'`else if` istruzione per specificare una nuova condizione se la prima condizione è `false`.
+
+### 4.1 Esempio
+
+```cpp
 if (risultato_esame >= 18){
     printf ("Complimenti hai superato l'esame");
 }
@@ -95,11 +111,68 @@ else {
 }
 ```
 
-## 📑 Esercizi
+## 5. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "A cosa serve l'istruzione if in C++?",
+answers: {
+a: 'Ripetere un ciclo',
+b: 'Dichiarare variabili',
+c: 'Eseguire codice solo se una condizione è vera',
+d: 'Stampare a video'
+},
+correctAnswer: 'c'
+},
+{
+question: "Quando viene eseguito il blocco else?",
+answers: {
+a: 'Sempre',
+b: 'Quando la condizione dell\'if è falsa',
+c: 'Quando la condizione è vera',
+d: 'Solo nei cicli'
+},
+correctAnswer: 'b'
+},
+{
+question: "Quale sintassi è corretta?",
+answers: {
+a: 'if condizione {}',
+b: 'if(condizione) {}',
+c: 'if = condizione {}',
+d: 'if -> condizione {}'
+},
+correctAnswer: 'b'
+},
+{
+question: "A cosa serve else if?",
+answers: {
+a: 'Ripetere il programma',
+b: 'Controllare condizioni aggiuntive',
+c: 'Terminare il programma',
+d: 'Stampare output'
+},
+correctAnswer: 'b'
+},
+{
+question: "Quante istruzioni else può avere un if?",
+answers: {
+a: 'Infinite',
+b: 'Due',
+c: 'Una sola',
+d: 'Nessuna'
+},
+correctAnswer: 'c'
+}
+]} />
+
+## 6. Esercizi
 
 [20 Esercizi di programmazione con la Selezione (if)](https://ticoprof.wordpress.com/2016/03/29/esercizi-di-programmazione-selezione/)
 
-### ESERCIZIO 1
+### 6.1 Esercizio
 
 realizzare un programma che chiede all'utente 3 valori (valore1, valore2, valore3), in base ai quali il programma restituisce in output i 3 valori dal maggiore al minore.
 
@@ -154,9 +227,9 @@ if (numero1 >= numero2 && numero1 >= numero3) {
 }
 ```
 
-</summary>
+</details>
 
-### ESERCIZIO 2
+### 6.2 Esercizio
 
 realizzare un programma che chiede all'utente 2 valori, in base ai quali il programma dice qual è il maggiore, oppure uguali nel caso.
 
@@ -194,9 +267,9 @@ int main(){
 }
 ```
 
-</summary>
+</details>
 
-### ESERCIZIO 3
+### 6.3 Esercizio
 
 realizzare un programma che chiede all'utente 1 valore, se il valore è:
 
@@ -261,4 +334,4 @@ int main(){
 }
 ```
 
-</summary>
+</details>
