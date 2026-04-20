@@ -125,9 +125,9 @@ int main() {
 
 | Funzione  | Tipo restituito | Sicurezza | Note                                     |
 | --------- | --------------- | --------- | ---------------------------------------- |
-| `atoi`    | `int`           | ❌         | Non gestisce errori                      |
-| `atol`    | `long int`      | ❌         | Non gestisce errori                      |
-| `atof`    | `double`        | ❌         | Non gestisce errori                      |
-| `strtol`  | `long int`      | ✅         | Gestisce basi diverse + errori           |
-| `strtoul` | `unsigned long` | ✅         | Come `strtol`, ma senza segno            |
-| `strtod`  | `double`        | ✅         | Gestisce virgola + notazione scientifica |
+| `atoi`    | `int`           | ❌        | Non gestisce errori                      |
+| `atol`    | `long int`      | ❌        | Non gestisce errori                      |
+| `atof`    | `double`        | ❌        | Non gestisce errori                      |
+| `strtol`  | `long int`      | ✅        | Gestisce basi diverse + errori           |
+| `strtoul` | `unsigned long` | ✅        | Come `strtol`, ma senza segno            |
+| `strtod`  | `double`        | ✅        | Gestisce virgola + notazione scientifica |

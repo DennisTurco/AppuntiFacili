@@ -1,0 +1,311 @@
+---
+title: "Enum in Java"
+order: 18
+draft: false
+lastUpdateDate: "2026-04-20"
+subject: "Java"
+category: "Informatica"
+difficulty: "facile"
+tags: ["java", "programmazione", "enum", "tipi", "oop"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Descrizione
+
+Un **enum** (enumerazione) è un **tipo di dato speciale** introdotto in Java per rappresentare un insieme **limitato e fisso di valori costanti**.
+
+In pratica serve quando una variabile **può assumere solo alcuni valori predefiniti**.
+
+Esempi reali:
+
+- giorni della settimana
+- mesi dell'anno
+- stati di un ordine
+- livelli di accesso
+- direzioni (NORD, SUD, EST, OVEST)
+
+
+## 2. Perché usare enum?
+
+Prima degli enum si usavano spesso:
+
+```java
+String stato = "ATTIVO";
+```
+
+oppure:
+
+```java
+int stato = 1;
+```
+
+Problemi:
+
+- errori di scrittura (es. "Ativo")
+- valori non validi
+- codice poco leggibile
+- difficile manutenzione
+
+**Gli enum risolvono questi problemi.**
+
+## 3. Sintassi base
+
+Un enum si dichiara con la parola chiave `enum`.
+
+```java
+enum Giorno {
+    LUNEDI,
+    MARTEDI,
+    MERCOLEDI,
+    GIOVEDI,
+    VENERDI,
+    SABATO,
+    DOMENICA
+}
+```
+
+Ogni valore è chiamato costante enum.
+
+## 4. Utilizzare un enum
+
+1. Dichiarare una variabile enum: `Giorno oggi;`
+2. Assegnare un valore: `oggi = Giorno.LUNEDI;`
+
+### 4.1 Esempio completo
+
+```java
+public class Main {
+
+    enum Stato {
+        ACCESO,
+        SPENTO
+    }
+
+    public static void main(String[] args) {
+        Stato lampada = Stato.ACCESO;
+        System.out.println(lampada); // -> Output: ACCESO
+    }
+}
+```
+
+## 5. Enum e controlli condizionali
+
+Gli enum funzionano perfettamente con `if` e `switch`.
+
+### 5.1 Con if
+
+```java
+if(lampada == Stato.ACCESO){
+    System.out.println("La lampada è accesa");
+}
+```
+
+### 5.2 Con switch (molto usato)
+
+```java
+switch(lampada){
+    case ACCESO:
+        System.out.println("ON");
+        break;
+
+    case SPENTO:
+        System.out.println("OFF");
+        break;
+}
+```
+
+Gli enum rendono gli `switch` molto più chiari.
+
+## 6. Metodi automatici degli enum
+
+Java fornisce alcuni metodi già pronti.
+
+### 6.1 values()
+
+Restituisce tutti i valori.
+
+```java
+for(Giorno g : Giorno.values()){
+    System.out.println(g);
+}
+```
+
+### 6.2 valueOf()
+
+Converte una stringa in enum.
+
+```java
+Giorno g = Giorno.valueOf("LUNEDI");
+```
+
+<Aside variant="warning">
+Deve essere scritto identico.
+</Aside>
+
+### 6.3 ordinal()
+
+Restituisce la posizione.
+
+```java
+System.out.println(Giorno.LUNEDI.ordinal()); // -> Output: 0
+```
+
+## 7. Enum come vere classi
+
+Molti non sanno che un `enum` è una **classe speciale**.
+
+Può avere:
+
+- attributi
+- costruttori
+- metodi
+
+Per esempio:
+
+```java
+enum Livello {
+
+    BASSO(1),
+    MEDIO(2),
+    ALTO(3);
+
+    private int codice;
+
+    Livello(int codice){
+        this.codice = codice;
+    }
+
+    public int getCodice(){
+        return codice;
+    }
+}
+```
+
+## 8. Quando usare enum (Regola pratica)
+
+Usare un enum quando:
+
+- i valori sono pochi
+- i valori non cambiano
+- rappresentano stati o categorie
+
+Esempi ideali:
+
+- stato ordine → IN_PREPARAZIONE, SPEDITO
+- ruolo utente → ADMIN, USER
+- difficoltà → FACILE, MEDIO, DIFFICILE
+
+## 9. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "Cos'è un enum?",
+answers: {
+a: 'Un ciclo',
+b: 'Un tipo di dato speciale',
+c: 'Un metodo',
+d: 'Un array'
+},
+correctAnswer: 'b'
+},
+{
+question: "Gli enum possono contenere metodi?",
+answers: {
+a: 'No',
+b: 'Solo statici',
+c: 'Sì',
+d: 'Solo privati'
+},
+correctAnswer: 'c'
+},
+{
+question: "Quale parola chiave crea un enum?",
+answers: {
+a: 'class',
+b: 'type',
+c: 'enum',
+d: 'define'
+},
+correctAnswer: 'c'
+},
+{
+question: "Quale metodo restituisce tutti i valori?",
+answers: {
+a: 'getAll()',
+b: 'values()',
+c: 'list()',
+d: 'enumList()'
+},
+correctAnswer: 'b'
+},
+{
+question: "Quando è consigliato usare enum?",
+answers: {
+a: 'Per numeri casuali',
+b: 'Per valori fissi e limitati',
+c: 'Per cicli',
+d: 'Per input utente'
+},
+correctAnswer: 'b'
+}
+]} />
+
+## 10. Esercizi
+
+[Esercizi Enum](https://www.w3resource.com/java-exercises/java-enum-types.php)
+
+### 10.1 Esercizio
+
+Creare un enum Semaforo con:
+
+ROSSO, GIALLO, VERDE
+
+Stampare il comportamento del semaforo.
+
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```java
+enum Semaforo {
+    ROSSO,
+    GIALLO,
+    VERDE
+}
+
+public class Main {
+
+    public static void main(String[] args){
+
+        Semaforo s = Semaforo.ROSSO;
+
+        switch(s){
+            case ROSSO:
+                System.out.println("STOP");
+                break;
+            case GIALLO:
+                System.out.println("ATTENZIONE");
+                break;
+            case VERDE:
+                System.out.println("VAI");
+                break;
+        }
+    }
+}
+```
+
+</details>
+
+### 10.2 Esercizio
+
+Creare un enum Ruolo con:
+
+ADMIN, USER, GUEST
+
+Stampare un messaggio diverso per ogni ruolo.
+
+### 10.3 Esercizio
+
+Creare un enum Livello con un valore numerico associato e stampare il codice del livello scelto.
