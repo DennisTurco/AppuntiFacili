@@ -1,0 +1,419 @@
+---
+title: "Programmazione Object-Oriented (0-0)"
+order: 6
+draft: false
+lastUpdateDate: "2026-04-28"
+subject: "Java"
+category: "Informatica"
+difficulty: "difficile"
+tags: ["java", "programmazione", "oop"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+La **programmazione orientata agli oggetti** (*Object-Oriented Programming*, OOP) è un paradigma che organizza il software attorno a **oggetti**.
+
+Un programma non viene più visto come una sequenza di istruzioni, ma come un insieme di **entità che collaborano tra loro**.
+
+Un oggetto può rappresentare:
+
+- oggetti reali → automobile, studente, telefono;
+- concetti astratti → conto bancario, esame, prenotazione.
+
+---
+
+### Classe e Oggetto
+
+- **Classe** → modello o progetto.
+- **Oggetto** → istanza concreta della classe.
+
+Analogia:
+
+| Concetto | Esempio |
+|---|---|
+| Classe | Progetto di una casa |
+| Oggetto | Casa costruita |
+
+---
+
+Un oggetto possiede:
+
+- **Stato** → attributi (dati)
+- **Comportamento** → metodi (azioni)
+
+---
+
+## 2. Perché usare l'OOP?
+
+L'OOP permette di:
+
+- organizzare programmi complessi;
+- riutilizzare codice;
+- rendere il software più manutenibile;
+- modellare il mondo reale.
+
+Rispetto alla programmazione procedurale:
+
+### Procedurale
+
+- il focus è sulle **funzioni**
+- i dati sono separati dal comportamento
+
+### Object-Oriented
+
+- il focus è sugli **oggetti**
+- dati e comportamenti sono uniti
+
+## 3. Creazione di una Classe
+
+In Java una classe si definisce con la keyword `class`.
+
+```java
+class Persona {
+}
+```
+
+Questa classe è vuota ma può già creare oggetti.
+
+## 4. Creare un Oggetto (Istanza)
+
+```java
+Persona p1 = new Persona();
+```
+
+`new` crea un oggetto in memoria.
+
+## 5. Attributi (Stato)
+
+Gli attributi rappresentano le informazioni dell'oggetto.
+
+```java
+class Persona {
+    String nome;
+    int eta;
+}
+```
+
+Uso:
+
+```java
+Persona p = new Persona();
+
+p.nome = "Anna";
+p.eta = 25;
+```
+
+## 6. Metodi (Comportamento)
+
+I metodi descrivono cosa può fare un oggetto.
+
+```java
+class Persona {
+
+    String nome;
+    int eta;
+
+    void saluta(){
+        System.out.println("Ciao, sono " + nome);
+    }
+}
+```
+
+Uso:
+
+```java
+Persona p = new Persona();
+p.nome = "Marco";
+
+p.saluta();
+```
+
+## 7. Il Costruttore
+
+Il costruttore inizializza l'oggetto quando viene creato.
+
+Ha:
+
+- stesso nome della classe
+- nessun tipo di ritorno
+
+```java
+class Persona {
+
+    String nome;
+    int eta;
+
+    Persona(String nome, int eta){
+        this.nome = nome;
+        this.eta = eta;
+    }
+}
+```
+
+Creazione:
+
+```java
+Persona p = new Persona("Anna", 25);
+```
+
+`this` rappresenta l'oggetto corrente. Serve per distinguere attributi e parametri.
+
+## 8. Incapsulamento
+
+L'incapsulamento protegge i dati interni dell'oggetto.
+
+Gli attributi dovrebbero essere privati.
+
+```java
+class ContoBancario {
+
+    private double saldo;
+
+    void deposita(double importo){
+        saldo += importo;
+    }
+}
+```
+
+Accesso controllato tramite metodi.
+
+### 8.1 Getter e Setter
+
+```java
+class Studente {
+
+    private String nome;
+
+    public String getNome(){
+        return nome;
+    }
+
+    public void setNome(String nome){
+        this.nome = nome;
+    }
+}
+```
+
+## 9. Attributi di Istanza e Statici
+
+### 9.1 Attributi di istanza
+
+Ogni oggetto ha il proprio valore.
+
+### 9.2 Attributi statici
+
+Condivisi tra tutti gli oggetti.
+
+```java
+class Studente {
+
+    String nome;
+    static String scuola = "ITI Fermi";
+}
+```
+
+Uso:
+
+```java
+System.out.println(Studente.scuola);
+```
+
+## 10. Comunicazione tra Oggetti
+
+Gli oggetti collaborano invocando metodi.
+
+```java
+Studente s = new Studente();
+Registro r = new Registro();
+
+r.aggiungiStudente(s);
+```
+
+Gli oggetti si scambiano messaggi (chiamate di metodo).
+
+## 11. Relazioni tra Classi
+
+### 11.1 Associazione
+
+Un oggetto usa un altro oggetto.
+
+### 11.2 Aggregazione / Composizione
+
+Un oggetto contiene altri oggetti.
+
+Esempio:
+
+```java
+class Auto {
+    Motore motore;
+}
+```
+
+## 12. Esempio Completo
+
+```java
+class Rettangolo {
+
+    private int base;
+    private int altezza;
+
+    Rettangolo(int base, int altezza){
+        this.base = base;
+        this.altezza = altezza;
+    }
+
+    int area(){
+        return base * altezza;
+    }
+
+    int perimetro(){
+        return 2*base + 2*altezza;
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args){
+
+        Rettangolo r = new Rettangolo(5,7);
+
+        System.out.println(r.area());
+        System.out.println(r.perimetro());
+    }
+}
+```
+
+## 13. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "Cos'è una classe in Java?",
+answers:{
+a:"Un oggetto già creato",
+b:"Un modello per creare oggetti",
+c:"Una variabile globale",
+d:"Un metodo speciale"
+},
+correctAnswer:"b"
+},
+{
+question:"Cos'è un oggetto?",
+answers:{
+a:"Una funzione",
+b:"Un'istanza di una classe",
+c:"Un ciclo",
+d:"Un package"
+},
+correctAnswer:"b"
+},
+{
+question:"A cosa serve il costruttore?",
+answers:{
+a:"Distruggere oggetti",
+b:"Stampare dati",
+c:"Inizializzare l'oggetto",
+d:"Creare cicli"
+},
+correctAnswer:"c"
+},
+{
+question:"Quale keyword crea un oggetto?",
+answers:{
+a:"create",
+b:"new",
+c:"object",
+d:"init"
+},
+correctAnswer:"b"
+},
+{
+question:"Cosa indica 'private'?",
+answers:{
+a:"Accesso libero",
+b:"Metodo statico",
+c:"Accesso limitato alla classe",
+d:"Metodo pubblico"
+},
+correctAnswer:"c"
+},
+{
+question:"Quale keyword indica ereditarietà?",
+answers:{
+a:"inherit",
+b:"extends",
+c:"implements",
+d:"super"
+},
+correctAnswer:"b"
+},
+{
+question:"Cosa rappresenta 'this'?",
+answers:{
+a:"La classe padre",
+b:"Un metodo statico",
+c:"L'oggetto corrente",
+d:"Una variabile globale"
+},
+correctAnswer:"c"
+},
+{
+question:"Un attributo static è:",
+answers:{
+a:"Diverso per ogni oggetto",
+b:"Condiviso tra tutte le istanze",
+c:"Sempre privato",
+d:"Un metodo"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 14. Esercizi
+
+[Esercizi geeksforgeeks](https://www.geeksforgeeks.org/java/java-oop-exercises/)
+
+### 14.1 Classe Persona
+
+Creare una classe `Persona` con:
+
+- nome
+- età
+- metodo saluta()
+
+### 14.2 Classe Rettangolo
+
+Creare una classe `Rettangolo` con:
+
+- base e altezza private
+- costruttore
+- metodo area
+- metodo perimetro
+
+### 14.3 Conto Bancario
+
+Creare una classe `ContoBancario` con:
+
+- saldo privato
+- deposita()
+- preleva()
+- mostraSaldo()
+
+### 14.4 Studente (static)
+
+Creare una classe Studente con:
+
+- nome
+- voto
+- attributo static `scuola`
+
+Stampare la scuola da più oggetti.
+
+### 14.5 Sfida
+
+Creare una classe Auto che contiene un oggetto Motore.
+
+Simulare l'accensione dell'auto tramite chiamata di metodo.

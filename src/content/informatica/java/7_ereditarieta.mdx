@@ -2,7 +2,7 @@
 title: "Ereditarietà"
 order: 7
 draft: false
-lastUpdateDate: "2025-08-28"
+lastUpdateDate: "2026-04-28"
 subject: "Java"
 category: "Informatica"
 difficulty: "difficile"
@@ -232,6 +232,180 @@ public class Main {
 }
 ```
 
-## 6. Esercizi
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Cos'è l'ereditarietà in Java?",
+answers:{
+a:"La copia del codice tra classi",
+b:"Il meccanismo con cui una classe eredita attributi e metodi da un'altra",
+c:"Un tipo di ciclo",
+d:"Una variabile globale"
+},
+correctAnswer:"b"
+},
+{
+question:"Quale keyword permette di creare una sottoclasse?",
+answers:{
+a:"implements",
+b:"inherits",
+c:"extends",
+d:"super"
+},
+correctAnswer:"c"
+},
+{
+question:"La classe da cui si eredita si chiama:",
+answers:{
+a:"Sottoclasse",
+b:"Classe finale",
+c:"Superclasse",
+d:"Classe statica"
+},
+correctAnswer:"c"
+},
+{
+question:"Una sottoclasse può:",
+answers:{
+a:"Solo usare i metodi della superclasse",
+b:"Aggiungere nuovi attributi e metodi",
+c:"Eliminare la superclasse",
+d:"Ereditare solo i costruttori"
+},
+correctAnswer:"b"
+},
+{
+question:"Quale keyword richiama il costruttore della superclasse?",
+answers:{
+a:"this",
+b:"parent",
+c:"base",
+d:"super"
+},
+correctAnswer:"d"
+},
+{
+question:"Tutte le classi Java derivano implicitamente da:",
+answers:{
+a:"System",
+b:"Main",
+c:"Object",
+d:"ClassBase"
+},
+correctAnswer:"c"
+},
+{
+question:"L'operatore instanceof serve per:",
+answers:{
+a:"Creare oggetti",
+b:"Verificare il tipo di un oggetto",
+c:"Copiare oggetti",
+d:"Distruggere oggetti"
+},
+correctAnswer:"b"
+},
+{
+question:"Un oggetto Quadrato è anche un Rettangolo?",
+answers:{
+a:"No",
+b:"Solo se castato",
+c:"Sì, se Quadrato estende Rettangolo",
+d:"Solo con protected"
+},
+correctAnswer:"c"
+},
+{
+question:"Quale visibilità permette accesso alle sottoclassi?",
+answers:{
+a:"private",
+b:"protected",
+c:"default",
+d:"static"
+},
+correctAnswer:"b"
+},
+{
+question:"Ridefinire un metodo della superclasse si chiama:",
+answers:{
+a:"Overloading",
+b:"Overriding",
+c:"Casting",
+d:"Binding"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 7. Esercizi
 
 [Ereditarietà di classi in linguaggio Java:esercizi risolti](https://www.edutecnica.it/informatica/polimorfismo_x/polimorfismo_x.htm)
+
+### 7.1 Ereditarietà base
+
+Creare:
+
+- una classe Veicolo
+- una classe Auto che estende Veicolo
+
+Classe Veicolo:
+
+- attributi: marca, velocità
+- metodo: stampaInfo()
+
+Classe Auto:
+
+- attributo: numeroPorte
+
+Creare un Main che istanzia un oggetto Auto.
+
+### 7.2 Uso di super
+
+Creare una classe:
+
+- Animale con attributo nome.
+
+Creare una sottoclasse:
+
+- Cane.
+
+Requisiti:
+
+- costruttore con parametro nome
+- inizializzazione tramite super(...).
+
+### 7.3 Override
+
+Creare:
+
+- classe Forma con metodo area().
+- classi Cerchio e Rettangolo.
+
+Ogni sottoclasse deve ridefinire il metodo area().
+
+Stampare l'area usando variabili di tipo Forma.
+
+### 7.4 Uso di instanceof
+
+Dato un riferimento:
+
+- Animale a = new Cane();
+
+Verificare:
+
+- se è un Cane
+- se è un Animale
+- se è un Object
+
+### 7.5 Ereditarietà multilivello
+
+Realizzare la gerarchia:
+
+- Persona → Studente → StudenteUniversitario
+
+Ogni classe deve aggiungere:
+
+- almeno un attributo
+- almeno un metodo.
