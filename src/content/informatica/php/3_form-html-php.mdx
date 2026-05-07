@@ -1,0 +1,347 @@
+---
+title: "Form HTML e PHP"
+order: 3
+draft: false
+lastUpdateDate: "2026-05-07"
+subject: "PHP"
+category: "Informatica"
+difficulty: "medio"
+tags: ["php", "programmazione", "web", "form", "html", "input"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Un **form HTML** è il modo principale per raccogliere dati dall'utente (nome, email, password, ecc.) e inviarli al server dove PHP li elabora.
+
+Il ciclo completo è:
+
+```
+Utente compila il form → Browser invia dati al server → PHP li riceve e li elabora → Risposta all'utente
+```
+
+## 2. Struttura di un form HTML
+
+```html
+<form action="elabora.php" method="POST">
+  <label for="nome">Nome:</label>
+  <input type="text" id="nome" name="nome">
+  <button type="submit">Invia</button>
+</form>
+```
+
+### Attributi fondamentali del tag `<form>`
+
+| Attributo  | Descrizione                                                  |
+| ---------- | ------------------------------------------------------------ |
+| `action`   | URL della pagina PHP che riceve i dati (default: stessa pagina) |
+| `method`   | Metodo di invio: `GET` o `POST`                              |
+| `enctype`  | Necessario per upload file: `multipart/form-data`           |
+
+<Aside variant="info">
+Se `action` viene omesso o impostato a `""`, il form viene inviato alla **stessa pagina** PHP.
+</Aside>
+
+## 3. Attributo `type` del tag `<input>`
+
+L'attributo `type` definisce il **tipo di campo** visualizzato e il tipo di dati che l'utente può inserire.
+
+| `type`           | Descrizione                                             | Esempio visivo          |
+| ---------------- | ------------------------------------------------------- | ----------------------- |
+| `text`           | Campo di testo a riga singola                           | Campo libero            |
+| `password`       | Come `text`, ma nasconde i caratteri                    | ● ● ● ● ●               |
+| `email`          | Testo con validazione formato email                     | utente@dominio.com      |
+| `number`         | Solo numeri, con frecce su/giù                          | 1, 2, 3…                |
+| `tel`            | Numero di telefono                                      | +39 333 1234567         |
+| `url`            | URL con validazione formato                             | https://esempio.com     |
+| `date`           | Selettore data                                          | gg/mm/aaaa              |
+| `time`           | Selettore orario                                        | hh:mm                   |
+| `checkbox`       | Casella di spunta (true/false)                          | ☑ Accetto               |
+| `radio`          | Selezione singola tra più opzioni                       | ● Opzione A  ○ Opzione B |
+| `range`          | Cursore per un valore in un intervallo                  | ——●—————                |
+| `file`           | Caricamento file                                        | Sfoglia…                |
+| `hidden`         | Campo invisibile all'utente                             | (non visibile)          |
+| `submit`         | Pulsante di invio del form                              | [Invia]                 |
+| `reset`          | Pulsante per azzerare il form                           | [Reimposta]             |
+| `color`          | Selettore colore                                        | 🎨                      |
+| `search`         | Campo di ricerca                                        | 🔍                      |
+
+### Esempi pratici di `type`
+
+```html
+<!-- Testo e password -->
+<input type="text"     name="username" placeholder="Nome utente">
+<input type="password" name="password" placeholder="Password">
+
+<!-- Email e numero -->
+<input type="email"  name="email" placeholder="tuo@email.com">
+<input type="number" name="eta"   min="1" max="120">
+
+<!-- Data e orario -->
+<input type="date" name="nascita">
+<input type="time" name="orario">
+
+<!-- Checkbox e radio -->
+<input type="checkbox" name="termini" value="si"> Accetto i termini
+<input type="radio" name="sesso" value="m"> Maschio
+<input type="radio" name="sesso" value="f"> Femmina
+
+<!-- Range -->
+<input type="range" name="volume" min="0" max="100" value="50">
+
+<!-- File e nascosto -->
+<input type="file"   name="foto">
+<input type="hidden" name="token" value="abc123">
+```
+
+<Aside variant="tip">
+Usa il `type` corretto: il browser mostrerà la tastiera appropriata su mobile (es. tastierino numerico per `number`, tastiera email per `email`) e applicherà una validazione base prima di inviare il form.
+</Aside>
+
+## 4. Altri elementi di un form
+
+### `<select>` — menu a tendina
+
+```html
+<select name="paese">
+  <option value="">-- Scegli --</option>
+  <option value="it">Italia</option>
+  <option value="fr">Francia</option>
+  <option value="de">Germania</option>
+</select>
+```
+
+### `<textarea>` — testo su più righe
+
+```html
+<textarea name="messaggio" rows="5" cols="40" placeholder="Scrivi qui..."></textarea>
+```
+
+## 5. Ricevere i dati in PHP
+
+### 5.1 Metodo POST
+
+```html
+<!-- form.html -->
+<form action="elabora.php" method="POST">
+  <input type="text"  name="nome"  placeholder="Nome">
+  <input type="email" name="email" placeholder="Email">
+  <button type="submit">Invia</button>
+</form>
+```
+
+```php
+<?php
+// elabora.php
+$nome  = htmlspecialchars($_POST['nome']);
+$email = htmlspecialchars($_POST['email']);
+
+echo "<h2>Dati ricevuti:</h2>";
+echo "Nome: $nome <br>";
+echo "Email: $email";
+?>
+```
+
+### 5.2 Metodo GET (ricerca)
+
+```html
+<form action="cerca.php" method="GET">
+  <input type="search" name="q" placeholder="Cerca...">
+  <button type="submit">Cerca</button>
+</form>
+```
+
+```php
+<?php
+// cerca.php
+$query = htmlspecialchars($_GET['q']);
+echo "Hai cercato: $query";
+?>
+```
+
+## 6. Form e PHP sulla stessa pagina
+
+Una tecnica comune è gestire form e logica in **un unico file PHP**.
+
+```php
+<?php
+// index.php
+$messaggio = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome = htmlspecialchars($_POST['nome']);
+    $messaggio = "Ciao, $nome! Il modulo è stato inviato correttamente.";
+}
+?>
+
+<!doctype html>
+<html>
+<head><title>Form PHP</title></head>
+<body>
+
+<?php if ($messaggio): ?>
+    <p style="color: green;"><?= $messaggio ?></p>
+<?php endif; ?>
+
+<form method="POST">
+  <label>Nome: <input type="text" name="nome" required></label>
+  <button type="submit">Invia</button>
+</form>
+
+</body>
+</html>
+```
+
+<Aside variant="info">
+`<?= $variabile ?>` è una scorciatoia per `<?php echo $variabile; ?>`.
+</Aside>
+
+## 7. Validazione dei dati
+
+Prima di usare i dati, è essenziale verificare che siano presenti e nel formato corretto.
+
+```php
+<?php
+$errori = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $nome  = trim($_POST['nome'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $eta   = intval($_POST['eta'] ?? 0);
+
+    if (empty($nome)) {
+        $errori[] = "Il nome è obbligatorio.";
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errori[] = "L'email non è valida.";
+    }
+
+    if ($eta < 18 || $eta > 120) {
+        $errori[] = "L'età deve essere compresa tra 18 e 120.";
+    }
+
+    if (empty($errori)) {
+        echo "Dati validi! Benvenuto, $nome.";
+    } else {
+        foreach ($errori as $err) {
+            echo "<p style='color:red;'>$err</p>";
+        }
+    }
+}
+?>
+```
+
+<Aside variant="warning">
+La validazione lato client (HTML5, JavaScript) è utile per l'UX, ma **non basta**: un utente malintenzionato può aggirarla. La validazione PHP lato server è **obbligatoria**.
+</Aside>
+
+### Funzioni di validazione e sanitizzazione utili
+
+| Funzione                              | Uso                                          |
+| ------------------------------------- | -------------------------------------------- |
+| `htmlspecialchars($str)`              | Converte caratteri HTML pericolosi           |
+| `trim($str)`                          | Rimuove spazi all'inizio e alla fine         |
+| `empty($var)`                         | Controlla se la variabile è vuota            |
+| `isset($var)`                         | Controlla se la variabile esiste             |
+| `intval($var)`                        | Converte in intero                           |
+| `floatval($var)`                      | Converte in decimale                         |
+| `filter_var($var, FILTER_VALIDATE_EMAIL)` | Valida il formato email               |
+| `filter_var($var, FILTER_VALIDATE_INT)`   | Valida il formato intero              |
+
+## 8. Esercizi
+
+1. Crea un form con `type="text"`, `type="email"` e `type="number"` (età). Invia i dati con POST e mostrali a schermo.
+2. Aggiungi una validazione PHP: il nome deve avere almeno 2 caratteri e l'email deve essere valida.
+3. Crea un form di selezione del paese con `<select>` e mostra il paese scelto dopo l'invio.
+4. Usa `type="radio"` per scegliere il sesso e `type="checkbox"` per accettare i termini. Verifica lato PHP che i termini siano stati accettati.
+5. Crea un form sulla stessa pagina (action="") che mostri un messaggio di successo dopo l'invio senza ricaricare tutto.
+
+## 9. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) L'attributo 'action' di un form specifica:",
+answers: {
+a: "Il metodo di invio (GET o POST)",
+b: "La pagina che riceve i dati del form",
+c: "Il tipo di input",
+d: "Il colore del pulsante"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Quale type si usa per nascondere la password durante la digitazione?",
+answers: {
+a: "type='hidden'",
+b: "type='secret'",
+c: "type='password'",
+d: "type='secure'"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Quale metodo non mostra i dati nell'URL?",
+answers: {
+a: "GET",
+b: "POST",
+c: "REQUEST",
+d: "SEND"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Quale type permette di caricare un file?",
+answers: {
+a: "type='upload'",
+b: "type='attach'",
+c: "type='document'",
+d: "type='file'"
+},
+correctAnswer: "d"
+},
+{
+question: "5) Quale superglobale riceve i dati di un form con method='POST'?",
+answers: {
+a: "$_GET",
+b: "$_REQUEST",
+c: "$_POST",
+d: "$_FORM"
+},
+correctAnswer: "c"
+},
+{
+question: "6) Cosa fa htmlspecialchars()?",
+answers: {
+a: "Cifra la stringa con SHA-256",
+b: "Converte caratteri HTML speciali prevenendo XSS",
+c: "Rimuove gli spazi dalla stringa",
+d: "Converte la stringa in maiuscolo"
+},
+correctAnswer: "b"
+},
+{
+question: "7) Quale type genera un cursore per selezionare un valore tra min e max?",
+answers: {
+a: "type='slider'",
+b: "type='number'",
+c: "type='range'",
+d: "type='scale'"
+},
+correctAnswer: "c"
+},
+{
+question: "8) Per rilevare se il form è stato inviato in PHP si usa:",
+answers: {
+a: "$_POST['submitted']",
+b: "$_SERVER['REQUEST_METHOD'] === 'POST'",
+c: "form_submitted()",
+d: "isset($_FORM)"
+},
+correctAnswer: "b"
+}
+]} />

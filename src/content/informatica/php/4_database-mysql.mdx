@@ -1,0 +1,423 @@
+---
+title: "Database MySQL con PHP"
+order: 4
+draft: false
+lastUpdateDate: "2026-05-07"
+subject: "PHP"
+category: "Informatica"
+difficulty: "difficile"
+tags: ["php", "programmazione", "web", "database", "mysql", "sql"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+La maggior parte delle applicazioni web ha bisogno di **salvare dati in modo persistente**: utenti, articoli, ordini, messaggi…
+
+PHP si integra facilmente con i principali database relazionali. Il più usato in ambito web è **MySQL** (o il suo fork **MariaDB**).
+
+## 2. Cos'è un DBMS?
+
+Un **DBMS** (*Database Management System*) è un software che gestisce la creazione, la modifica e l'interrogazione di basi di dati.
+
+| Caratteristica         | Descrizione                                            |
+| ---------------------- | ------------------------------------------------------ |
+| **Organizzazione**     | I dati sono strutturati in tabelle (righe e colonne)   |
+| **Interrogazione**     | Si usa il linguaggio SQL per leggere e modificare dati |
+| **Sicurezza**          | Gestione di utenti, permessi e accessi                 |
+| **Integrità**          | Vincoli per garantire la coerenza dei dati             |
+
+### DBMS più diffusi per il web
+
+| DBMS       | Tipo        | Note                                      |
+| ---------- | ----------- | ----------------------------------------- |
+| **MySQL**  | Relazionale | Il più usato con PHP, parte dello stack LAMP |
+| **MariaDB**| Relazionale | Fork open source di MySQL, compatibile    |
+| **SQLite** | Relazionale | Basato su file, integrato in PHP          |
+| **PostgreSQL** | Relazionale | Potente, open source                  |
+
+<Aside variant="info">
+**MariaDB** è nato come alternativa open source a MySQL dopo l'acquisizione di MySQL da parte di Oracle. È pienamente compatibile con MySQL: tutto ciò che impari per MySQL vale anche per MariaDB.
+</Aside>
+
+## 3. Lo stack LAMP
+
+PHP + MySQL vengono spesso usati insieme nello stack **LAMP**:
+
+| Lettera | Software          | Ruolo                     |
+| ------- | ----------------- | ------------------------- |
+| **L**   | Linux             | Sistema operativo         |
+| **A**   | Apache            | Web server                |
+| **M**   | MySQL / MariaDB   | Database                  |
+| **P**   | PHP               | Linguaggio server-side    |
+
+Su Windows si usa spesso **XAMPP** o **WampServer** per avere tutto in locale.
+
+## 4. PHP + MySQL: due approcci
+
+PHP offre due modi per connettersi a MySQL:
+
+| Metodo       | Stile         | Consigliato |
+| ------------ | ------------- | :---------: |
+| `mysqli`     | Procedurale / OOP |  Sì   |
+| `PDO`        | OOP, multi-database |  Sì  |
+| `mysql_*`    | Funzioni vecchie |  Deprecato |
+
+<Aside variant="warning">
+Le funzioni `mysql_connect()`, `mysql_query()` ecc. sono state **rimosse** da PHP 7. Usa sempre `mysqli` o `PDO`.
+</Aside>
+
+In questa lezione usiamo **`mysqli`** in stile procedurale (più semplice per iniziare).
+
+## 5. Connettersi al database
+
+```php
+<?php
+$host   = "localhost";
+$utente = "root";
+$password = "";
+$database = "scuola";
+
+// Connessione
+$conn = mysqli_connect($host, $utente, $password, $database);
+
+// Verifica connessione
+if (!$conn) {
+    die("Connessione fallita: " . mysqli_connect_error());
+}
+
+echo "Connessione riuscita!";
+?>
+```
+
+<Aside variant="info">
+`die()` interrompe lo script e mostra il messaggio di errore. Usa sempre la verifica della connessione.
+</Aside>
+
+### Chiudere la connessione
+
+```php
+<?php
+mysqli_close($conn);
+?>
+```
+
+## 6. Creare un database e una tabella
+
+Queste operazioni si fanno tipicamente una volta sola (o tramite un pannello come phpMyAdmin).
+
+```sql
+-- Crea il database
+CREATE DATABASE IF NOT EXISTS scuola;
+
+-- Seleziona il database
+USE scuola;
+
+-- Crea la tabella studenti
+CREATE TABLE IF NOT EXISTS studenti (
+    id    INT AUTO_INCREMENT PRIMARY KEY,
+    nome  VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    voto  DECIMAL(4,2)
+);
+```
+
+In PHP è possibile eseguire queste query con `mysqli_query()`, ma normalmente si usa phpMyAdmin o un client SQL.
+
+## 7. Inserire dati (INSERT)
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+
+$nome  = "Mario Rossi";
+$email = "mario@example.com";
+$voto  = 8.5;
+
+$sql = "INSERT INTO studenti (nome, email, voto) VALUES ('$nome', '$email', $voto)";
+
+if (mysqli_query($conn, $sql)) {
+    echo "Studente inserito con successo.";
+} else {
+    echo "Errore: " . mysqli_error($conn);
+}
+
+mysqli_close($conn);
+?>
+```
+
+<Aside variant="warning">
+**Attenzione alla SQL Injection!** Inserire direttamente le variabili nella query è pericoloso. Usa sempre le **prepared statements** (vedi sezione 10).
+</Aside>
+
+## 8. Leggere dati (SELECT)
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+
+$sql     = "SELECT * FROM studenti";
+$result  = mysqli_query($conn, $sql);
+
+if (mysqli_num_rows($result) > 0) {
+    while ($riga = mysqli_fetch_assoc($result)) {
+        echo "ID: " . $riga['id'] . " - Nome: " . $riga['nome'] . " - Voto: " . $riga['voto'] . "<br>";
+    }
+} else {
+    echo "Nessun risultato.";
+}
+
+mysqli_close($conn);
+?>
+```
+
+### Funzioni principali per leggere risultati
+
+| Funzione                    | Descrizione                                      |
+| --------------------------- | ------------------------------------------------ |
+| `mysqli_fetch_assoc($res)`  | Restituisce la riga come array associativo       |
+| `mysqli_fetch_row($res)`    | Restituisce la riga come array indicizzato       |
+| `mysqli_fetch_array($res)`  | Restituisce entrambi i tipi                     |
+| `mysqli_num_rows($res)`     | Numero totale di righe restituite                |
+
+## 9. Aggiornare e cancellare dati
+
+### UPDATE
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+
+$sql = "UPDATE studenti SET voto = 9.0 WHERE email = 'mario@example.com'";
+
+if (mysqli_query($conn, $sql)) {
+    echo "Voto aggiornato. Righe modificate: " . mysqli_affected_rows($conn);
+} else {
+    echo "Errore: " . mysqli_error($conn);
+}
+?>
+```
+
+### DELETE
+
+```php
+<?php
+$sql = "DELETE FROM studenti WHERE email = 'mario@example.com'";
+
+if (mysqli_query($conn, $sql)) {
+    echo "Studente eliminato.";
+}
+?>
+```
+
+## 10. Prepared Statements (sicurezza)
+
+Le **prepared statements** separano la query SQL dai dati, prevenendo la **SQL Injection**.
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+
+// 1. Prepara la query con i segnaposto ?
+$stmt = mysqli_prepare($conn, "INSERT INTO studenti (nome, email, voto) VALUES (?, ?, ?)");
+
+// 2. Associa i parametri (s = string, d = double/float, i = integer)
+$nome  = "Luigi Verdi";
+$email = "luigi@example.com";
+$voto  = 7.5;
+mysqli_stmt_bind_param($stmt, "ssd", $nome, $email, $voto);
+
+// 3. Esegui
+mysqli_stmt_execute($stmt);
+echo "Inserito con prepared statement.";
+
+mysqli_stmt_close($stmt);
+mysqli_close($conn);
+?>
+```
+
+### Tipi di parametro per `bind_param`
+
+| Carattere | Tipo          |
+| --------- | ------------- |
+| `s`       | Stringa       |
+| `i`       | Intero        |
+| `d`       | Double/Float  |
+| `b`       | Blob (binario)|
+
+<Aside variant="tip">
+Le prepared statements sono **sempre preferibili** rispetto all'inserimento diretto delle variabili in una query. Usale ogni volta che ricevi dati dall'utente.
+</Aside>
+
+## 11. Esempio completo: form + database
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+$messaggio = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome  = htmlspecialchars(trim($_POST['nome']));
+    $email = htmlspecialchars(trim($_POST['email']));
+    $voto  = floatval($_POST['voto']);
+
+    $stmt = mysqli_prepare($conn, "INSERT INTO studenti (nome, email, voto) VALUES (?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "ssd", $nome, $email, $voto);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $messaggio = "Studente registrato con successo!";
+    } else {
+        $messaggio = "Errore: " . mysqli_error($conn);
+    }
+    mysqli_stmt_close($stmt);
+}
+?>
+
+<!doctype html>
+<html>
+<head><title>Registra Studente</title></head>
+<body>
+
+<?php if ($messaggio): ?>
+  <p><strong><?= $messaggio ?></strong></p>
+<?php endif; ?>
+
+<form method="POST">
+  <label>Nome:  <input type="text"   name="nome"  required></label><br>
+  <label>Email: <input type="email"  name="email" required></label><br>
+  <label>Voto:  <input type="number" name="voto"  step="0.1" min="0" max="10"></label><br>
+  <button type="submit">Registra</button>
+</form>
+
+<h2>Elenco studenti</h2>
+<?php
+  $result = mysqli_query($conn, "SELECT * FROM studenti ORDER BY nome");
+  while ($r = mysqli_fetch_assoc($result)) {
+      echo $r['nome'] . " — " . $r['email'] . " — Voto: " . $r['voto'] . "<br>";
+  }
+  mysqli_close($conn);
+?>
+
+</body>
+</html>
+```
+
+## 12. Gestione degli errori
+
+```php
+<?php
+// Connessione con gestione errori
+$conn = mysqli_connect("localhost", "root", "", "scuola");
+
+if (!$conn) {
+    die("Errore di connessione: " . mysqli_connect_error());
+}
+
+// Query con gestione errori
+$result = mysqli_query($conn, "SELECT * FROM studenti");
+
+if (!$result) {
+    die("Errore nella query: " . mysqli_error($conn));
+}
+
+// ... usa $result ...
+
+mysqli_close($conn);
+?>
+```
+
+## 13. Esercizi
+
+1. Crea il database `negozio` con una tabella `prodotti` (id, nome, prezzo, quantità). Inserisci 3 prodotti via script PHP.
+2. Scrivi uno script PHP che mostri tutti i prodotti in una tabella HTML.
+3. Crea un form che permetta di cercare un prodotto per nome e mostri i risultati (usa una prepared statement con `LIKE ?`).
+4. Aggiungi una funzione di modifica: un form che riceva l'id del prodotto e il nuovo prezzo, e lo aggiorni nel database.
+5. Crea un form di login che confronti email e password (hashata con `password_hash()`) salvate nel database.
+
+## 14. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Cosa significa DBMS?",
+answers: {
+a: "Dynamic Base Management System",
+b: "Database Management System",
+c: "Data Binary Memory Store",
+d: "Database Module and SQL"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Quale funzione PHP apre la connessione a MySQL?",
+answers: {
+a: "mysql_connect()",
+b: "db_connect()",
+c: "mysqli_connect()",
+d: "sql_open()"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Cosa sono le prepared statements?",
+answers: {
+a: "Query salvate nel database",
+b: "Query che separano SQL dai dati, prevenendo SQL Injection",
+c: "Funzioni PHP per generare HTML",
+d: "Commenti nel codice SQL"
+},
+correctAnswer: "b"
+},
+{
+question: "4) Quale carattere rappresenta una stringa in mysqli_stmt_bind_param?",
+answers: {
+a: "i",
+b: "d",
+c: "s",
+d: "b"
+},
+correctAnswer: "c"
+},
+{
+question: "5) Quale funzione recupera una riga come array associativo?",
+answers: {
+a: "mysqli_fetch_row()",
+b: "mysqli_get_assoc()",
+c: "mysqli_fetch_assoc()",
+d: "mysqli_read()"
+},
+correctAnswer: "c"
+},
+{
+question: "6) Cosa fa mysqli_num_rows()?",
+answers: {
+a: "Restituisce il numero di colonne",
+b: "Conta il numero di righe restituite dalla query",
+c: "Elimina le righe duplicate",
+d: "Conteggia le tabelle del database"
+},
+correctAnswer: "b"
+},
+{
+question: "7) Quale stack include Linux, Apache, MySQL e PHP?",
+answers: {
+a: "MEAN",
+b: "MERN",
+c: "LAMP",
+d: "LEMP"
+},
+correctAnswer: "c"
+},
+{
+question: "8) Perché non bisogna usare le funzioni mysql_* in PHP moderno?",
+answers: {
+a: "Sono troppo lente",
+b: "Funzionano solo su Linux",
+c: "Sono state rimosse da PHP 7",
+d: "Non supportano MySQL 8"
+},
+correctAnswer: "c"
+}
+]} />

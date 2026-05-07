@@ -1,0 +1,326 @@
+---
+title: "Variabili Superglobali in PHP"
+order: 2
+draft: false
+lastUpdateDate: "2026-05-07"
+subject: "PHP"
+category: "Informatica"
+difficulty: "medio"
+tags: ["php", "programmazione", "web", "superglobali", "variabili"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Cosa sono le variabili superglobali?
+
+Le **variabili superglobali** sono variabili predefinite di PHP, **sempre disponibili** in qualsiasi punto dello script (funzioni, classi, file inclusi), senza bisogno di dichiararle o importarle.
+
+Il loro nome inizia sempre con `$_` seguito da una parola in maiuscolo.
+
+<Aside variant="info">
+Le superglobali sono **array associativi**: contengono coppie chiave → valore.
+</Aside>
+
+## 2. Panoramica delle superglobali
+
+| Variabile      | Descrizione                                                     |
+| -------------- | --------------------------------------------------------------- |
+| `$_GET`        | Dati inviati tramite URL (metodo GET)                           |
+| `$_POST`       | Dati inviati tramite form (metodo POST)                         |
+| `$_REQUEST`    | Unione di `$_GET`, `$_POST` e `$_COOKIE`                       |
+| `$_SERVER`     | Informazioni sul server e sulla richiesta HTTP                  |
+| `$_SESSION`    | Dati della sessione utente (persistenti tra le pagine)          |
+| `$_COOKIE`     | Dati dei cookie salvati nel browser                             |
+| `$_FILES`      | File caricati tramite form (`<input type="file">`)              |
+| `$_ENV`        | Variabili d'ambiente del sistema operativo                      |
+| `$GLOBALS`     | Accesso a tutte le variabili globali dello script               |
+
+## 3. `$_GET`
+
+Contiene i dati passati nell'**URL** dopo il simbolo `?`.
+
+Esempio di URL:
+```
+http://localhost/pagina.php?nome=Luca&eta=20
+```
+
+```php
+<?php
+  $nome = $_GET['nome'];  // "Luca"
+  $eta  = $_GET['eta'];   // "20"
+  echo "Ciao, $nome! Hai $eta anni.";
+?>
+```
+
+<Aside variant="warning">
+I dati ricevuti via `$_GET` sono **visibili nell'URL** e non adatti per informazioni sensibili (password, dati personali).
+</Aside>
+
+## 4. `$_POST`
+
+Contiene i dati inviati tramite un **form HTML** con metodo `POST`. I dati **non sono visibili nell'URL**.
+
+```php
+<?php
+  $nome = $_POST['nome'];
+  echo "Hai inviato: $nome";
+?>
+```
+
+<Aside variant="info">
+`$_POST` è usato per form di login, registrazione e invio dati sensibili perché i valori non appaiono nella barra degli indirizzi.
+</Aside>
+
+### Differenza GET vs POST
+
+| Caratteristica         | `$_GET`            | `$_POST`          |
+| ---------------------- | ------------------ | ----------------- |
+| Dati visibili nell'URL | Sì              | No             |
+| Adatto per dati sensibili | No           | Sì             |
+| Lunghezza dati         | Limitata (~2000 char) | Molto più grande |
+| Uso tipico             | Filtri, ricerche   | Login, form       |
+
+## 5. `$_REQUEST`
+
+Raccoglie in un unico array i dati di `$_GET`, `$_POST` e `$_COOKIE`.
+
+```php
+<?php
+  $nome = $_REQUEST['nome'];  // funziona sia con GET che con POST
+?>
+```
+
+<Aside variant="warning">
+È comodo ma meno sicuro: non distingue la provenienza del dato. Preferisci sempre `$_GET` o `$_POST` esplicitamente.
+</Aside>
+
+## 6. `$_SERVER`
+
+Contiene informazioni sul **server**, sull'**ambiente** e sulla **richiesta HTTP**.
+
+```php
+<?php
+  echo $_SERVER['PHP_SELF'];       // percorso del file corrente
+  echo $_SERVER['REQUEST_METHOD']; // "GET" o "POST"
+  echo $_SERVER['SERVER_NAME'];    // nome del server (es. "localhost")
+  echo $_SERVER['HTTP_USER_AGENT']; // browser dell'utente
+  echo $_SERVER['REMOTE_ADDR'];    // indirizzo IP dell'utente
+?>
+```
+
+### Uso pratico: rilevare il metodo della richiesta
+
+```php
+<?php
+  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      echo "Modulo inviato con POST";
+  } else {
+      echo "Pagina visualizzata normalmente";
+  }
+?>
+```
+
+## 7. `$_SESSION`
+
+Permette di **memorizzare dati relativi a un utente** tra una pagina e l'altra (es. utente loggato, carrello, preferenze).
+
+La sessione deve essere **avviata** con `session_start()` **prima di qualsiasi output HTML**.
+
+```php
+<?php
+  session_start();
+
+  // Salvare un dato in sessione
+  $_SESSION['utente'] = "Mario";
+  $_SESSION['ruolo']  = "admin";
+?>
+```
+
+```php
+<?php
+  // Leggere la sessione in un'altra pagina
+  session_start();
+  echo "Benvenuto, " . $_SESSION['utente'];  // Benvenuto, Mario
+?>
+```
+
+```php
+<?php
+  // Distruggere la sessione (logout)
+  session_start();
+  session_destroy();
+  echo "Logout effettuato.";
+?>
+```
+
+<Aside variant="info">
+I dati di sessione sono salvati **sul server**, non nel browser. Il browser riceve solo un ID di sessione (cookie `PHPSESSID`).
+</Aside>
+
+## 8. `$_COOKIE`
+
+I **cookie** sono piccoli dati salvati nel **browser dell'utente** e inviati al server ad ogni richiesta.
+
+```php
+<?php
+  // Impostare un cookie (valido per 7 giorni)
+  setcookie("lingua", "it", time() + 7 * 24 * 3600);
+?>
+```
+
+```php
+<?php
+  // Leggere un cookie
+  if (isset($_COOKIE['lingua'])) {
+      echo "Lingua preferita: " . $_COOKIE['lingua'];
+  }
+?>
+```
+
+<Aside variant="warning">
+I cookie sono visibili e modificabili dall'utente. Non usarli per dati sensibili senza cifratura.
+</Aside>
+
+### Session vs Cookie
+
+| Caratteristica       | `$_SESSION`         | `$_COOKIE`              |
+| -------------------- | ------------------- | ----------------------- |
+| Dove sono salvati    | Sul server          | Nel browser             |
+| Durata               | Fino alla chiusura del browser (default) | Scade alla data impostata |
+| Sicurezza            | Più sicuri          | Meno sicuri             |
+| Visibilità utente    | Non visibili        | Visibili nel browser    |
+
+## 9. `$_FILES`
+
+Gestisce i **file caricati** tramite un form HTML.
+
+```html
+<form method="POST" enctype="multipart/form-data">
+  <input type="file" name="foto">
+  <button type="submit">Carica</button>
+</form>
+```
+
+```php
+<?php
+  if (isset($_FILES['foto'])) {
+      $nome_file = $_FILES['foto']['name'];
+      $tmp       = $_FILES['foto']['tmp_name'];
+      move_uploaded_file($tmp, "uploads/" . $nome_file);
+      echo "File caricato: $nome_file";
+  }
+?>
+```
+
+## 10. Sicurezza: validare sempre i dati
+
+I dati ricevuti dall'esterno (GET, POST, COOKIE) possono contenere codice malevolo. È **fondamentale** validarli e sanitizzarli.
+
+```php
+<?php
+  // Rimozione di tag HTML e caratteri pericolosi
+  $nome = htmlspecialchars($_POST['nome']);
+  $eta  = intval($_POST['eta']);  // converti in intero
+
+  echo "Nome: $nome, Età: $eta";
+?>
+```
+
+<Aside variant="warning">
+Non fidarti mai dei dati provenienti dall'utente. Usa sempre `htmlspecialchars()` per le stringhe e `intval()` / `floatval()` per i numeri.
+</Aside>
+
+## 11. Esercizi
+
+1. Crea una pagina PHP che legga un nome dall'URL (`?nome=...`) e mostri un messaggio di benvenuto personalizzato.
+2. Usando `$_SERVER['HTTP_USER_AGENT']`, mostra il browser con cui l'utente sta navigando.
+3. Scrivi uno script che avvii una sessione, salvi un messaggio e lo mostri in una seconda pagina (simulando la navigazione).
+4. Crea un cookie che ricordi la lingua preferita dell'utente per 30 giorni. Leggi e mostra il valore nella stessa pagina.
+5. Spiega con parole tue la differenza tra `$_GET` e `$_POST`, e quando usare `$_SESSION` invece dei cookie.
+
+## 12. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Le variabili superglobali sono disponibili:",
+answers: {
+a: "Solo nelle funzioni",
+b: "Solo nel file principale",
+c: "In qualsiasi punto dello script",
+d: "Solo se dichiarate con global"
+},
+correctAnswer: "c"
+},
+{
+question: "2) Quale superglobale contiene i dati visibili nell'URL?",
+answers: {
+a: "$_POST",
+b: "$_SERVER",
+c: "$_GET",
+d: "$_SESSION"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Quale funzione bisogna chiamare prima di usare $_SESSION?",
+answers: {
+a: "session_open()",
+b: "start_session()",
+c: "session_start()",
+d: "init_session()"
+},
+correctAnswer: "c"
+},
+{
+question: "4) Dove vengono salvati i dati di sessione?",
+answers: {
+a: "Nel browser dell'utente",
+b: "Sul server",
+c: "Nel database",
+d: "Nel cookie"
+},
+correctAnswer: "b"
+},
+{
+question: "5) Quale funzione si usa per salvare un cookie?",
+answers: {
+a: "cookie_set()",
+b: "save_cookie()",
+c: "setcookie()",
+d: "$_COOKIE['chiave'] = valore"
+},
+correctAnswer: "c"
+},
+{
+question: "6) Quale superglobale contiene informazioni sul browser dell'utente?",
+answers: {
+a: "$_GET",
+b: "$_COOKIE",
+c: "$_SESSION",
+d: "$_SERVER"
+},
+correctAnswer: "d"
+},
+{
+question: "7) Perché usare htmlspecialchars() sui dati ricevuti dall'utente?",
+answers: {
+a: "Per migliorare la velocità",
+b: "Per prevenire attacchi XSS",
+c: "Per convertire stringhe in numeri",
+d: "Per iniziare la sessione"
+},
+correctAnswer: "b"
+},
+{
+question: "8) Quale superglobale gestisce i file caricati da un form?",
+answers: {
+a: "$_POST",
+b: "$_REQUEST",
+c: "$_UPLOAD",
+d: "$_FILES"
+},
+correctAnswer: "d"
+}
+]} />

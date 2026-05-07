@@ -1,0 +1,332 @@
+---
+title: "Introduzione a PHP"
+order: 1
+draft: false
+lastUpdateDate: "2026-05-07"
+subject: "PHP"
+category: "Informatica"
+difficulty: "facile"
+tags: ["php", "programmazione", "web", "introduzione"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Cos'è PHP?
+
+**PHP** (*PHP: Hypertext Preprocessor*) è un linguaggio di programmazione **server-side**, interpretato e open source, progettato principalmente per lo sviluppo web.
+
+A differenza di HTML (che è statico), PHP permette di creare **pagine web dinamiche**: il contenuto cambia in base all'utente, al database, all'orario, ecc.
+
+<Aside variant="info">
+PHP viene eseguito **sul server**: il browser riceve solo l'HTML risultante, mai il codice PHP sorgente.
+</Aside>
+
+### Caratteristiche principali
+
+| Caratteristica     | Descrizione                                           |
+| ------------------ | ----------------------------------------------------- |
+| **Interpretato**   | Eseguito riga per riga dall'interprete PHP            |
+| **Server-side**    | Il codice gira sul server, non nel browser            |
+| **Open source**    | Gratuito e con codice sorgente disponibile            |
+| **Multipiattaforma** | Funziona su Windows, macOS e Linux                  |
+| **HTML-embedded**  | Si integra direttamente nelle pagine HTML             |
+| **General purpose** | Adatto a svariati tipi di applicazioni               |
+
+### Dove si usa PHP?
+
+PHP è il linguaggio server-side più usato al mondo. Grandi piattaforme come **Facebook**, **Wikipedia** e **WordPress** sono scritte in PHP.
+
+## 2. Come funziona PHP
+
+Il flusso di una richiesta PHP è il seguente:
+
+```
+Browser → richiede pagina.php → Server Web → Interprete PHP → HTML → Browser
+```
+
+1. Il browser richiede un file `.php` al server
+2. Il server passa il file all'interprete PHP
+3. PHP esegue il codice e produce HTML
+4. Il server invia l'HTML al browser
+
+<Aside variant="info">
+Il browser non vede mai il codice PHP, solo l'HTML risultante.
+</Aside>
+
+## 3. Sintassi di base
+
+Il codice PHP si inserisce tra i tag `<?php` e `?>` all'interno di un file `.php`.
+
+```php
+<?php
+  // Questo è un commento su una riga
+  echo "Ciao, mondo!";
+?>
+```
+
+### Regole fondamentali
+
+- Ogni istruzione termina con `;`
+- I commenti su una riga iniziano con `//`
+- I commenti su più righe si delimitano con `/* ... */`
+- I file si salvano con estensione `.php`
+
+### Esempio completo: pagina PHP con HTML
+
+```php
+<!doctype html>
+<html>
+  <head><title>La mia prima pagina PHP</title></head>
+  <body>
+    <h1>Benvenuto!</h1>
+    <?php
+      echo "<p>Oggi è: " . date("d/m/Y") . "</p>";
+    ?>
+  </body>
+</html>
+```
+
+Output nel browser (esempio):
+
+```
+Benvenuto!
+Oggi è: 07/05/2026
+```
+
+## 4. Variabili
+
+In PHP le variabili iniziano **sempre con `$`** seguito dal nome.
+
+```php
+<?php
+  $eta = 19;            // intero
+  $nome = "Mario";      // stringa
+  $prezzo = 9.99;       // decimale (float)
+  $attivo = true;       // booleano
+?>
+```
+
+<Aside variant="info">
+PHP è **tipizzato dinamicamente**: non occorre dichiarare il tipo, viene determinato in base al valore assegnato.
+</Aside>
+
+### Regole per i nomi delle variabili
+
+- Iniziano sempre con `$`
+- Il nome deve iniziare con una lettera o `_`
+- Possono contenere lettere, cifre e `_`
+- Sono **case-sensitive**: `$nome` ≠ `$Nome`
+
+### Tipi principali
+
+| Tipo       | Esempio                  | Descrizione              |
+| ---------- | ------------------------ | ------------------------ |
+| `int`      | `$x = 42;`               | Numero intero            |
+| `float`    | `$x = 3.14;`             | Numero decimale          |
+| `string`   | `$x = "ciao";`           | Testo                    |
+| `bool`     | `$x = true;`             | Valore logico            |
+| `array`    | `$x = [1, 2, 3];`        | Array                    |
+| `null`     | `$x = null;`             | Valore vuoto             |
+
+## 5. Output con `echo`
+
+La funzione `echo` invia testo (e HTML) al browser.
+
+```php
+<?php
+  $nome = "Luca";
+  echo "Ciao, $nome!";          // Ciao, Luca!  (doppi apici: espande variabili)
+  echo 'Ciao, $nome!';          // Ciao, $nome! (apici singoli: no espansione)
+?>
+```
+
+### Concatenazione con `.`
+
+```php
+<?php
+  $nome = "Anna";
+  $eta = 22;
+  echo "Nome: " . $nome . ", Età: " . $eta . "<br>";
+?>
+```
+
+<Aside variant="tip">
+Usa `<br>` per andare a capo nella pagina web. `\n` aggiunge un ritorno a capo solo nel sorgente HTML, non nella pagina visualizzata.
+</Aside>
+
+## 6. Operatori
+
+### Operatori aritmetici
+
+| Operatore | Significato       | Esempio         |
+| --------- | ----------------- | --------------- |
+| `+`       | Addizione         | `$a + $b`       |
+| `-`       | Sottrazione       | `$a - $b`       |
+| `*`       | Moltiplicazione   | `$a * $b`       |
+| `/`       | Divisione         | `$a / $b`       |
+| `%`       | Modulo (resto)    | `$a % $b`       |
+| `**`      | Potenza           | `$a ** $b`      |
+
+### Operatori di confronto
+
+| Operatore | Significato          |
+| --------- | -------------------- |
+| `==`      | Uguale (valore)      |
+| `===`     | Identico (valore e tipo) |
+| `!=`      | Diverso              |
+| `<`, `>`  | Minore, maggiore     |
+| `<=`, `>=`| Minore/uguale, maggiore/uguale |
+
+<Aside variant="info">
+`==` confronta solo il **valore**, `===` confronta anche il **tipo**:
+```php
+0 == "0"   // true
+0 === "0"  // false
+```
+</Aside>
+
+## 7. Strutture di controllo
+
+### if / elseif / else
+
+```php
+<?php
+  $voto = 75;
+
+  if ($voto >= 90) {
+      echo "Ottimo!";
+  } elseif ($voto >= 60) {
+      echo "Sufficiente";
+  } else {
+      echo "Insufficiente";
+  }
+?>
+```
+
+### Ciclo for
+
+```php
+<?php
+  for ($i = 1; $i <= 5; $i++) {
+      echo "Numero: $i <br>";
+  }
+?>
+```
+
+### Ciclo while
+
+```php
+<?php
+  $n = 1;
+  while ($n <= 3) {
+      echo "Riga $n <br>";
+      $n++;
+  }
+?>
+```
+
+### Ciclo foreach (per array)
+
+```php
+<?php
+  $frutti = ["mela", "banana", "arancia"];
+  foreach ($frutti as $frutto) {
+      echo $frutto . "<br>";
+  }
+?>
+```
+
+## 8. Esercizi
+
+1. Crea una pagina PHP che mostri il tuo nome, cognome e anno di nascita usando variabili e `echo`.
+2. Genera 5 numeri casuali tra 1 e 100 con `rand(1, 100)` e mostrali con un ciclo `for`.
+3. Scrivi uno script che, dato un numero intero `$n`, stampa se è pari o dispari.
+4. Crea un array con 4 città italiane e stampa l'elenco con un ciclo `foreach`.
+5. Scrivi un'istruzione `if/elseif/else` che converta un voto numerico (da 0 a 100) in un giudizio testuale.
+
+## 9. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "1) Come inizia un blocco di codice PHP?",
+answers: {
+a: "<php>",
+b: "<?php",
+c: "//php",
+d: "<%php"
+},
+correctAnswer: "b"
+},
+{
+question: "2) Dove viene eseguito il codice PHP?",
+answers: {
+a: "Nel browser dell'utente",
+b: "Nel database",
+c: "Sul server web",
+d: "Nel file CSS"
+},
+correctAnswer: "c"
+},
+{
+question: "3) Come si dichiara una variabile in PHP?",
+answers: {
+a: "var nome = 'Mario';",
+b: "let nome = 'Mario';",
+c: "$nome = 'Mario';",
+d: "nome = 'Mario';"
+},
+correctAnswer: "c"
+},
+{
+question: "4) Quale operatore concatena le stringhe in PHP?",
+answers: {
+a: "+",
+b: "&",
+c: ".",
+d: ","
+},
+correctAnswer: "c"
+},
+{
+question: "5) Cosa stampa: echo 'Ciao $nome'; con $nome='Mario'?",
+answers: {
+a: "Ciao Mario",
+b: "Ciao $nome",
+c: "Errore di sintassi",
+d: "Mario"
+},
+correctAnswer: "b"
+},
+{
+question: "6) Ogni istruzione PHP deve terminare con:",
+answers: {
+a: ".",
+b: ":",
+c: ";",
+d: "niente"
+},
+correctAnswer: "c"
+},
+{
+question: "7) Quale ciclo si usa per scorrere un array in PHP?",
+answers: {
+a: "forall",
+b: "foreach",
+c: "loop",
+d: "each"
+},
+correctAnswer: "b"
+},
+{
+question: "8) Cosa fa la funzione rand(1, 90)?",
+answers: {
+a: "Genera un array da 1 a 90",
+b: "Calcola la media tra 1 e 90",
+c: "Restituisce un numero casuale intero tra 1 e 90",
+d: "Ordina numeri da 1 a 90"
+},
+correctAnswer: "c"
+}
+]} />
