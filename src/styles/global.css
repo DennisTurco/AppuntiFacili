@@ -57,3 +57,25 @@
 .copy-code:hover {
   background-color: #e4e4e4;
 }
+
+/* Mermaid diagrams: force white background */
+pre.mermaid,
+pre.mermaid svg {
+  background: #ffffff !important;
+}
+pre.mermaid svg rect.background {
+  fill: #ffffff !important;
+}
+
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 2rem auto;
+}
+
+.mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}

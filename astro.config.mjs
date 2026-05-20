@@ -3,20 +3,22 @@ import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from '@astrojs/sitemap';
 import icon from "astro-icon";
-import mermaid from 'astro-mermaid';
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkCollapse from "remark-collapse"; // https://www.npmjs.com/package/remark-collapse
 import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#options
 import react from '@astrojs/react';
 import partytown from '@astrojs/partytown'
+import { remarkMermaid } from './src/plugins/remark-mermaid.mjs';
 
 export default defineConfig({
   site: "https://appuntifacili.it",
   integrations: [
     react(),
     mdx({
-      remarkPlugins: [remarkMath],
+      // extendMarkdownConfig is true by default, but we add remarkMermaid
+      // explicitly here so it also runs for .mdx files.
+      remarkPlugins: [remarkMath, remarkMermaid],
       rehypePlugins: [rehypeKatex],
     }),
     sitemap({
@@ -30,17 +32,13 @@ export default defineConfig({
         },
     }),
     icon({ include: ["fa6-solid", "fa6-brands"] }),
-    mermaid({
-      theme: 'forest',
-      autoTheme: true,
-      mermaidConfig: { flowchart: { curve: 'basis' } },
-    }),
   ],
   markdown: {
     remarkPlugins: [
       remarkMath,
       remarkToc,
       [remarkCollapse, { test: "Table of contents" }],
+      remarkMermaid,
     ],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
