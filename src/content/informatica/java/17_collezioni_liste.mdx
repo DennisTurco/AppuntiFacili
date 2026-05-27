@@ -1,169 +1,130 @@
 ---
-title: "Collezioni Java: List e ArrayList"
+title: "Array e ArrayList"
 order: 17
 draft: false
-lastUpdateDate: "2026-04-20"
+lastUpdateDate: "2026-05-27"
 subject: "Java"
 category: "Informatica"
 difficulty: "facile"
-tags: ["java", "programmazione", "list", "arraylist", "collezioni"]
+tags: ["java", "programmazione", "array", "arraylist", "list", "collezioni"]
 author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 0. Note
+## 1. Array
 
-La spiegazione approfondita su come funzionano le liste è stata affrontata qualche lezione prima, per saperne di più [LISTE](https://appuntifacili.it/informatica/java/14_lista)
-In questa lezione si discute su come usare le liste che mette a disposizione direttamente il linguaggio senza necessità di doverle definire da capo ogni volta.
+Un **array** è una sequenza di elementi **dello stesso tipo** con **dimensione fissa**.
 
-## 1. Descrizione
-
-In Java, le **collezioni** permettono di gestire gruppi di dati in modo dinamico.
-
-A differenza degli **array**, le collezioni:
-
-- possono **crescere o ridursi automaticamente**
-- offrono molti metodi già pronti
-- semplificano la gestione dei dati
-
-Una delle strutture più utilizzate è la **List**.
-
-Una `List` rappresenta una **lista ordinata di elementi** accessibili tramite indice.
-
-## 2. Array vs List
-
-In questo esempio implementiamo una la Coda utilizzando una lista.
-
-### 2.1 Array
+### 1.1 Dichiarazione e creazione
 
 ```java
-int[] numeri = new int[3];
+// tipo[] nome = new tipo[dimensione];
+int[] numeri = new int[5];
+String[] nomi = new String[3];
 ```
 
-- dimensione fissa
-- meno flessibile
-- pochi metodi disponibili
+### 1.2 Assegnare e leggere valori
 
-### 2.2 List
+Gli indici partono da `0`.
 
 ```java
-List<Integer> numeri = new ArrayList<>();
+numeri[0] = 10;
+numeri[1] = 20;
+numeri[2] = 30;
+
+System.out.println(numeri[0]); // -> 10
 ```
 
-- dimensione dinamica
-- molti metodi utili
-- più moderna e utilizzata
+### 1.3 Inizializzazione diretta
 
-## 3. Cos'è List?
+```java
+int[] voti = {8, 7, 9, 6, 10};
+String[] giorni = {"Lunedì", "Martedì", "Mercoledì"};
+```
 
-`List` è una interfaccia.
-Non può essere creata direttamente:
+### 1.4 Lunghezza
+
+```java
+System.out.println(voti.length); // -> 5
+```
+
+### 1.5 Scorrere un array
+
+```java
+// for classico (con indice)
+for (int i = 0; i < voti.length; i++) {
+    System.out.println("Voto " + i + ": " + voti[i]);
+}
+
+// for-each (consigliato quando non serve l'indice)
+for (int voto : voti) {
+    System.out.println(voto);
+}
+```
+
+### 1.6 Limiti degli array
+
+- Dimensione **fissa**: non si può aggiungere un elemento oltre la capacità iniziale
+- Se si accede a un indice non valido → `ArrayIndexOutOfBoundsException`
+
+```java
+int[] arr = new int[3];
+arr[5] = 99; // -> ERRORE: ArrayIndexOutOfBoundsException
+```
+
+## 2. ArrayList e List
+
+`ArrayList` è una **lista dinamica**: può crescere e ridursi automaticamente.
+
+Per saperne di più su come funzionano le liste internamente → [LISTE](/informatica/java/14_lista)
+
+### 2.1 List è un'interfaccia
+
+`List` non può essere istanziata direttamente:
 
 ```java
 List<Integer> lista = new List<>();         // -> ERRORE
 List<Integer> lista = new ArrayList<>();    // -> OK
 ```
 
-`ArrayList` è una classe concreta che implementa `List`.
+`ArrayList` è la classe concreta che implementa `List` più usata.
 
-## 4. Tipi Generici (Generics)
+### 2.2 Tipi Generici (Generics)
 
-Tra `< >` si specifica il tipo di dato contenuto nella lista.
-
-Esempi:
-
-```java
-List<Integer> numeri = new ArrayList<>();
-List<String> nomi = new ArrayList<>();
-List<Double> prezzi = new ArrayList<>();
-```
-
-Le `List` funzionano solo con **oggetti**, non con tipi primitivi.
+Tra `< >` si specifica il tipo di dato. Le liste funzionano solo con **oggetti**, non tipi primitivi → si usano le **classi wrapper**:
 
 | Tipo primitivo | Classe Wrapper |
 | -------------- | -------------- |
-| int            | Integer        |
-| double         | Double         |
-| char           | Character      |
-| boolean        | Boolean        |
-
-## 5. Operazioni principali
-
-### 5.1 Aggiungere elementi
+| `int`          | `Integer`      |
+| `double`       | `Double`       |
+| `char`         | `Character`    |
+| `boolean`      | `Boolean`      |
 
 ```java
-nomi.add("Marco");
-nomi.add("Luca");
-nomi.add("Anna");
+List<Integer> numeri = new ArrayList<>();
+List<String>  nomi   = new ArrayList<>();
+List<Double>  prezzi = new ArrayList<>();
 ```
 
-### 5.2 Stampare la lista
+### 2.3 Operazioni principali
 
 ```java
-System.out.println(nomi); // -> output: [Marco, Luca, Anna]
+List<String> nomi = new ArrayList<>();
+
+nomi.add("Marco");            // aggiunge in fondo
+nomi.add(0, "Luigi");         // inserisce all'indice 0
+nomi.get(1);                  // legge l'elemento all'indice 1
+nomi.set(0, "Peach");         // modifica l'elemento all'indice 0
+nomi.remove(0);               // rimuove per indice
+nomi.remove("Marco");         // rimuove per valore
+nomi.size();                  // numero di elementi
+nomi.contains("Luigi");       // true/false
+nomi.isEmpty();               // true se vuota
+nomi.clear();                 // svuota la lista
+System.out.println(nomi);     // stampa tutta la lista
 ```
 
-### 5.3 Accesso tramite indice
-
-```java
-System.out.println(nomi.get(0)); // -> output: Marco
-```
-
-### 5.4 Modificare un elemento
-
-```java
-nomi.set(1, "Giulia");
-```
-
-### 5.5 Rimuovere elementi
-
-```java
-nomi.remove(0);
-```
-
-o
-
-```java
-nomi.remove("Anna");
-```
-
-### 5.6 Dimensione della lista
-
-```java
-nomi.size();
-```
-
-### 5.7 Verificare se è vuota
-
-```java
-nomi.isEmpty();
-```
-
-### 5.8 Controllare se contiene un elemento
-
-```java
-nomi.contains("Marco");
-```
-
-## 6. Scorrere una List
-
-### 6.1 Ciclo for classico
-
-```java
-for(int i = 0; i < nomi.size(); i++){
-    System.out.println(nomi.get(i));
-}
-```
-
-### 6.2 For-each (consigliato)
-
-```java
-for(String nome : nomi){
-    System.out.println(nome);
-}
-```
-
-## 7. ArrayList di numeri
+### 2.4 Esempio completo
 
 ```java
 import java.util.*;
@@ -177,49 +138,83 @@ public class Main {
         numeri.add(20);
         numeri.add(30);
 
-        for(Integer n : numeri){
-            System.out.println(n);
-        }
+        System.out.println(numeri);         // -> [10, 20, 30]
+        System.out.println(numeri.size());  // -> 3
+        System.out.println(numeri.get(0));  // -> 10
     }
 }
 ```
 
-## 8. List più comuni in Java
+## 3. Scorrere una collezione
 
-| Classe     | Descrizione                              |
-| ---------- | ---------------------------------------- |
-| ArrayList  | veloce in lettura                        |
-| LinkedList | veloce inserimento/rimozione             |
-| Vector     | versione sincronizzata (raramente usata) |
+### 3.1 For classico (con indice)
 
+```java
+for (int i = 0; i < nomi.size(); i++) {
+    System.out.println(i + ": " + nomi.get(i));
+}
+```
 
-## 9. Quiz a risposta multipla
+### 3.2 For-each (consigliato)
+
+```java
+for (String nome : nomi) {
+    System.out.println(nome);
+}
+```
+
+### 3.3 Ricerca
+
+```java
+if (nomi.contains("Marco")) {
+    System.out.println("Trovato!");
+}
+```
+
+## 4. Array vs ArrayList — confronto
+
+| Caratteristica | Array                    | ArrayList                  |
+| -------------- | ------------------------ | -------------------------- |
+| Dimensione     | Fissa                    | Dinamica                   |
+| Metodi         | Solo `.length`           | Molti metodi pronti        |
+| Tipi           | Primitivi e oggetti      | Solo oggetti (wrapper)     |
+| Quando usarlo  | Dimensione nota e fissa  | Dimensione variabile       |
+
+## 5. List più comuni in Java
+
+| Classe       | Descrizione                              |
+| ------------ | ---------------------------------------- |
+| `ArrayList`  | Veloce in lettura, uso generale          |
+| `LinkedList` | Veloce in inserimento/rimozione          |
+| `Vector`     | Versione sincronizzata (raramente usata) |
+
+## 6. Quiz a risposta multipla
 
 import Quiz from '../../../components/Quiz.jsx';
 
 <Quiz client:load questions={[
 {
+question: "Quale indice ha il primo elemento di un array?",
+answers: {
+a: '1',
+b: '0',
+c: '-1',
+d: 'Dipende dal tipo'
+},
+correctAnswer: 'b'
+},
+{
 question: "Cos'è List in Java?",
 answers: {
-a: 'Una classe',
+a: 'Una classe concreta',
 b: 'Un array',
-c: 'Un’interfaccia',
+c: "Un'interfaccia",
 d: 'Un metodo'
 },
 correctAnswer: 'c'
 },
 {
-question: "Quale classe implementa List?",
-answers: {
-a: 'Scanner',
-b: 'ArrayList',
-c: 'System',
-d: 'Math'
-},
-correctAnswer: 'b'
-},
-{
-question: "Quale metodo aggiunge un elemento?",
+question: "Quale metodo aggiunge un elemento a un ArrayList?",
 answers: {
 a: 'put()',
 b: 'insert()',
@@ -229,65 +224,60 @@ d: 'push()'
 correctAnswer: 'c'
 },
 {
-question: "Come si legge un elemento?",
+question: "Come si ottiene la dimensione di un ArrayList?",
 answers: {
-a: 'read()',
-b: 'get()',
-c: 'take()',
-d: 'index()'
+a: 'lista.length',
+b: 'lista.count()',
+c: 'lista.size()',
+d: 'lista.dim()'
 },
-correctAnswer: 'b'
+correctAnswer: 'c'
 },
 {
-question: "Quale metodo restituisce la dimensione?",
+question: "Qual è la differenza principale tra array e ArrayList?",
 answers: {
-a: 'length',
-b: 'count()',
-c: 'size()',
-d: 'dim()'
+a: 'ArrayList è più veloce',
+b: 'Array supporta solo stringhe',
+c: 'ArrayList ha dimensione dinamica, array è fisso',
+d: 'Non ci sono differenze'
 },
 correctAnswer: 'c'
 }
 ]} />
 
-## 10. Esercizi
+## 7. Esercizi
 
 - [Esercizi ArrayList](https://www.w3resource.com/java-exercises/collection/array-list.php)
 - [Esercizi LinkedList](https://www.w3resource.com/java-exercises/collection/linked-list.php)
 
-### 10.1 Esercizio
+### 7.1 Esercizio: media dei voti
 
-Creare una ArrayList di interi e stampare:
+Crea un array di 5 voti interi e calcola la media.
 
-- tutti i numeri
-- la dimensione della lista
 <details>
 <summary>💡 Mostra soluzione</summary>
+
 ```java
-import java.util.*;
-
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
-        List<Integer> numeri = new ArrayList<>();
+        int[] voti = {7, 8, 6, 9, 7};
+        int somma = 0;
 
-        numeri.add(5);
-        numeri.add(10);
-        numeri.add(15);
-
-        for(Integer n : numeri){
-            System.out.println(n);
+        for (int v : voti) {
+            somma += v;
         }
 
-        System.out.println("Dimensione: " + numeri.size());
+        System.out.println("Media: " + (double) somma / voti.length);
     }
 }
 ```
+
 </details>
 
-### 10.2 Esercizio
+### 7.2 Esercizio: lista di nomi
 
-Chiedere all'utente 5 nomi e salvarli in una ArrayList, poi stamparli.
+Chiedere all'utente 5 nomi, salvarli in una `ArrayList` e stamparli.
 
 <details>
 <summary>💡 Mostra soluzione</summary>
@@ -296,17 +286,17 @@ Chiedere all'utente 5 nomi e salvarli in una ArrayList, poi stamparli.
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
         List<String> nomi = new ArrayList<>();
 
-        for(int i = 0; i < 5; i++){
+        for (int i = 0; i < 5; i++) {
             System.out.print("Inserisci nome: ");
             nomi.add(input.nextLine());
         }
 
-        for(String nome : nomi){
+        for (String nome : nomi) {
             System.out.println(nome);
         }
 
@@ -317,9 +307,9 @@ public class Main {
 
 </details>
 
-### 12.3 Esercizio
+### 7.3 Esercizio: massimo di una lista
 
-Inserire numeri finché l'utente scrive 0 e poi stampare il massimo.
+Inserisci numeri finché l'utente scrive 0, poi stampa il valore massimo.
 
 <details>
 <summary>💡 Mostra soluzione</summary>
@@ -328,31 +318,24 @@ Inserire numeri finché l'utente scrive 0 e poi stampare il massimo.
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
         List<Integer> numeri = new ArrayList<>();
-
         int n;
 
-        do{
+        do {
             System.out.print("Inserisci numero (0 per terminare): ");
             n = input.nextInt();
-
-            if(n != 0)
-                numeri.add(n);
-
-        }while(n != 0);
+            if (n != 0) numeri.add(n);
+        } while (n != 0);
 
         int max = numeri.get(0);
-
-        for(Integer num : numeri){
-            if(num > max)
-                max = num;
+        for (int num : numeri) {
+            if (num > max) max = num;
         }
 
         System.out.println("Massimo: " + max);
-
         input.close();
     }
 }

@@ -1,0 +1,647 @@
+---
+title: "Minecraft Modding con Forge"
+order: 100
+draft: false
+lastUpdateDate: "2026-05-27"
+subject: "Java"
+category: "Informatica"
+difficulty: "medio"
+tags: ["java", "minecraft", "modding", "forge", "item", "blocco", "eventi", "crafting"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Come funziona il Minecraft Modding
+
+### 1.1 Client vs Server
+
+Quando giochi a Minecraft esistono due "mondi" separati che comunicano tra loro:
+
+| Lato          | Responsabilità                                          |
+| ------------- | ------------------------------------------------------- |
+| **Client**    | Rendering grafico, interfaccia utente, suoni, animazioni |
+| **Server**    | Logica di gioco, generazione mondo, fisica, danni       |
+
+Anche in singleplayer, Minecraft avvia internamente un server locale.
+
+Quando si fa modding bisogna sempre chiedersi: **questo codice gira sul client, sul server o su entrambi?**
+
+```java
+// Controllare su quale lato si sta eseguendo:
+if (!level.isClientSide()) {
+    // codice lato SERVER
+}
+if (level.isClientSide()) {
+    // codice lato CLIENT
+}
+```
+
+Errori comuni derivano dall'eseguire codice client-only sul server (crash) o viceversa.
+
+### 1.2 API di Modding
+
+Le **API di modding** sono librerie che fanno da ponte tra il tuo codice e il codice interno di Minecraft.
+
+Senza un'API dovresti modificare direttamente il codice di Minecraft (rischioso, fragile, illegale).
+
+Le API più usate per Java Edition:
+
+| API             | Note                                         |
+| --------------- | -------------------------------------------- |
+| **Minecraft Forge** | La più diffusa, stabile, ampia community |
+| **Fabric**      | Più leggero e moderno, aggiornamenti rapidi  |
+| **NeoForge**    | Fork di Forge, la direzione futura           |
+
+In questa guida usiamo **Minecraft Forge** (versione 1.20.1).
+
+### 1.3 Introduzione a Minecraft Forge
+
+**Forge** è un framework di modding che:
+
+- Permette di registrare nuovi oggetti, blocchi, entità
+- Fornisce un sistema di eventi per intercettare le azioni di Minecraft
+- Gestisce la compatibilità tra mod diverse
+- Ha una documentazione e community enormi
+
+### 1.4 Setup ambiente Forge
+
+**Requisiti:**
+
+- Java JDK 17 o superiore
+- IntelliJ IDEA (consigliato) o Eclipse
+- Connessione internet per scaricare le dipendenze
+
+**Passi:**
+
+1. Vai su [https://files.minecraftforge.net](https://files.minecraftforge.net)
+2. Scegli la versione **1.20.1** → scarica il file **MDK** (Mod Development Kit)
+3. Estrai lo zip in una cartella (es. `C:\MinecraftMods\mia-mod`)
+4. Apri IntelliJ IDEA → **Open** → seleziona la cartella estratta
+5. Aspetta che Gradle scarichi le dipendenze (può richiedere 10-20 minuti alla prima apertura)
+
+### 1.5 Primo avvio workspace
+
+Una volta che Gradle ha finito:
+
+1. Apri il pannello **Gradle** (icona a destra in IntelliJ)
+2. Vai in `Tasks → forgegradle runs → genIntellijRuns`
+3. Esegui il task per generare le configurazioni di run
+4. Nella barra in alto, seleziona la configurazione **runClient** e premi ▶️
+
+Dovresti vedere Minecraft avviarsi con la dicitura **"Forge"** nel menu principale.
+
+---
+
+## 2. Prima Mod
+
+### 2.1 Struttura del progetto
+
+Dopo aver estratto il MDK, la struttura è:
+
+```
+mia-mod/
+├── build.gradle            ← configurazione build (nome mod, versione, dipendenze)
+├── gradle.properties       ← variabili: mod_id, versione, minecraft_version
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── com/example/miamod/
+│       │       └── MiaMod.java    ← classe principale della mod
+│       └── resources/
+│           ├── META-INF/
+│           │   └── mods.toml      ← metadati della mod (nome, autore, descrizione)
+│           └── assets/
+│               └── miamod/        ← texture, modelli, traduzioni
+```
+
+### 2.2 File principali
+
+#### `gradle.properties`
+
+```properties
+# Identificatore unico della mod (solo lettere minuscole e _)
+mod_id=miamod
+mod_name=La Mia Mod
+mod_version=1.0.0
+
+minecraft_version=1.20.1
+forge_version=47.2.0
+```
+
+#### `META-INF/mods.toml`
+
+```toml
+[[mods]]
+modId = "miamod"
+version = "1.0.0"
+displayName = "La Mia Mod"
+description = '''
+La mia prima mod per Minecraft!
+'''
+```
+
+#### `MiaMod.java` — classe principale
+
+```java
+package com.example.miamod;
+
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+@Mod("miamod")  // deve corrispondere al modId in mods.toml
+public class MiaMod {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
+    public MiaMod() {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        LOGGER.info("MiaMod caricata!");
+    }
+
+    private void setup(final FMLCommonSetupEvent event) {
+        LOGGER.info("Setup completato.");
+    }
+}
+```
+
+### 2.3 Registrare oggetti
+
+In Forge, ogni oggetto/blocco/entità deve essere **registrato** con un `DeferredRegister`.
+
+Creiamo un file `ModItems.java`:
+
+```java
+package com.example.miamod;
+
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+public class ModItems {
+
+    // DeferredRegister: registro rimandato (si attiva al caricamento)
+    public static final DeferredRegister<Item> ITEMS =
+        DeferredRegister.create(ForgeRegistries.ITEMS, "miamod");
+
+    // Registrazione dell'item "ruby"
+    public static final RegistryObject<Item> RUBY =
+        ITEMS.register("ruby", () -> new Item(new Item.Properties()));
+}
+```
+
+Poi nella classe principale registra il DeferredRegister sull'event bus:
+
+```java
+public MiaMod() {
+    IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    ModItems.ITEMS.register(modEventBus);  // ← aggiungere questa riga
+}
+```
+
+### 2.4 Aggiungere un item custom
+
+Con la registrazione sopra, l'item esiste ma mancano ancora **texture** e **traduzione**.
+
+#### Texture
+
+Crea il file `src/main/resources/assets/miamod/textures/item/ruby.png`
+(immagine 16x16 pixel)
+
+#### Modello
+
+Crea `src/main/resources/assets/miamod/models/item/ruby.json`:
+
+```json
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "miamod:item/ruby"
+  }
+}
+```
+
+#### Traduzione
+
+Crea `src/main/resources/assets/miamod/lang/it_it.json`:
+
+```json
+{
+  "item.miamod.ruby": "Rubino"
+}
+```
+
+Avvia il gioco in modalità creativa: cerca "Rubino" e dovresti trovare il tuo item!
+
+---
+
+## 3. Blocchi e Ricette
+
+### 3.1 Creare un blocco custom
+
+Creiamo `ModBlocks.java`:
+
+```java
+package com.example.miamod;
+
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+public class ModBlocks {
+
+    public static final DeferredRegister<Block> BLOCKS =
+        DeferredRegister.create(ForgeRegistries.BLOCKS, "miamod");
+
+    public static final RegistryObject<Block> RUBY_BLOCK =
+        BLOCKS.register("ruby_block", () ->
+            new Block(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_RED)
+                .strength(5.0f, 6.0f)  // durezza e resistenza alle esplosioni
+                .requiresCorrectToolForDrops()
+            )
+        );
+}
+```
+
+Registra anche `ModBlocks.BLOCKS` sull'event bus nella classe principale.
+
+Ogni blocco necessita anche di un **BlockItem** (l'item che rappresenta il blocco nell'inventario):
+
+```java
+// In ModItems.java, aggiungi:
+public static final RegistryObject<Item> RUBY_BLOCK_ITEM =
+    ITEMS.register("ruby_block", () ->
+        new BlockItem(ModBlocks.RUBY_BLOCK.get(), new Item.Properties())
+    );
+```
+
+### 3.2 Texture del blocco
+
+Crea `src/main/resources/assets/miamod/textures/block/ruby_block.png` (16x16)
+
+Modello del blocco `assets/miamod/models/block/ruby_block.json`:
+
+```json
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "miamod:block/ruby_block"
+  }
+}
+```
+
+Stato del blocco `assets/miamod/blockstates/ruby_block.json`:
+
+```json
+{
+  "variants": {
+    "": { "model": "miamod:block/ruby_block" }
+  }
+}
+```
+
+Modello item del blocco `assets/miamod/models/item/ruby_block.json`:
+
+```json
+{
+  "parent": "miamod:block/ruby_block"
+}
+```
+
+### 3.3 Crafting Recipe
+
+Crea `src/main/resources/data/miamod/recipes/ruby_block.json`:
+
+```json
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RRR",
+    "RRR",
+    "RRR"
+  ],
+  "key": {
+    "R": { "item": "miamod:ruby" }
+  },
+  "result": {
+    "item": "miamod:ruby_block",
+    "count": 1
+  }
+}
+```
+
+**Ricetta shapeless** (ingredienti in qualsiasi ordine):
+
+```json
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "miamod:ruby_block" }
+  ],
+  "result": {
+    "item": "miamod:ruby",
+    "count": 9
+  }
+}
+```
+
+### 3.4 Creative Tab
+
+Per rendere gli item visibili nella tab creativa, crea `ModCreativeTabs.java`:
+
+```java
+package com.example.miamod;
+
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
+
+public class ModCreativeTabs {
+
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
+        DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "miamod");
+
+    public static final RegistryObject<CreativeModeTab> MIAMOD_TAB =
+        CREATIVE_MODE_TABS.register("miamod_tab", () ->
+            CreativeModeTab.builder()
+                .title(Component.translatable("creativetab.miamod.miamod_tab"))
+                .icon(() -> ModItems.RUBY.get().getDefaultInstance())
+                .displayItems((params, output) -> {
+                    output.accept(ModItems.RUBY.get());
+                    output.accept(ModBlocks.RUBY_BLOCK_ITEM.get());
+                })
+                .build()
+        );
+}
+```
+
+---
+
+## 4. Eventi e Gameplay
+
+### 4.1 Il sistema di eventi
+
+In Minecraft Forge, gli **eventi** sono il modo in cui intercetti le azioni del gioco.
+
+**Idea**: Minecraft esegue migliaia di azioni al secondo. Con gli eventi puoi "agganciarti" a quelle che ti interessano.
+
+```
+Giocatore salta
+        ↓
+Minecraft lancia l'evento LivingJumpEvent
+        ↓
+Forge chiama TUTTI i metodi registrati per quell'evento
+        ↓
+Il tuo metodo riceve l'evento e fa qualcosa
+```
+
+Gli eventi funzionano con le **annotazioni**: `@SubscribeEvent`.
+
+### 4.2 Creare un Event Handler
+
+Crea `ModEvents.java`:
+
+```java
+package com.example.miamod;
+
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+@Mod.EventBusSubscriber(modid = "miamod")
+public class ModEvents {
+
+    // tutti i metodi con @SubscribeEvent vengono registrati automaticamente
+
+}
+```
+
+### 4.3 Esempio: salto → effetto pozione
+
+Ogni volta che il giocatore salta, applichiamo l'effetto **velocità**:
+
+```java
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+@Mod.EventBusSubscriber(modid = "miamod")
+public class ModEvents {
+
+    @SubscribeEvent
+    public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
+
+        // controlliamo che sia un player (non un mob)
+        if (event.getEntity() instanceof Player player) {
+
+            // applichiamo effetto Velocità per 3 secondi (60 tick), livello 1
+            player.addEffect(new MobEffectInstance(
+                MobEffects.MOVEMENT_SPEED,
+                60,   // durata in tick (20 tick = 1 secondo)
+                0     // livello (0 = livello I)
+            ));
+
+            System.out.println(player.getName().getString() + " ha saltato!");
+        }
+    }
+}
+```
+
+### 4.4 Esempio: click destro → potere speciale
+
+Intercettiamo il tasto destro del mouse quando il giocatore tiene in mano il nostro rubino:
+
+```java
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+@Mod.EventBusSubscriber(modid = "miamod")
+public class ModEvents {
+
+    @SubscribeEvent
+    public static void onRightClick(PlayerInteractEvent.RightClickItem event) {
+
+        Player player = event.getEntity();
+        ItemStack item = player.getItemInHand(InteractionHand.MAIN_HAND);
+
+        // verifica che il giocatore tenga il rubino in mano
+        if (item.is(ModItems.RUBY.get())) {
+
+            // eseguiamo solo lato server
+            if (!player.level().isClientSide()) {
+                player.addEffect(new MobEffectInstance(
+                    MobEffects.NIGHT_VISION,
+                    200,  // 10 secondi
+                    0
+                ));
+
+                player.sendSystemMessage(
+                    Component.literal("✨ Visione notturna attivata!")
+                );
+            }
+        }
+    }
+}
+```
+
+### 4.5 Altri eventi utili
+
+| Evento                                   | Si attiva quando...                     |
+| ---------------------------------------- | --------------------------------------- |
+| `PlayerEvent.PlayerLoggedInEvent`        | Un giocatore entra nel mondo            |
+| `LivingDeathEvent`                       | Un'entità muore                         |
+| `BlockEvent.BreakEvent`                  | Un blocco viene rotto                   |
+| `BlockEvent.EntityPlaceEvent`            | Un blocco viene piazzato                |
+| `EntityItemPickupEvent`                  | Il giocatore raccoglie un item          |
+| `PlayerInteractEvent.RightClickBlock`    | Click destro su un blocco               |
+| `LivingHurtEvent`                        | Un'entità riceve danno                  |
+| `TickEvent.PlayerTickEvent`              | Ogni tick (20 volte al secondo)         |
+
+---
+
+## 5. Riepilogo e prossimi passi
+
+### 5.1 Cosa abbiamo visto
+
+| Argomento        | Concetti chiave                                          |
+| ---------------- | -------------------------------------------------------- |
+| Architettura     | Client vs Server, API di modding, Forge                  |
+| Setup            | MDK, Gradle, configurazione IntelliJ                     |
+| Struttura mod    | Classe principale, `@Mod`, event bus, DeferredRegister   |
+| Item custom      | Registrazione, texture, modello, traduzione              |
+| Blocco custom    | Proprietà, BlockItem, texture, blockstate                |
+| Ricette          | Crafting shaped/shapeless in JSON                        |
+| Creative Tab     | Raggruppare i propri item                                |
+| Eventi           | `@SubscribeEvent`, LivingJumpEvent, RightClickItem       |
+
+### 5.2 Prossimi passi consigliati
+
+- Creare un'**entità** (mob personalizzato)
+- Aggiungere **generazione nel mondo** (minerali, strutture)
+- Implementare una **GUI** (inventory personalizzato)
+- Gestire la **network communication** tra client e server
+
+**Risorse utili:**
+- [Forge Documentation](https://docs.minecraftforge.net/)
+- [McJty's Forge Tutorials (YouTube)](https://www.youtube.com/@McJty)
+- [Forge Discord](https://discord.gg/UvedJ9m)
+
+## 6. Quiz a risposta multipla
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question: "Qual è la differenza principale tra Client e Server in Minecraft?",
+answers: {
+a: 'Il client è più veloce del server',
+b: 'Il client gestisce il rendering, il server gestisce la logica di gioco',
+c: 'Il server è solo per il multiplayer',
+d: 'Non c\'è differenza in singleplayer'
+},
+correctAnswer: 'b'
+},
+{
+question: "Cos'è un DeferredRegister?",
+answers: {
+a: 'Un sistema per ritardare l\'avvio di Minecraft',
+b: 'Un registro che si attiva al momento giusto del caricamento della mod',
+c: 'Un\'annotazione per gli eventi',
+d: 'Un file di configurazione JSON'
+},
+correctAnswer: 'b'
+},
+{
+question: "Quale annotazione si usa per registrare un event handler?",
+answers: {
+a: '@EventHandler',
+b: '@ForgeEvent',
+c: '@SubscribeEvent',
+d: '@RegisterEvent'
+},
+correctAnswer: 'c'
+},
+{
+question: "Dove si definisce una crafting recipe in Forge?",
+answers: {
+a: 'Nel file ModItems.java',
+b: 'Nella classe principale della mod',
+c: 'In un file JSON nella cartella data/modid/recipes/',
+d: 'Nel file mods.toml'
+},
+correctAnswer: 'c'
+},
+{
+question: "Come si controlla se il codice gira lato server?",
+answers: {
+a: 'if (Server.isRunning())',
+b: 'if (!level.isClientSide())',
+c: 'if (Forge.isServer())',
+d: 'if (side == Side.SERVER)'
+},
+correctAnswer: 'b'
+}
+]} />
+
+## 7. Esercizi
+
+### 7.1 Esercizio: item Smeraldo Magico
+
+Registra un nuovo item chiamato `magic_emerald`. Aggiungi texture (puoi riusare quella di un item vanilla) e aggiungilo alla creative tab.
+
+### 7.2 Esercizio: evento caduta
+
+Crea un event handler che intercetta `LivingFallEvent`: quando il giocatore cade, stampa nella chat la distanza di caduta.
+
+<details>
+<summary>💡 Suggerimento</summary>
+
+```java
+@SubscribeEvent
+public static void onFall(LivingFallEvent event) {
+    if (event.getEntity() instanceof Player player) {
+        if (!player.level().isClientSide()) {
+            player.sendSystemMessage(
+                Component.literal("Caduto da: " + event.getDistance() + " blocchi!")
+            );
+        }
+    }
+}
+```
+
+</details>
+
+### 7.3 Esercizio: blocco luminoso
+
+Crea un blocco che emette luce. Usa `.lightLevel(state -> 15)` nelle `BlockBehaviour.Properties`.
+
+<details>
+<summary>💡 Suggerimento</summary>
+
+```java
+public static final RegistryObject<Block> GLOWING_RUBY_BLOCK =
+    BLOCKS.register("glowing_ruby_block", () ->
+        new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_RED)
+            .strength(3.0f)
+            .lightLevel(state -> 15)  // luce massima = 15
+        )
+    );
+```
+
+</details>

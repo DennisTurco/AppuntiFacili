@@ -2,7 +2,7 @@
 title: "Enum in Java"
 order: 18
 draft: false
-lastUpdateDate: "2026-04-20"
+lastUpdateDate: "2026-05-27"
 subject: "Java"
 category: "Informatica"
 difficulty: "facile"
@@ -11,11 +11,11 @@ author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 1. Descrizione
+## 1. Cos'è un Enum?
 
 Un **enum** (enumerazione) è un **tipo di dato speciale** introdotto in Java per rappresentare un insieme **limitato e fisso di valori costanti**.
 
-In pratica serve quando una variabile **può assumere solo alcuni valori predefiniti**.
+Si usa quando una variabile **può assumere solo alcuni valori predefiniti**.
 
 Esempi reali:
 
@@ -25,66 +25,58 @@ Esempi reali:
 - livelli di accesso
 - direzioni (NORD, SUD, EST, OVEST)
 
-
 ## 2. Perché usare enum?
 
-Prima degli enum si usavano spesso:
+Prima degli enum si usavano spesso stringhe o interi:
 
 ```java
-String stato = "ATTIVO";
-```
-
-oppure:
-
-```java
-int stato = 1;
+String stato = "ATTIVO";   // ❌ potrei scrivere "Attivo", "attivo", "Ativo"...
+int livello = 2;            // ❌ cosa vuol dire 2? non è chiaro
 ```
 
 Problemi:
-
 - errori di scrittura (es. "Ativo")
-- valori non validi
+- valori non validi accettati senza errori
 - codice poco leggibile
 - difficile manutenzione
 
-**Gli enum risolvono questi problemi.**
+**Gli enum risolvono questi problemi** — il compilatore controlla che il valore sia valido.
 
 ## 3. Sintassi base
 
-Un enum si dichiara con la parola chiave `enum`.
-
 ```java
-enum Giorno {
-    LUNEDI,
-    MARTEDI,
-    MERCOLEDI,
-    GIOVEDI,
-    VENERDI,
-    SABATO,
-    DOMENICA
+enum NomeEnum {
+    VALORE1,
+    VALORE2,
+    VALORE3
 }
 ```
 
-Ogni valore è chiamato costante enum.
+```java
+enum Giorno {
+    LUNEDI, MARTEDI, MERCOLEDI, GIOVEDI, VENERDI, SABATO, DOMENICA
+}
+```
+
+Ogni valore è chiamato **costante enum**.
 
 ## 4. Utilizzare un enum
 
-1. Dichiarare una variabile enum: `Giorno oggi;`
-2. Assegnare un valore: `oggi = Giorno.LUNEDI;`
+```java
+Giorno oggi = Giorno.LUNEDI;
+System.out.println(oggi); // -> LUNEDI
+```
 
 ### 4.1 Esempio completo
 
 ```java
 public class Main {
 
-    enum Stato {
-        ACCESO,
-        SPENTO
-    }
+    enum Stato { ACCESO, SPENTO }
 
     public static void main(String[] args) {
         Stato lampada = Stato.ACCESO;
-        System.out.println(lampada); // -> Output: ACCESO
+        System.out.println(lampada); // -> ACCESO
     }
 }
 ```
@@ -96,7 +88,7 @@ Gli enum funzionano perfettamente con `if` e `switch`.
 ### 5.1 Con if
 
 ```java
-if(lampada == Stato.ACCESO){
+if (lampada == Stato.ACCESO) {
     System.out.println("La lampada è accesa");
 }
 ```
@@ -104,64 +96,49 @@ if(lampada == Stato.ACCESO){
 ### 5.2 Con switch (molto usato)
 
 ```java
-switch(lampada){
-    case ACCESO:
-        System.out.println("ON");
-        break;
+enum Stagione { PRIMAVERA, ESTATE, AUTUNNO, INVERNO }
 
-    case SPENTO:
-        System.out.println("OFF");
-        break;
+Stagione s = Stagione.ESTATE;
+
+switch (s) {
+    case PRIMAVERA: System.out.println("Fiori e sole");      break;
+    case ESTATE:    System.out.println("Caldo e vacanze");   break;
+    case AUTUNNO:   System.out.println("Foglie colorate");   break;
+    case INVERNO:   System.out.println("Neve e freddo");     break;
 }
 ```
 
-Gli enum rendono gli `switch` molto più chiari.
-
 ## 6. Metodi automatici degli enum
 
-Java fornisce alcuni metodi già pronti.
-
-### 6.1 values()
-
-Restituisce tutti i valori.
+### 6.1 values() — tutti i valori
 
 ```java
-for(Giorno g : Giorno.values()){
+for (Giorno g : Giorno.values()) {
     System.out.println(g);
 }
 ```
 
-### 6.2 valueOf()
-
-Converte una stringa in enum.
+### 6.2 valueOf() — da stringa a enum
 
 ```java
 Giorno g = Giorno.valueOf("LUNEDI");
 ```
 
 <Aside variant="warning">
-Deve essere scritto identico.
+Deve essere scritto identico alla costante.
 </Aside>
 
-### 6.3 ordinal()
-
-Restituisce la posizione.
+### 6.3 ordinal() — posizione (da 0)
 
 ```java
-System.out.println(Giorno.LUNEDI.ordinal()); // -> Output: 0
+System.out.println(Giorno.LUNEDI.ordinal()); // -> 0
 ```
 
-## 7. Enum come vere classi
+## 7. Enum con attributi e metodi
 
-Molti non sanno che un `enum` è una **classe speciale**.
+Un `enum` è una **classe speciale**: può avere attributi, costruttori e metodi.
 
-Può avere:
-
-- attributi
-- costruttori
-- metodi
-
-Per esempio:
+### 7.1 Esempio: livelli con codice
 
 ```java
 enum Livello {
@@ -170,31 +147,62 @@ enum Livello {
     MEDIO(2),
     ALTO(3);
 
-    private int codice;
+    private final int codice;
 
-    Livello(int codice){
+    Livello(int codice) {
         this.codice = codice;
     }
 
-    public int getCodice(){
+    public int getCodice() {
         return codice;
     }
 }
 ```
 
-## 8. Quando usare enum (Regola pratica)
+### 7.2 Esempio: pianeti con massa e raggio
+
+```java
+enum Pianeta {
+
+    MERCURIO(3.303e+23, 2.4397e6),
+    VENERE  (4.869e+24, 6.0518e6),
+    TERRA   (5.976e+24, 6.37814e6),
+    MARTE   (6.421e+23, 3.3972e6);
+
+    private final double massa;
+    private final double raggio;
+
+    Pianeta(double massa, double raggio) {
+        this.massa = massa;
+        this.raggio = raggio;
+    }
+
+    public double getMassa()  { return massa; }
+    public double getRaggio() { return raggio; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        for (Pianeta p : Pianeta.values()) {
+            System.out.println(p + " → massa: " + p.getMassa());
+        }
+    }
+}
+```
+
+## 8. Quando usare enum
 
 Usare un enum quando:
 
-- i valori sono pochi
-- i valori non cambiano
-- rappresentano stati o categorie
+- i valori sono **pochi** e **non cambiano**
+- rappresentano **stati o categorie**
 
 Esempi ideali:
 
-- stato ordine → IN_PREPARAZIONE, SPEDITO
-- ruolo utente → ADMIN, USER
+- stato ordine → IN_PREPARAZIONE, SPEDITO, CONSEGNATO
+- ruolo utente → ADMIN, USER, GUEST
 - difficoltà → FACILE, MEDIO, DIFFICILE
+- direzioni → NORD, SUD, EST, OVEST
 
 ## 9. Quiz a risposta multipla
 
@@ -205,21 +213,11 @@ import Quiz from '../../../components/Quiz.jsx';
 question: "Cos'è un enum?",
 answers: {
 a: 'Un ciclo',
-b: 'Un tipo di dato speciale',
+b: 'Un tipo di dato speciale con valori fissi',
 c: 'Un metodo',
 d: 'Un array'
 },
 correctAnswer: 'b'
-},
-{
-question: "Gli enum possono contenere metodi?",
-answers: {
-a: 'No',
-b: 'Solo statici',
-c: 'Sì',
-d: 'Solo privati'
-},
-correctAnswer: 'c'
 },
 {
 question: "Quale parola chiave crea un enum?",
@@ -232,7 +230,17 @@ d: 'define'
 correctAnswer: 'c'
 },
 {
-question: "Quale metodo restituisce tutti i valori?",
+question: "Gli enum possono contenere attributi e metodi?",
+answers: {
+a: 'No',
+b: 'Solo statici',
+c: 'Sì',
+d: 'Solo privati'
+},
+correctAnswer: 'c'
+},
+{
+question: "Quale metodo restituisce tutti i valori di un enum?",
 answers: {
 a: 'getAll()',
 b: 'values()',
@@ -257,40 +265,25 @@ correctAnswer: 'b'
 
 [Esercizi Enum](https://www.w3resource.com/java-exercises/java-enum-types.php)
 
-### 10.1 Esercizio
+### 10.1 Esercizio: Semaforo
 
-Creare un enum Semaforo con:
-
-ROSSO, GIALLO, VERDE
-
-Stampare il comportamento del semaforo.
+Crea un enum `Semaforo` con ROSSO, GIALLO, VERDE e stampa il comportamento con switch.
 
 <details>
 <summary>💡 Mostra soluzione</summary>
 
 ```java
-enum Semaforo {
-    ROSSO,
-    GIALLO,
-    VERDE
-}
+enum Semaforo { ROSSO, GIALLO, VERDE }
 
 public class Main {
-
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         Semaforo s = Semaforo.ROSSO;
 
-        switch(s){
-            case ROSSO:
-                System.out.println("STOP");
-                break;
-            case GIALLO:
-                System.out.println("ATTENZIONE");
-                break;
-            case VERDE:
-                System.out.println("VAI");
-                break;
+        switch (s) {
+            case ROSSO:  System.out.println("STOP");       break;
+            case GIALLO: System.out.println("ATTENZIONE"); break;
+            case VERDE:  System.out.println("VAI");        break;
         }
     }
 }
@@ -298,14 +291,35 @@ public class Main {
 
 </details>
 
-### 10.2 Esercizio
+### 10.2 Esercizio: Taglia con misura
 
-Creare un enum Ruolo con:
+Crea un enum `Taglia` con S, M, L, XL. Associa a ciascuno un valore numerico (S=36, M=38, L=40, XL=42) e stampali tutti.
 
-ADMIN, USER, GUEST
+<details>
+<summary>💡 Mostra soluzione</summary>
 
-Stampare un messaggio diverso per ogni ruolo.
+```java
+enum Taglia {
+    S(36), M(38), L(40), XL(42);
+
+    private final int misura;
+
+    Taglia(int misura) { this.misura = misura; }
+
+    public int getMisura() { return misura; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        for (Taglia t : Taglia.values()) {
+            System.out.println(t + " → " + t.getMisura());
+        }
+    }
+}
+```
+
+</details>
 
 ### 10.3 Esercizio
 
-Creare un enum Livello con un valore numerico associato e stampare il codice del livello scelto.
+Creare un enum `Ruolo` con ADMIN, USER, GUEST e stampare un messaggio diverso per ogni ruolo.
