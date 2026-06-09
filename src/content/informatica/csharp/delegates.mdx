@@ -253,7 +253,114 @@ CreaAnimale d1 = () => new Cane(); // Covarianza
 GestisciAnimale d2 = (Animale a) => Console.WriteLine(a.GetType().Name); // Controvarianza
 ```
 
-## 10. Esercizi
+## 10. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Cos'è un delegato in C#?",
+answers:{
+a:"Una classe che eredita da Object",
+b:"Un tipo che incapsula un riferimento a uno o più metodi",
+c:"Un'interfaccia per i metodi asincroni",
+d:"Un tipo di ciclo"
+},
+correctAnswer:"b"
+},
+{
+question:"Quale keyword si usa per dichiarare un tipo delegato?",
+answers:{
+a:"event",
+b:"func",
+c:"delegate",
+d:"action"
+},
+correctAnswer:"c"
+},
+{
+question:"Cosa fa l'operatore += su un delegato?",
+answers:{
+a:"Somma due valori",
+b:"Aggiunge un metodo alla lista di invocazione (multicast)",
+c:"Crea un nuovo delegato",
+d:"Rimuove un metodo dal delegato"
+},
+correctAnswer:"b"
+},
+{
+question:"In un delegato multicast con tipo di ritorno, quale valore viene mantenuto?",
+answers:{
+a:"Il primo",
+b:"La media",
+c:"Tutti i valori in una lista",
+d:"L'ultimo"
+},
+correctAnswer:"d"
+},
+{
+question:"Quale delegato predefinito rappresenta un metodo che non restituisce valore?",
+answers:{
+a:"Func",
+b:"Predicate",
+c:"Action",
+d:"Delegate"
+},
+correctAnswer:"c"
+},
+{
+question:"Func<string, int> rappresenta:",
+answers:{
+a:"Un metodo che accetta int e restituisce string",
+b:"Un metodo che accetta string e restituisce int",
+c:"Un metodo che accetta due stringhe",
+d:"Un metodo senza parametri"
+},
+correctAnswer:"b"
+},
+{
+question:"Qual è la differenza tra un metodo anonimo e una lambda expression?",
+answers:{
+a:"Non c'è differenza",
+b:"La lambda è più compatta e usa la sintassi =>",
+c:"Il metodo anonimo usa =>",
+d:"La lambda richiede un tipo di ritorno esplicito"
+},
+correctAnswer:"b"
+},
+{
+question:"Gli eventi in C# si basano su:",
+answers:{
+a:"Interfacce",
+b:"Classi astratte",
+c:"Delegati",
+d:"Struct"
+},
+correctAnswer:"c"
+},
+{
+question:"La covarianza in un delegato permette di:",
+answers:{
+a:"Accettare un tipo più generico come parametro",
+b:"Restituire un tipo derivato rispetto a quello dichiarato",
+c:"Usare metodi statici come delegati",
+d:"Eliminare il tipo di ritorno"
+},
+correctAnswer:"b"
+},
+{
+question:"Quale operatore si usa per rimuovere un metodo da un delegato multicast?",
+answers:{
+a:"--",
+b:"/=",
+c:"-=",
+d:"remove"
+},
+correctAnswer:"c"
+}
+]} />
+
+## 11. Esercizi
 
 ### 10.1 Esercizio
 **Scenario**:
