@@ -2,7 +2,7 @@
 title: "Dependency Injection"
 order: 3
 draft: false
-lastUpdateDate: "2026-06-09"
+lastUpdateDate: "2026-06-10"
 subject: "C#"
 category: "Informatica"
 difficulty: "complesso"
@@ -13,32 +13,111 @@ videoLesson: false
 
 ## 1. Introduzione
 
-La **Dependency Injection (DI)** è un pattern di design che implementa il principio **Inversion of Control (IoC)**: invece di creare le dipendenze all'interno di una classe, queste vengono **fornite dall'esterno**.
+La **Dependency Injection (DI)** è un pattern che realizza il principio di **Inversion of Control (IoC)**: una classe non costruisce da sola ciò di cui ha bisogno, ma riceve le dipendenze dall'esterno.
+
+In altre parole, il codice applicativo smette di dire:
+
+- "creo io i miei collaboratori"
+
+e inizia a dire:
+
+- "dichiaro di cosa ho bisogno, qualcun altro me lo fornisce"
+
+Questo "qualcun altro" può essere:
+
+- il chiamante, in codice puro;
+- un composition root;
+- un **contenitore DI** come quello integrato in .NET.
 
 Vantaggi principali:
-- **Testabilità**: si possono sostituire le dipendenze reali con mock nei test.
-- **Manutenibilità**: le classi dipendono da astrazioni, non da implementazioni concrete.
-- **Flessibilità**: cambiare implementazione senza modificare il codice che la usa.
+
+- **Testabilità**: dipendenze sostituibili con fake, stub o mock.
+- **Manutenibilità**: minore accoppiamento tra moduli.
+- **Estendibilità**: nuove implementazioni senza toccare il codice client.
+- **Separazione delle responsabilità**: la creazione degli oggetti è separata dal loro uso.
 
 ```mermaid
 graph LR
-    A[Classe che ha bisogno di X] -->|dipende da| B[Interfaccia IX]
-    C[IoC Container] -->|inietta| A
-    D[Implementazione concreta X] -->|registrata nel| C
-    D -->|implementa| B
+    A[Classe client] -->|dipende da| B[Astrazione]
+    C[Container / Composition Root] -->|fornisce implementazione| A
+    D[Classe concreta] -->|implementa| B
 ```
+
+### 1.1 IoC in profondità
+
+**Inversion of Control** significa che il flusso di creazione e collegamento degli oggetti non è più controllato dalle singole classi, ma da un livello superiore.
+
+Senza IoC:
+
+- ogni classe decide **come** creare le proprie dipendenze;
+- ogni classe conosce dettagli concreti di costruzione;
+- il grafo degli oggetti è sparso nel codice.
+
+Con IoC:
+
+- le classi dichiarano **cosa** serve loro;
+- il wiring viene centralizzato;
+- l'applicazione è più componibile.
+
+Dal punto di vista architetturale:
+
+$$
+\text{Modulo ad alto livello} \rightarrow \text{Astrazione} \leftarrow \text{Modulo a basso livello}
+$$
+
+Il punto chiave è che i moduli importanti del dominio non dovrebbero dipendere da dettagli infrastrutturali.
+
+### 1.2 Hollywood Principle
+
+Un modo intuitivo per capire IoC è il **Hollywood Principle**:
+
+> "Don't call us, we'll call you."
+
+Tradotto nel contesto DI:
+
+- una classe non va a cercare le sue dipendenze;
+- è il framework/container che le fornisce quando serve.
+
+Esempio mentale:
+
+- il controller ASP.NET Core non crea `ILogger`, `DbContext` o servizi applicativi;
+- li dichiara nel costruttore;
+- il framework li inietta quando costruisce il controller.
+
+Questa inversione del controllo rende il codice meno "imperativo" nella costruzione e più dichiarativo nelle dipendenze.
+
+### 1.3 Relazione con il DIP di SOLID
+
+La DI è spesso il meccanismo pratico che permette di applicare il **DIP - Dependency Inversion Principle**.
+
+Il DIP afferma:
+
+1. I moduli ad alto livello non devono dipendere da moduli a basso livello. Entrambi devono dipendere da astrazioni.
+2. Le astrazioni non devono dipendere dai dettagli. Sono i dettagli che devono dipendere dalle astrazioni.
+
+Esempio:
+
+- `OrdineService` è modulo ad alto livello;
+- `EmailService` è un dettaglio infrastrutturale;
+- `INotificaService` è l'astrazione.
+
+Se `OrdineService` dipende da `INotificaService`, allora il dominio resta stabile anche se cambiamo il canale di notifica.
+
+La DI da sola non garantisce una buona architettura, ma rende molto più naturale rispettare il DIP.
 
 ## 2. Il problema senza DI
 
+### 2.1 Accoppiamento forte
+
 ```cs
-// ❌ SENZA DI: accoppiamento forte
+// SENZA DI: accoppiamento forte
 public class OrdineService
 {
     private readonly EmailService _emailService;
 
     public OrdineService()
     {
-        // La classe crea la dipendenza → hard-coded
+        // La classe crea la dipendenza -> hard-coded
         _emailService = new EmailService();
     }
 
@@ -51,13 +130,71 @@ public class OrdineService
 ```
 
 Problemi:
-- Non si può testare `OrdineService` senza usare anche `EmailService`.
-- Sostituire `EmailService` con `SmsService` richiede modifica del codice.
+
+- `OrdineService` conosce una classe concreta.
+- Il costruttore nasconde una dipendenza reale.
+- Nei test non puoi sostituire facilmente `EmailService`.
+- Se domani vuoi inviare SMS o push notification, devi modificare la classe.
+
+Quando una classe usa spesso `new` per creare collaboratori, sta mescolando due responsabilità:
+
+- logica di business;
+- costruzione dell'object graph.
+
+### 2.2 Il Service Locator è un anti-pattern
+
+Un errore comune è pensare: "va bene, non uso `new`, allora chiedo tutto a un contenitore globale".
+
+```cs
+public class OrdineService
+{
+    public void ConfermaOrdine(int ordineId)
+    {
+        var notificaService = ServiceLocator.Current.GetRequiredService<INotificaService>();
+        notificaService.Invia("Ordine confermato");
+    }
+}
+```
+
+Questo approccio è chiamato **Service Locator** ed è considerato un **anti-pattern**.
+
+Perché?
+
+1. **Nasconde le dipendenze**  
+   Dal costruttore non si capisce più di cosa ha bisogno la classe.
+
+2. **Riduce la leggibilità**  
+   Le dipendenze diventano implicite e disperse nel codice.
+
+3. **Rende i test più difficili**  
+   Serve spesso configurare un contenitore globale o simulare un resolver.
+
+4. **Viola il principio di explicit dependencies**  
+   Una buona API dovrebbe dichiarare chiaramente le collaborazioni necessarie.
+
+5. **Introduce coupling al container**  
+   La classe dipende dal meccanismo di risoluzione, non solo dall'astrazione.
+
+Con la DI corretta:
+
+- la classe riceve ciò che serve nel costruttore;
+- il container viene usato nel composition root, non dentro il dominio.
+
+```mermaid
+graph TD
+    A[Service Locator] --> B[La classe cerca i servizi]
+    B --> C[Dipendenze nascoste]
+    C --> D[Test e manutenzione peggiori]
+
+    E[Dependency Injection] --> F[La classe dichiara le dipendenze]
+    F --> G[Dipendenze esplicite]
+    G --> H[Test e manutenzione migliori]
+```
 
 ## 3. Soluzione con DI
 
 ```cs
-// Interfaccia → astrazione
+// Interfaccia -> astrazione
 public interface INotificaService
 {
     void Invia(string messaggio);
@@ -70,7 +207,7 @@ public class EmailService : INotificaService
         => Console.WriteLine($"Email inviata: {messaggio}");
 }
 
-// ✅ CON DI: dipende dall'interfaccia, non dall'implementazione
+// CON DI: dipende dall'interfaccia, non dall'implementazione
 public class OrdineService
 {
     private readonly INotificaService _notificaService;
@@ -89,52 +226,77 @@ public class OrdineService
 }
 ```
 
-## 4. Tipi di iniezione
+Qui la classe:
 
-### 4.1 Constructor Injection (raccomandato)
+- non sa quale implementazione riceverà;
+- non conosce il container;
+- dichiara esplicitamente il proprio contratto di collaborazione.
+
+### 3.1 Constructor Injection
+
+È la forma più raccomandata perché:
+
+- rende obbligatorie le dipendenze;
+- favorisce oggetti immutabili;
+- rende subito visibili i requisiti della classe.
 
 ```cs
 public class MioServizio
 {
     private readonly IRepository _repo;
 
-    public MioServizio(IRepository repo) // ← iniettato nel costruttore
+    public MioServizio(IRepository repo)
     {
         _repo = repo;
     }
 }
 ```
 
-### 4.2 Property Injection
+Se una classe ha troppi parametri nel costruttore, spesso non è un limite della DI ma un segnale architetturale: probabilmente la classe ha troppe responsabilità.
+
+### 3.2 Property Injection
 
 ```cs
 public class MioServizio
 {
-    public ILogger Logger { get; set; } // ← iniettato come proprietà
+    public ILogger Logger { get; set; } = NullLogger.Instance;
 }
 ```
 
-### 4.3 Method Injection
+È meno sicura perché:
+
+- la dipendenza può mancare;
+- l'oggetto può essere usato in stato incompleto;
+- le dipendenze non sono evidenti quanto nel costruttore.
+
+Va bene solo in scenari molto specifici.
+
+### 3.3 Method Injection
 
 ```cs
 public class MioServizio
 {
-    public void Esegui(ILogger logger) // ← iniettato nel metodo
+    public void Esegui(ILogger logger)
     {
         logger.Log("Eseguito");
     }
 }
 ```
 
-## 5. DI in .NET — IServiceCollection
+È utile quando la dipendenza serve solo per una singola operazione, non per tutta la vita dell'oggetto.
 
-.NET include un IoC container nativo. La registrazione avviene in `Program.cs` (o `Startup.cs`).
+## 4. DI in .NET: `IServiceCollection`, `IServiceProvider` e object graph
+
+.NET include un contenitore DI nativo minimalista ma molto efficace, basato su:
+
+- `IServiceCollection`: descrive **come registrare** i servizi;
+- `IServiceProvider`: sa **come risolverli**;
+- `IServiceScope`: delimita uno scope di vita per i servizi scoped.
 
 ```cs
 // Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
-// Registrazione dei servizi
 builder.Services.AddScoped<IOrdineService, OrdineService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddSingleton<IConfigService, ConfigService>();
@@ -142,9 +304,77 @@ builder.Services.AddSingleton<IConfigService, ConfigService>();
 var app = builder.Build();
 ```
 
-## 6. Lifetime dei servizi
+### 4.1 Come nasce il container
 
-Il **lifetime** determina per quanto tempo vive un'istanza del servizio.
+Il flusso tipico è:
+
+1. Popoli `builder.Services`.
+2. Alla `Build()`, il framework crea il provider radice.
+3. Per ogni request HTTP viene creato uno scope figlio.
+4. Quando serve un controller o un servizio, il provider costruisce il relativo object graph.
+
+### 4.2 Come `IServiceProvider` risolve il grafo degli oggetti
+
+Supponiamo:
+
+- `UserController` dipende da `IUserService`;
+- `UserService` dipende da `IUserRepository` e `ILogger<UserService>`;
+- `UserRepository` dipende da `AppDbContext`.
+
+Quando il framework deve creare `UserController`, il container:
+
+1. individua il costruttore selezionato;
+2. legge i parametri richiesti;
+3. per ogni parametro cerca la registrazione corrispondente;
+4. risolve ricorsivamente tutte le dipendenze;
+5. costruisce l'intero object graph;
+6. memorizza o riusa l'istanza in base al lifetime;
+7. gestisce il `Dispose()` a fine scope, se necessario.
+
+```mermaid
+graph TD
+    A[Request HTTP] --> B[IServiceScope]
+    B --> C[UserController]
+    C --> D[IUserService -> UserService]
+    D --> E[IUserRepository -> UserRepository]
+    D --> F[ILogger<UserService>]
+    E --> G[AppDbContext]
+```
+
+In termini concettuali:
+
+$$
+\text{Resolve}(A) = A(B, C), \quad \text{Resolve}(B) = B(D), \quad \text{Resolve}(C) = C()
+$$
+
+Il container attraversa il grafo fino alle foglie, poi costruisce gli oggetti dal basso verso l'alto.
+
+### 4.3 Provider radice e scope
+
+Il **provider radice** vive per tutta l'applicazione. Da esso vengono creati gli scope:
+
+- in ASP.NET Core uno scope per request;
+- in console/background service puoi crearli manualmente;
+- i servizi `Scoped` non dovrebbero essere risolti direttamente dal provider radice.
+
+```cs
+using var scope = app.Services.CreateScope();
+var service = scope.ServiceProvider.GetRequiredService<IMioServizio>();
+```
+
+### 4.4 Validazione del container
+
+Il container può intercettare alcuni problemi:
+
+- servizi mancanti;
+- dipendenze circolari;
+- mismatch di lifetime, ad esempio singleton che cattura uno scoped.
+
+Questa validazione è preziosa perché sposta molti errori dalla produzione all'avvio o alla prima risoluzione.
+
+## 5. Lifetime dei servizi
+
+Il **lifetime** determina per quanto tempo vive un'istanza.
 
 ```mermaid
 graph TD
@@ -154,10 +384,9 @@ graph TD
     E[Request 2] -->|usa| F[Scoped S2]
     E -->|usa| G[Transient T2]
     E -->|usa| D
-    style D fill:#f9f,stroke:#333
 ```
 
-### 6.1 Transient
+### 5.1 Transient
 
 Nuova istanza **ogni volta** che il servizio viene richiesto.
 
@@ -165,21 +394,31 @@ Nuova istanza **ogni volta** che il servizio viene richiesto.
 builder.Services.AddTransient<IMioServizio, MioServizio>();
 ```
 
-- ✅ Servizi leggeri e stateless.
-- ❌ Costoso se il servizio ha setup complesso.
+Usalo per:
 
-### 6.2 Scoped
+- servizi leggeri;
+- componenti stateless;
+- oggetti che non devono condividere stato.
 
-Una sola istanza **per richiesta HTTP** (o per scope definito).
+Rischio:
+
+- troppe allocazioni se la costruzione è costosa.
+
+### 5.2 Scoped
+
+Una sola istanza **per scope**. In ASP.NET Core di solito significa una richiesta HTTP.
 
 ```cs
 builder.Services.AddScoped<IMioServizio, MioServizio>();
 ```
 
-- ✅ Servizi che devono condividere stato nella stessa richiesta (es. DbContext).
-- ❌ Non usare fuori da uno scope (es. singleton che dipende da scoped).
+È ideale per:
 
-### 6.3 Singleton
+- `DbContext`;
+- unit of work;
+- servizi che devono condividere contesto nella stessa richiesta.
+
+### 5.3 Singleton
 
 Una sola istanza **per tutta la vita dell'applicazione**.
 
@@ -187,26 +426,33 @@ Una sola istanza **per tutta la vita dell'applicazione**.
 builder.Services.AddSingleton<IMioServizio, MioServizio>();
 ```
 
-- ✅ Servizi costosi da creare e thread-safe (es. cache, configurazione).
-- ❌ Non può dipendere da Transient o Scoped (captive dependency).
+È adatto a:
 
-### Tabella riepilogativa
+- cache;
+- configurazione;
+- servizi costosi da creare e thread-safe.
 
-| Lifetime | Istanze create | Durata |
-|---|---|---|
-| Transient | Ogni richiesta al container | Brevissima |
-| Scoped | Una per scope (HTTP request) | Durata request |
-| Singleton | Una sola | Vita dell'app |
+Un singleton deve essere progettato con attenzione:
 
-## 7. Captive Dependency
+- può essere usato da thread diversi;
+- non deve dipendere da servizi con lifetime più breve.
 
-Un errore comune: un **Singleton** che dipende da un **Scoped** crea una *captive dependency* — il Scoped viene "catturato" dal Singleton e vive più a lungo del previsto.
+### 5.4 Tabella riepilogativa
+
+| Lifetime | Istanze create | Durata | Uso tipico |
+|---|---|---|---|
+| Transient | Ogni richiesta al container | Brevissima | Mapper, strategy stateless |
+| Scoped | Una per scope | Durata request/scope | `DbContext`, servizi applicativi request-bound |
+| Singleton | Una sola | Vita dell'app | Cache, provider condivisi |
+
+### 5.5 Captive Dependency
+
+Un errore classico: un singleton che trattiene uno scoped.
 
 ```cs
-// ❌ PROBLEMA: Singleton cattura uno Scoped
 public class MioSingleton
 {
-    private readonly IMioScoped _scoped; // ← questo scoped vivrà per sempre!
+    private readonly IMioScoped _scoped;
 
     public MioSingleton(IMioScoped scoped)
     {
@@ -218,7 +464,413 @@ public class MioSingleton
 // builder.Services.AddScoped<IMioScoped, MioScoped>();
 ```
 
-.NET lancia `InvalidOperationException` in development se rileva questo pattern.
+Perché è sbagliato?
+
+- lo scoped nasce per vivere poco;
+- il singleton lo conserva troppo a lungo;
+- si rompe il modello di lifetime.
+
+In sviluppo, .NET può lanciare `InvalidOperationException` quando rileva questo pattern.
+
+## 6. Registrazioni avanzate nel container
+
+### 6.1 Factory registration
+
+Non sempre un servizio si costruisce bene con il semplice mapping interfaccia-implementazione. In questi casi puoi registrarlo con una factory:
+
+```cs
+builder.Services.AddTransient<ReportService>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<ReportService>>();
+    var clock = sp.GetRequiredService<ISystemClock>();
+    var culture = CultureInfo.GetCultureInfo("it-IT");
+
+    return new ReportService(logger, clock, culture);
+});
+```
+
+Questa tecnica è utile quando:
+
+- servono parametri calcolati;
+- vuoi combinare servizi risolti dal container con valori manuali;
+- l'inizializzazione è più complessa del normale.
+
+Va usata con disciplina: se la factory diventa molto lunga, probabilmente la composizione andrebbe spostata in una classe dedicata.
+
+### 6.2 Open generics
+
+Il container .NET supporta la registrazione di **generici aperti**.
+
+```cs
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+```
+
+Questo significa che:
+
+- quando chiedi `IRepository<User>`, il container crea `Repository<User>`;
+- quando chiedi `IRepository<Order>`, crea `Repository<Order>`.
+
+È molto utile per repository, validator, handler, mapper e pipeline generiche.
+
+```cs
+public interface IRepository<T>
+{
+    T? GetById(int id);
+}
+
+public class Repository<T> : IRepository<T>
+{
+    public T? GetById(int id) => default;
+}
+```
+
+### 6.3 Keyed services in .NET 8
+
+Con .NET 8 puoi registrare più implementazioni della stessa interfaccia usando una **chiave**.
+
+```cs
+builder.Services.AddKeyedScoped<IPagamentoService, CartaPagamentoService>("carta");
+builder.Services.AddKeyedScoped<IPagamentoService, PaypalPagamentoService>("paypal");
+builder.Services.AddKeyedScoped<IPagamentoService, BonificoPagamentoService>("bonifico");
+```
+
+Risoluzione in un controller:
+
+```cs
+[ApiController]
+[Route("api/pagamenti")]
+public class PagamentiController : ControllerBase
+{
+    [HttpPost("carta")]
+    public IActionResult PagaConCarta(
+        [FromKeyedServices("carta")] IPagamentoService pagamentoService)
+    {
+        pagamentoService.Paga(100m);
+        return Ok();
+    }
+}
+```
+
+Oppure manualmente:
+
+```cs
+var pagamento = serviceProvider.GetRequiredKeyedService<IPagamentoService>("paypal");
+```
+
+Quando usarli:
+
+- più strategie della stessa interfaccia;
+- scelta dell'implementazione in base a contesto funzionale;
+- sostituzione di `switch` o `if` annidati su tipi concreti.
+
+Attenzione: i keyed services non devono diventare un pretesto per reintrodurre logica di selezione caotica nel dominio.
+
+### 6.4 Options Pattern: `IOptions<T>`, `IOptionsMonitor<T>`, `IOptionsSnapshot<T>`
+
+In .NET la configurazione si integra con la DI tramite l'**Options Pattern**.
+
+Classe di configurazione:
+
+```cs
+public class MailOptions
+{
+    public string Host { get; set; } = "";
+    public int Port { get; set; }
+    public string Sender { get; set; } = "";
+}
+```
+
+Registrazione:
+
+```cs
+builder.Services.Configure<MailOptions>(
+    builder.Configuration.GetSection("Mail"));
+```
+
+Uso con `IOptions<T>`:
+
+```cs
+public class MailService
+{
+    private readonly MailOptions _options;
+
+    public MailService(IOptions<MailOptions> options)
+    {
+        _options = options.Value;
+    }
+}
+```
+
+Differenze fondamentali:
+
+| Tipo | Lifetime tipico | Aggiornamenti config | Scenario |
+|---|---|---|---|
+| `IOptions<T>` | Singleton-like wrapper | No refresh per richiesta | Config quasi statica |
+| `IOptionsSnapshot<T>` | Scoped | Valori ricalcolati per scope/request | Web app con config riletta a ogni request |
+| `IOptionsMonitor<T>` | Singleton | Supporta change notification e accesso al valore corrente | Background service, singleton, hot reload config |
+
+#### `IOptions<T>`
+
+- semplice;
+- economico;
+- ottimo per configurazioni stabili.
+
+#### `IOptionsSnapshot<T>`
+
+- disponibile in contesti scoped;
+- in ASP.NET Core fornisce un "snapshot" per request;
+- utile quando la configurazione può cambiare e vuoi leggere la versione corrente a ogni richiesta.
+
+#### `IOptionsMonitor<T>`
+
+- usabile anche nei singleton;
+- espone `CurrentValue`;
+- permette `OnChange(...)`.
+
+```cs
+public class CacheWarmupService
+{
+    private readonly IOptionsMonitor<MailOptions> _optionsMonitor;
+
+    public CacheWarmupService(IOptionsMonitor<MailOptions> optionsMonitor)
+    {
+        _optionsMonitor = optionsMonitor;
+    }
+
+    public void StampaHostCorrente()
+    {
+        Console.WriteLine(_optionsMonitor.CurrentValue.Host);
+    }
+}
+```
+
+È buona pratica affiancare anche:
+
+- validazione con `Validate(...)`;
+- `ValidateOnStart()` per fallire subito se la configurazione è errata.
+
+### 6.5 Decorator pattern con DI
+
+Il **Decorator** permette di avvolgere un servizio con un altro che implementa la stessa interfaccia, aggiungendo comportamento senza modificare il servizio originale.
+
+```cs
+public interface IReportService
+{
+    Task GeneraAsync();
+}
+
+public class ReportService : IReportService
+{
+    public Task GeneraAsync() => Task.CompletedTask;
+}
+
+public class LoggingReportDecorator : IReportService
+{
+    private readonly IReportService _inner;
+    private readonly ILogger<LoggingReportDecorator> _logger;
+
+    public LoggingReportDecorator(
+        IReportService inner,
+        ILogger<LoggingReportDecorator> logger)
+    {
+        _inner = inner;
+        _logger = logger;
+    }
+
+    public async Task GeneraAsync()
+    {
+        _logger.LogInformation("Inizio generazione report");
+        await _inner.GeneraAsync();
+        _logger.LogInformation("Fine generazione report");
+    }
+}
+```
+
+Concettualmente:
+
+```mermaid
+graph LR
+    A[Client] --> B[IReportService]
+    B --> C[LoggingDecorator]
+    C --> D[ReportService]
+```
+
+Con il container built-in, il decorator puro non è comodo quanto in container più avanzati. Per questo spesso si usa **Scrutor**, che aggiunge assembly scanning e decorator registration:
+
+```cs
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.Decorate<IReportService, LoggingReportDecorator>();
+```
+
+### 6.6 Scrutor e assembly scanning
+
+La libreria **Scrutor** estende `Microsoft.Extensions.DependencyInjection` e consente:
+
+- assembly scanning;
+- registrazioni convenzionali;
+- decorator registration.
+
+Esempio:
+
+```cs
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<IUserService>()
+    .AddClasses(classes => classes.InNamespaces("MyApp.Services"))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
+```
+
+È utile in progetti grandi, ma va usata con moderazione: le registrazioni troppo implicite possono rendere meno chiaro il composition root.
+
+## 7. Errori comuni, dipendenze circolari e test
+
+### 7.1 Circular dependencies
+
+Una dipendenza circolare avviene quando:
+
+- `A` dipende da `B`;
+- `B` dipende da `C`;
+- `C` dipende da `A`.
+
+```mermaid
+graph LR
+    A[ServiceA] --> B[ServiceB]
+    B --> C[ServiceC]
+    C --> A
+```
+
+Esempio:
+
+```cs
+public class ServiceA
+{
+    public ServiceA(ServiceB b) { }
+}
+
+public class ServiceB
+{
+    public ServiceB(ServiceA a) { }
+}
+```
+
+Il container in genere le rileva durante la risoluzione e lancia un'eccezione.
+
+Come evitarle:
+
+1. **Rivedi il design**: spesso indica responsabilità intrecciate.
+2. **Estrai un servizio terzo**: logica condivisa in una nuova astrazione.
+3. **Usa eventi, callback o mediator** quando la comunicazione è bidirezionale.
+4. **Riduci il coupling** tra servizi applicativi.
+
+La soluzione corretta quasi mai è "forzare" il container: di solito bisogna migliorare il design.
+
+### 7.2 Unit testing con DI
+
+La DI rende i test molto più facili perché puoi sostituire le implementazioni reali con finte implementazioni o mock.
+
+Esempio con fake:
+
+```cs
+public class FakeNotificaService : INotificaService
+{
+    public string? UltimoMessaggio { get; private set; }
+
+    public void Invia(string messaggio)
+    {
+        UltimoMessaggio = messaggio;
+    }
+}
+```
+
+Test con `Microsoft.Extensions.DependencyInjection`:
+
+```cs
+var services = new ServiceCollection();
+
+services.AddScoped<INotificaService, FakeNotificaService>();
+services.AddScoped<OrdineService>();
+
+using var provider = services.BuildServiceProvider();
+using var scope = provider.CreateScope();
+
+var ordineService = scope.ServiceProvider.GetRequiredService<OrdineService>();
+var fake = (FakeNotificaService)scope.ServiceProvider.GetRequiredService<INotificaService>();
+
+ordineService.ConfermaOrdine(10);
+
+Assert.Equal("Ordine confermato", fake.UltimoMessaggio);
+```
+
+Con un framework di mocking puoi registrare direttamente un mock dell'interfaccia:
+
+```cs
+services.AddSingleton<INotificaService>(mock.Object);
+```
+
+Buone pratiche nei test:
+
+- testa il comportamento, non l'implementazione interna;
+- usa interfacce ai confini esterni;
+- mantieni piccolo il composition root del test;
+- evita di usare il provider come service locator dentro il codice di produzione.
+
+### 7.3 DI nei test di integrazione
+
+Nei test di integrazione puoi costruire un container quasi reale e sostituire solo alcune dipendenze:
+
+- database reale con database in-memory;
+- servizi esterni con fake server o stub;
+- clock reale con `ISystemClock` finto.
+
+Questo approccio consente di verificare non solo la logica, ma anche il wiring dell'applicazione.
+
+### 7.4 Confronto tra container DI
+
+#### `Microsoft.Extensions.DependencyInjection`
+
+Punti forti:
+
+- integrato nativamente in ASP.NET Core;
+- semplice e standard;
+- ottima scelta per la maggior parte dei progetti.
+
+Limiti:
+
+- meno funzionalità avanzate out-of-the-box;
+- decorator e convention scanning richiedono spesso librerie esterne come Scrutor;
+- meno espressivo di container più sofisticati.
+
+#### Autofac
+
+Punti forti:
+
+- molto ricco di funzionalità;
+- ottimo supporto per moduli, named/keyed services, decorator, assembly scanning;
+- molto flessibile per scenari complessi.
+
+Contro:
+
+- aggiunge dipendenza esterna;
+- può introdurre configurazioni più complesse del necessario.
+
+#### Simple Injector
+
+Punti forti:
+
+- molto rigoroso sulla correttezza delle configurazioni;
+- forte focus su diagnosi, validazione e best practice;
+- eccellente per applicazioni che vogliono massima disciplina architetturale.
+
+Contro:
+
+- integrazione meno "naturale" del container built-in in alcuni scenari ASP.NET Core moderni;
+- filosofia più rigida, che richiede comprensione architetturale.
+
+#### Regola pratica
+
+- Se vuoi semplicità e integrazione con il framework: **container built-in**.
+- Se ti servono molte feature avanzate di composizione: **Autofac**.
+- Se vuoi massima verifica e disciplina architetturale: **Simple Injector**.
 
 ## 8. Esempio completo
 
@@ -234,6 +886,11 @@ public interface IUserService
     string GetNomeUtente(int id);
 }
 
+public interface IAuditService
+{
+    void Traccia(string messaggio);
+}
+
 // Implementazioni
 public class UserRepository : IUserRepository
 {
@@ -244,29 +901,49 @@ public class UserRepository : IUserRepository
     }
 }
 
+public class ConsoleAuditService : IAuditService
+{
+    public void Traccia(string messaggio)
+    {
+        Console.WriteLine($"AUDIT: {messaggio}");
+    }
+}
+
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepo;
+    private readonly IAuditService _auditService;
 
-    public UserService(IUserRepository userRepo)
+    public UserService(IUserRepository userRepo, IAuditService auditService)
     {
         _userRepo = userRepo;
+        _auditService = auditService;
     }
 
     public string GetNomeUtente(int id)
     {
+        _auditService.Traccia($"Richiesto utente {id}");
         var user = _userRepo.GetById(id);
         return user?.Nome ?? "Sconosciuto";
     }
 }
 
+public class User
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+}
+
 // Program.cs
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<IAuditService, ConsoleAuditService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
 app.MapControllers();
 app.Run();
 
@@ -277,7 +954,7 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
 
-    public UserController(IUserService userService) // ← iniettato automaticamente
+    public UserController(IUserService userService)
     {
         _userService = userService;
     }
@@ -290,6 +967,14 @@ public class UserController : ControllerBase
     }
 }
 ```
+
+In questo esempio:
+
+- il controller dipende da `IUserService`;
+- `UserService` dipende da due astrazioni;
+- il repository è sostituibile;
+- l'audit è separato dalla logica di business;
+- tutto il wiring è centralizzato in `Program.cs`.
 
 ## 9. Quiz
 

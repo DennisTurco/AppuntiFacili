@@ -13,19 +13,39 @@ videoLesson: false
 
 ## 1. Introduzione
 
-`IEnumerable<T>` e `IQueryable<T>` sono due interfacce fondamentali in C# per lavorare con collezioni di dati. Scegliere quella giusta ha un impatto diretto sulle **performance**, soprattutto quando si lavora con database.
+`IEnumerable<T>` e `IQueryable<T>` sembrano simili perché entrambe si usano con LINQ, ma descrivono due modelli di esecuzione molto diversi:
+
+- `IEnumerable<T>` descrive una sequenza che il runtime C# sa **iterare elemento per elemento**.
+- `IQueryable<T>` descrive una query che un provider esterno può **analizzare, trasformare e tradurre**.
+
+La differenza pratica è: con `IEnumerable<T>` il lavoro avviene tipicamente **in memoria**, con `IQueryable<T>` il lavoro può essere spostato **verso la sorgente dati** (database, provider remoto, motore custom).
 
 ```mermaid
 graph TD
-    A[IEnumerable&lt;T&gt;] -->|eredita da| B[IEnumerable non-generico]
-    C[IQueryable&lt;T&gt;] -->|eredita da| A
-    C -->|eredita da| D[IQueryable non-generico]
+    A[IEnumerable&lt;T&gt;] -->|itera dati gia disponibili| B[LINQ to Objects]
+    C[IQueryable&lt;T&gt;] -->|espone Expression Tree| D[IQueryProvider]
+    D --> E[Traduzione SQL o altro linguaggio]
+    E --> F[Sorgente esterna]
     style C fill:#d4edda
 ```
 
-## 2. IEnumerable\<T\>
+In termini di costo, il confronto tipico è:
 
-`IEnumerable<T>` è la base di tutte le collezioni in C#. Supporta l'iterazione con `foreach`.
+$$
+T_{IEnumerable}(n) = O(n)
+$$
+
+quando bisogna leggere e filtrare tutti gli elementi in memoria, mentre una query ben indicizzata può avvicinarsi a:
+
+$$
+T_{IQueryable+indice}(n) = O(\log n + k)
+$$
+
+con $k$ pari al numero di righe realmente restituite.
+
+## 2. IEnumerable\<T\> e pattern Iterator
+
+`IEnumerable<T>` è la base dell'iterazione in .NET. Il punto centrale non è il filtro, ma il fatto che una sequenza sappia produrre un **enumeratore**.
 
 ```cs
 public interface IEnumerable<out T>
@@ -34,117 +54,516 @@ public interface IEnumerable<out T>
 }
 ```
 
-- Esegue le query **in memoria** (client-side).
-- Usa **LINQ to Objects**.
-- Adatto per: List, Array, Dictionary, qualsiasi collezione in memoria.
+### 2.1 Come funziona davvero `foreach`
+
+Quando scrivi:
 
 ```cs
-List<int> numeri = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-IEnumerable<int> query = numeri
-    .Where(n => n > 5)   // filtra in memoria
-    .OrderBy(n => n);    // ordina in memoria
-
-foreach (var n in query)
-    Console.WriteLine(n); // 6, 7, 8, 9, 10
+foreach (var valore in collezione)
+{
+    Console.WriteLine(valore);
+}
 ```
 
-## 3. IQueryable\<T\>
+il compilatore lo trasforma concettualmente in qualcosa di molto vicino a:
 
-`IQueryable<T>` estende `IEnumerable<T>` e rappresenta una query che può essere **tradotta ed eseguita su una sorgente esterna** (es. SQL Server).
+```cs
+using IEnumerator<int> enumerator = collezione.GetEnumerator();
+
+while (enumerator.MoveNext())
+{
+    int valore = enumerator.Current;
+    Console.WriteLine(valore);
+}
+```
+
+I tre membri chiave del pattern iterator sono:
+
+- `GetEnumerator()`: crea l'oggetto che sa attraversare la sequenza.
+- `MoveNext()`: avanza alla posizione successiva e restituisce `true` se esiste un elemento.
+- `Current`: espone l'elemento corrente.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Enumerable as IEnumerable<T>
+    participant Enumerator as IEnumerator<T>
+
+    Client->>Enumerable: GetEnumerator()
+    Enumerable-->>Client: Enumerator
+    loop finche ci sono elementi
+        Client->>Enumerator: MoveNext()
+        Enumerator-->>Client: true / false
+        Client->>Enumerator: Current
+        Enumerator-->>Client: elemento corrente
+    end
+```
+
+### 2.2 `yield return` e la state machine generata dal compilatore
+
+Una delle caratteristiche più importanti di `IEnumerable<T>` è che puoi implementarlo senza scrivere manualmente un enumeratore completo.
+
+```cs
+public static IEnumerable<int> NumeriPari(int max)
+{
+    for (int i = 0; i <= max; i++)
+    {
+        if (i % 2 == 0)
+            yield return i;
+    }
+}
+```
+
+Con `yield return` il compilatore genera una **state machine**:
+
+- una classe nascosta che implementa `IEnumerable<int>` e `IEnumerator<int>`;
+- un campo interno per salvare lo stato corrente dell'iterazione;
+- campi per conservare variabili locali e parametri del metodo;
+- una logica in `MoveNext()` che riprende l'esecuzione dal punto dell'ultimo `yield return`.
+
+Schema concettuale:
+
+```cs
+private sealed class NumeriPariStateMachine : IEnumerable<int>, IEnumerator<int>
+{
+    private int _state;
+    private int _current;
+    private int _max;
+    private int _i;
+
+    public bool MoveNext()
+    {
+        switch (_state)
+        {
+            case 0:
+                _i = 0;
+                _state = 1;
+                goto case 1;
+
+            case 1:
+                while (_i <= _max)
+                {
+                    if (_i % 2 == 0)
+                    {
+                        _current = _i;
+                        _i++;
+                        return true;
+                    }
+
+                    _i++;
+                }
+                break;
+        }
+
+        return false;
+    }
+
+    public int Current => _current;
+}
+```
+
+Questo spiega perché `IEnumerable<T>` può essere molto efficiente quando vuoi **streaming** di dati uno alla volta invece di creare subito una lista completa.
+
+### 2.3 LINQ to Objects su `IEnumerable<T>`
+
+Su collezioni in memoria, gli operatori LINQ lavorano come composizione di iteratori:
+
+```cs
+List<int> numeri = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+IEnumerable<int> query = numeri
+    .Where(n => n > 5)
+    .OrderBy(n => n);
+
+foreach (var n in query)
+    Console.WriteLine(n);
+```
+
+Qui non esiste alcuna traduzione SQL: la lambda è codice .NET compilato e la sequenza viene percorsa in memoria.
+
+### 2.4 Implicazioni di memoria
+
+Se la sequenza è lazy, spesso la memoria aggiuntiva è circa:
+
+$$
+M_{streaming} = O(1)
+$$
+
+oltre allo stato dell'enumeratore. Se invece materializzi con `ToList()`, la memoria cresce con il numero di elementi:
+
+$$
+M_{buffering} = O(n)
+$$
+
+Questo è il motivo per cui `yield return` e catene LINQ lazy possono essere molto più leggere di una materializzazione anticipata.
+
+## 3. IQueryable\<T\> e architettura dei provider LINQ
+
+`IQueryable<T>` estende `IEnumerable<T>`, ma aggiunge tre concetti fondamentali:
 
 ```cs
 public interface IQueryable<out T> : IEnumerable<T>
 {
-    Expression Body { get; }
+    Expression Expression { get; }
     Type ElementType { get; }
     IQueryProvider Provider { get; }
 }
 ```
 
-- Esegue le query **sul server** (server-side).
-- Usa **Expression Trees** → traduce LINQ in SQL.
-- Adatto per: Entity Framework Core, LINQ to SQL, database remoti.
+- `Expression`: l'albero sintattico della query.
+- `ElementType`: il tipo degli elementi finali.
+- `Provider`: il componente che sa interpretare l'albero.
 
-```cs
-// Con EF Core
-IQueryable<Prodotto> query = _context.Prodotti
-    .Where(p => p.Prezzo > 100)    // NON eseguito ancora
-    .OrderBy(p => p.Nome);          // NON eseguito ancora
+### 3.1 Il ruolo di `IQueryProvider`
 
-// La query SQL viene generata ed eseguita SOLO qui:
-List<Prodotto> prodotti = await query.ToListAsync();
-// SQL: SELECT * FROM Prodotti WHERE Prezzo > 100 ORDER BY Nome
+Un provider LINQ riceve un `Expression Tree` e decide come eseguirlo. In Entity Framework Core il flusso concettuale è:
+
+1. costruzione della query LINQ;
+2. creazione di un `Expression Tree`;
+3. visita dell'albero con il **visitor pattern**;
+4. traduzione in una forma intermedia;
+5. generazione del comando SQL;
+6. esecuzione sul database;
+7. materializzazione dei risultati in oggetti .NET.
+
+```mermaid
+flowchart LR
+    A[Query LINQ] --> B[Expression Tree]
+    B --> C[ExpressionVisitor del provider]
+    C --> D[Algebra interna del provider]
+    D --> E[SQL Generator]
+    E --> F[Database]
+    F --> G[DbDataReader]
+    G --> H[Materializzazione entita o DTO]
 ```
 
-## 4. Execution Deferred (esecuzione differita)
-
-Sia `IEnumerable` che `IQueryable` supportano la **deferred execution**: la query non viene eseguita finché non si itera i risultati.
+### 3.2 Esempio concreto con EF Core
 
 ```cs
-// La query non viene eseguita in questo punto
-var query = numeri.Where(n => n > 5);
+IQueryable<Prodotto> query = _context.Prodotti
+    .Where(p => p.Prezzo > 100)
+    .OrderBy(p => p.Nome);
 
-Console.WriteLine("Query definita, non ancora eseguita");
+List<Prodotto> prodotti = await query.ToListAsync();
+```
 
-// Viene eseguita qui (prima iterazione)
+Fino a `ToListAsync()` non stai ancora leggendo righe: stai solo accumulando nodi nell'albero di espressione. Il provider osserva qualcosa di concettualmente simile a:
+
+- sorgente: `Prodotti`;
+- filtro: `p => p.Prezzo > 100`;
+- ordinamento: `p => p.Nome`.
+
+E poi genera SQL del tipo:
+
+```sql
+SELECT *
+FROM Prodotti
+WHERE Prezzo > 100
+ORDER BY Nome
+```
+
+### 3.3 Visitor pattern sugli Expression Tree
+
+Gli expression tree sono composti da nodi (`MethodCallExpression`, `BinaryExpression`, `MemberExpression`, `ConstantExpression`, ecc.). Un provider li percorre con un visitatore:
+
+```cs
+public class SqlLikeVisitor : ExpressionVisitor
+{
+    protected override Expression VisitMethodCall(MethodCallExpression node)
+    {
+        if (node.Method.Name == "Where")
+        {
+            // legge il predicato e prepara il frammento WHERE
+        }
+
+        return base.VisitMethodCall(node);
+    }
+
+    protected override Expression VisitBinary(BinaryExpression node)
+    {
+        if (node.NodeType == ExpressionType.GreaterThan)
+        {
+            // prepara qualcosa come: colonna > valore
+        }
+
+        return base.VisitBinary(node);
+    }
+}
+```
+
+Non è il tuo codice applicativo a eseguire direttamente la lambda: il provider la **interpreta come struttura dati**.
+
+## 4. Deferred execution e classificazione degli operatori LINQ
+
+Sia `IEnumerable<T>` sia `IQueryable<T>` supportano spesso la **deferred execution**: la query viene definita adesso, ma eseguita solo quando servono davvero i risultati.
+
+```cs
+var query = Enumerable.Range(1, 10)
+    .Where(n => n > 5)
+    .Select(n => n * 10);
+
+Console.WriteLine("Query costruita");
+
 foreach (var n in query)
     Console.WriteLine(n);
 ```
 
-I metodi che **forzano l'esecuzione immediata** sono:
-- `ToList()`, `ToArray()`, `ToDictionary()`
-- `Count()`, `First()`, `Single()`, `Any()`, `All()`
-- `Sum()`, `Max()`, `Min()`, `Average()`
+### 4.1 Deferred vs immediate
 
-## 5. La differenza chiave: dove avviene il filtro
+- **Deferred**: l'operatore restituisce un'altra sequenza o query componibile.
+- **Immediate**: l'operatore produce subito un valore finale oppure materializza tutti i risultati.
 
-Questa è la differenza più importante in termini di performance.
+### 4.2 Tabella dei principali operatori
+
+| Operatore | Tipo di esecuzione | Note principali |
+|---|---|---|
+| `Where` | Deferred | Filtra; con `IQueryable` diventa spesso `WHERE` SQL |
+| `Select` | Deferred | Proiezione; spesso `SELECT` SQL |
+| `SelectMany` | Deferred | Flatten di sequenze; spesso traducibile in join/apply |
+| `OrderBy` / `OrderByDescending` | Deferred | Imposta ordinamento; in SQL `ORDER BY` |
+| `ThenBy` / `ThenByDescending` | Deferred | Estende l'ordinamento |
+| `Skip` | Deferred | In SQL di solito `OFFSET` |
+| `Take` | Deferred | In SQL di solito `TOP` o `FETCH NEXT` |
+| `Distinct` | Deferred | In SQL `DISTINCT` |
+| `GroupBy` | Deferred | Su `IEnumerable` raggruppa in memoria; su `IQueryable` la traduzione dipende dalla forma della query |
+| `Join` | Deferred | Spesso traducibile in `JOIN` |
+| `GroupJoin` | Deferred | Traduzione più delicata; spesso base di left join |
+| `Union` | Deferred | In SQL `UNION` |
+| `Concat` | Deferred | In SQL `UNION ALL` o composizione equivalente |
+| `Append` / `Prepend` | Deferred | Tipico su `IEnumerable`; non sempre traducibile su provider SQL |
+| `DefaultIfEmpty` | Deferred | Utile per left join |
+| `Reverse` | Deferred | In memoria è semplice; su SQL non sempre traducibile |
+| `AsEnumerable` | Deferred | Cambia il tipo statico e sposta le operazioni successive in memoria |
+| `AsQueryable` | Deferred | Espone una sequenza come `IQueryable` |
+| `ToList` / `ToListAsync` | Immediate | Materializza tutti gli elementi |
+| `ToArray` | Immediate | Materializza in array |
+| `ToDictionary` | Immediate | Materializza e indicizza per chiave |
+| `Count` / `LongCount` | Immediate | Restituisce un numero; su SQL spesso `COUNT(*)` |
+| `Any` | Immediate | Restituisce `bool`; su SQL spesso `EXISTS` |
+| `All` | Immediate | Restituisce `bool`; su SQL viene riscritto in forma equivalente |
+| `First` / `FirstOrDefault` | Immediate | Restituisce il primo elemento |
+| `Single` / `SingleOrDefault` | Immediate | Verifica cardinalità attesa |
+| `Last` / `LastOrDefault` | Immediate | Su SQL può richiedere ordinamento esplicito |
+| `Contains` | Immediate se terminale | In SQL può diventare `IN` o `EXISTS` |
+| `Sum` / `Min` / `Max` / `Average` | Immediate | Operazioni di aggregazione |
+| `Aggregate` | Immediate | Molto comune in memoria, raramente traducibile in SQL |
+| `ForEach` su `List<T>` | Immediate | Non è un operatore LINQ standard |
+
+### 4.3 Conseguenze pratiche
+
+Ogni volta che chiami un operatore terminale come `ToList()`, `Count()`, `Any()` o `First()`, stai chiudendo la pipeline. Se la sorgente è `IQueryable<T>`, quello è il punto in cui il provider deve generare e lanciare una query reale.
+
+## 5. Expression Trees in profondità
+
+Gli expression tree sono il cuore di `IQueryable<T>`.
+
+### 5.1 `Func<T, bool>` vs `Expression<Func<T, bool>>`
 
 ```cs
-// ❌ IEnumerable con EF Core (CARICA TUTTO IN MEMORIA)
-IEnumerable<Prodotto> prodottiEnum = _context.Prodotti;
-var costosi = prodottiEnum.Where(p => p.Prezzo > 100).ToList();
-// SQL generato: SELECT * FROM Prodotti  ← tutto il DB!
-// Il filtro WHERE viene applicato in C# dopo aver letto tutto
+Func<Prodotto, bool> filtroCompilato = p => p.Prezzo > 100;
+Expression<Func<Prodotto, bool>> filtroEspressione = p => p.Prezzo > 100;
+```
 
-// ✅ IQueryable con EF Core (FILTRA SUL DATABASE)
+Differenza concettuale:
+
+- `Func<Prodotto, bool>` è **codice compilato**: puoi solo eseguirlo.
+- `Expression<Func<Prodotto, bool>>` è **una descrizione dell'espressione**: puoi ispezionarla, riscriverla, combinarla, tradurla.
+
+Con `IEnumerable<T>` il metodo `Where` riceve tipicamente una `Func<T, bool>`. Con `IQueryable<T>`, l'overload usa `Expression<Func<T, bool>>`.
+
+### 5.2 Anatomia di un expression tree
+
+Per l'espressione `p => p.Prezzo > 100`, l'albero contiene in genere:
+
+- un `ParameterExpression` per `p`;
+- un `MemberExpression` per `p.Prezzo`;
+- un `ConstantExpression` per `100`;
+- un `BinaryExpression` di tipo `GreaterThan`;
+- un nodo `LambdaExpression` come radice.
+
+```mermaid
+graph TD
+    A[Lambda p => ...] --> B[GreaterThan]
+    B --> C[Member: p.Prezzo]
+    B --> D[Constant: 100]
+```
+
+### 5.3 Costruzione programmatica
+
+Gli expression tree possono essere generati a runtime.
+
+```cs
+using System.Linq.Expressions;
+
+ParameterExpression parametro = Expression.Parameter(typeof(Prodotto), "p");
+MemberExpression proprietaPrezzo = Expression.Property(parametro, nameof(Prodotto.Prezzo));
+ConstantExpression valore = Expression.Constant(100m);
+BinaryExpression corpo = Expression.GreaterThan(proprietaPrezzo, valore);
+Expression<Func<Prodotto, bool>> filtro =
+    Expression.Lambda<Func<Prodotto, bool>>(corpo, parametro);
+```
+
+Questo è fondamentale per filtri dinamici, specification pattern, builder di query, API di ricerca avanzata.
+
+### 5.4 Come EF Core visita l'albero
+
+EF Core applica vari passaggi interni, concettualmente simili a questi:
+
+1. normalizzazione dell'espressione;
+2. sostituzione di parametri e chiusure catturate;
+3. riconoscimento dei metodi LINQ standard;
+4. tentativo di traduzione di membri e metodi in costrutti SQL;
+5. generazione dell'albero di query relazionale;
+6. compilazione della query in un delegate riusabile.
+
+Se il provider incontra un nodo non traducibile in una parte che deve restare server-side, lancia un'eccezione oppure richiede di passare esplicitamente in memoria con `AsEnumerable()`.
+
+## 6. Dove avviene il lavoro: performance, proiezione, N+1 e complessità
+
+La differenza più importante è **dove** applichi il filtro, la proiezione e l'aggregazione.
+
+### 6.1 Filtro in memoria vs filtro sul database
+
+```cs
+// Carica tutto, poi filtra in memoria
+IEnumerable<Prodotto> prodottiEnum = _context.Prodotti;
+var costosiMemoria = prodottiEnum.Where(p => p.Prezzo > 100).ToList();
+
+// Compone SQL e filtra sul database
 IQueryable<Prodotto> prodottiQuery = _context.Prodotti;
-var costosi = prodottiQuery.Where(p => p.Prezzo > 100).ToList();
-// SQL generato: SELECT * FROM Prodotti WHERE Prezzo > 100 ← solo i dati necessari
+var costosiDb = await prodottiQuery.Where(p => p.Prezzo > 100).ToListAsync();
 ```
 
 ```mermaid
 sequenceDiagram
     participant App
-    participant Database
+    participant DB as Database
 
-    Note over App,Database: IEnumerable (SBAGLIATO con EF)
-    App->>Database: SELECT * FROM Prodotti (tutto!)
-    Database-->>App: 1.000.000 righe
-    App->>App: filtra in memoria
+    Note over App,DB: IEnumerable con materializzazione precoce
+    App->>DB: SELECT * FROM Prodotti
+    DB-->>App: tutte le righe
+    App->>App: filtro Where in memoria
 
-    Note over App,Database: IQueryable (CORRETTO con EF)
-    App->>Database: SELECT * FROM Prodotti WHERE Prezzo > 100
-    Database-->>App: 50 righe
+    Note over App,DB: IQueryable
+    App->>DB: SELECT ... WHERE Prezzo > 100
+    DB-->>App: solo le righe utili
 ```
 
-## 6. Expression Trees
+### 6.2 Proiezione: `Select` contro entità complete
 
-`IQueryable` funziona grazie agli **Expression Trees**: le lambda non vengono eseguite in C#, ma rappresentate come strutture dati che possono essere tradotte in SQL.
+Spesso l'ottimizzazione più importante non è solo filtrare, ma **caricare meno colonne**.
 
 ```cs
-// Con IEnumerable: questa lambda è del codice C# compilato
-Func<Prodotto, bool> predicate = p => p.Prezzo > 100;
+// Carica l'entità completa
+var prodotti = await _context.Prodotti
+    .Where(p => p.Prezzo > 100)
+    .ToListAsync();
 
-// Con IQueryable: questa lambda è un Expression Tree (dati, non codice)
-Expression<Func<Prodotto, bool>> expression = p => p.Prezzo > 100;
-// EF Core può "leggere" questa espressione e tradurla in SQL
+// Carica solo le colonne necessarie
+var cards = await _context.Prodotti
+    .Where(p => p.Prezzo > 100)
+    .Select(p => new ProdottoCardDto
+    {
+        Id = p.Id,
+        Nome = p.Nome,
+        Prezzo = p.Prezzo
+    })
+    .ToListAsync();
 ```
 
-## 7. Estendere IQueryable dinamicamente
+Con `Select`:
 
-Un vantaggio di `IQueryable` è poter costruire query in modo dinamico e applicare filtri in modo condizionale **senza eseguire query intermedie**.
+- diminuisci I/O dal database;
+- riduci il payload di rete;
+- riduci il costo di materializzazione;
+- eviti tracking inutile di campi che non userai.
+
+### 6.3 Il problema N+1
+
+Il problema **N+1** nasce quando fai una query per ottenere N entità principali e poi, per ciascuna, scateni un'altra query per caricare dati correlati.
+
+```cs
+var ordini = await _context.Ordini.ToListAsync();
+
+foreach (var ordine in ordini)
+{
+    Console.WriteLine(ordine.Cliente.Nome);
+}
+```
+
+Se `Cliente` viene caricato in lazy loading, puoi ottenere:
+
+- 1 query per gli ordini;
+- N query aggiuntive per i clienti.
+
+Totale: `1 + N` round-trip.
+
+Relazione con `IEnumerable<T>` e `IQueryable<T>`:
+
+- se materializzi presto (`ToList`) e poi navighi proprietà non caricate, il rischio di N+1 aumenta;
+- con `IQueryable<T>` puoi fare `Include`, join o proiezioni per evitare round-trip ripetuti.
+
+```cs
+var ordini = await _context.Ordini
+    .Select(o => new
+    {
+        o.Id,
+        ClienteNome = o.Cliente.Nome,
+        Totale = o.Totale
+    })
+    .ToListAsync();
+```
+
+### 6.4 Complessità asintotica e benchmark concettuale
+
+Caso semplice: cercare prodotti con `Prezzo > 100`.
+
+Se hai già caricato tutti i prodotti in memoria, devi spesso attraversare tutti gli elementi:
+
+$$
+T_{scan}(n) = O(n)
+$$
+
+Su database con indice sulla colonna filtrata, il motore può usare una struttura dati che riduce la ricerca iniziale a:
+
+$$
+T_{indice}(n) = O(\log n + k)
+$$
+
+con $k$ righe risultanti. In pratica il guadagno reale dipende da:
+
+- selettività del filtro;
+- presenza di indice;
+- quantità di colonne lette;
+- latenza di rete;
+- costo di materializzazione lato applicazione.
+
+### 6.5 Memoria: streaming vs buffering
+
+```cs
+// Buffering completo
+List<Prodotto> lista = await _context.Prodotti.ToListAsync();
+
+// Streaming asincrono elemento per elemento
+await foreach (var prodotto in _context.Prodotti.AsAsyncEnumerable())
+{
+    Console.WriteLine(prodotto.Nome);
+}
+```
+
+In termini semplificati:
+
+$$
+M_{ToList}(n) = O(n)
+$$
+
+mentre lo streaming tende a mantenere memoria addizionale proporzionale a pochi elementi alla volta, anche se il provider può avere buffer interni.
+
+## 7. Query dinamiche e Specification pattern
+
+Uno dei vantaggi principali di `IQueryable<T>` è costruire query senza eseguire step intermedi.
+
+### 7.1 Composizione dinamica
 
 ```cs
 public async Task<List<Prodotto>> CercaAsync(
@@ -154,7 +573,7 @@ public async Task<List<Prodotto>> CercaAsync(
 {
     IQueryable<Prodotto> query = _context.Prodotti.AsQueryable();
 
-    if (!string.IsNullOrEmpty(nomeContieneParola))
+    if (!string.IsNullOrWhiteSpace(nomeContieneParola))
         query = query.Where(p => p.Nome.Contains(nomeContieneParola));
 
     if (prezzoMin.HasValue)
@@ -163,38 +582,193 @@ public async Task<List<Prodotto>> CercaAsync(
     if (prezzoMax.HasValue)
         query = query.Where(p => p.Prezzo <= prezzoMax.Value);
 
-    // UNA SOLA query SQL con tutti i filtri applicati
     return await query.ToListAsync();
 }
 ```
 
-## 8. Quando usare quale
+Il database vede una sola query finale, non tre query separate.
 
-| Situazione | Usa |
-|---|---|
-| Dati già in memoria (List, Array) | `IEnumerable<T>` |
-| Query su database con EF Core | `IQueryable<T>` |
-| Filtri dinamici su database | `IQueryable<T>` |
-| Operazioni in memoria su risultati già recuperati | `IEnumerable<T>` |
-| Paginazione su database | `IQueryable<T>` |
-| Metodi di libreria generici (non DB) | `IEnumerable<T>` |
+### 7.2 Specification pattern
 
-## 9. AsEnumerable() e AsQueryable()
-
-Puoi passare da uno all'altro esplicitamente.
+Lo **Specification pattern** incapsula regole di filtro in oggetti riusabili invece di duplicare lambda sparse nel codice.
 
 ```cs
-// Porta l'esecuzione dal DB alla memoria
-var query = _context.Prodotti
-    .Where(p => p.Prezzo > 100)   // eseguito in SQL
-    .AsEnumerable()                // da qui in poi: in memoria
-    .Where(p => AlgoritmoComplesso(p)); // non traducibile in SQL
+public abstract class Specification<T>
+{
+    public abstract Expression<Func<T, bool>> ToExpression();
 
-// Da IEnumerable a IQueryable (utile per testabilità)
-List<int> lista = new List<int> { 1, 2, 3 };
+    public IQueryable<T> Apply(IQueryable<T> query)
+        => query.Where(ToExpression());
+}
+
+public sealed class ProdottiCostosiSpecification : Specification<Prodotto>
+{
+    private readonly decimal _prezzoMinimo;
+
+    public ProdottiCostosiSpecification(decimal prezzoMinimo)
+    {
+        _prezzoMinimo = prezzoMinimo;
+    }
+
+    public override Expression<Func<Prodotto, bool>> ToExpression()
+        => p => p.Prezzo >= _prezzoMinimo;
+}
+```
+
+Uso:
+
+```cs
+Specification<Prodotto> spec = new ProdottiCostosiSpecification(100);
+var query = spec.Apply(_context.Prodotti);
+var risultati = await query.ToListAsync();
+```
+
+Vantaggi:
+
+- riuso di logica di business;
+- testabilità delle regole;
+- combinazione di filtri complessi;
+- mantenimento del filtro in forma traducibile (`Expression<Func<T, bool>>`).
+
+Se al posto di `Expression<Func<T, bool>>` usassi una `Func<T, bool>`, perderesti la possibilità di tradurre la regola in SQL.
+
+## 8. Limiti di IQueryable e client evaluation
+
+`IQueryable<T>` non significa che qualsiasi codice C# possa diventare SQL. Il provider può tradurre solo ciò che conosce.
+
+### 8.1 Esempi comuni di elementi difficili o impossibili da tradurre
+
+Questi casi sono spesso problematici o provider-specific:
+
+- metodi custom dell'applicazione (`CalcolaPunteggio(p)`);
+- delegate locali e `Func<T, bool>` già compilate;
+- overload con `StringComparison` non supportati dal provider;
+- logica con cicli, `try/catch`, variabili mutate;
+- `Regex.IsMatch(...)` se il provider non ha traduzione dedicata;
+- `Aggregate` arbitrari;
+- comparatori custom passati a `OrderBy`, `Distinct`, `GroupBy`;
+- alcuni overload indicizzati come `Where((x, index) => ...)`;
+- qualunque accesso a servizi esterni o stato non serializzabile in SQL.
+
+```cs
+// In genere non traducibile in SQL
+var query = _context.Prodotti
+    .Where(p => AlgoritmoComplesso(p));
+```
+
+### 8.2 Client evaluation
+
+Storicamente alcuni provider spostavano in silenzio parti della query sul client. In EF Core moderno, se una porzione centrale della query non è traducibile, nella maggior parte dei casi viene lanciata un'eccezione per evitare degradazioni nascoste di performance.
+
+Il passaggio corretto, se ti serve logica solo C#, è rendere esplicito il confine:
+
+```cs
+var risultati = _context.Prodotti
+    .Where(p => p.Prezzo > 10)
+    .AsEnumerable()
+    .Where(p => AlgoritmoComplesso(p))
+    .ToList();
+```
+
+Da quel punto in poi accetti volutamente che il resto del lavoro avvenga in memoria.
+
+### 8.3 Regola pratica
+
+- tutto ciò che può essere espresso in SQL: lascialo in `IQueryable<T>`;
+- tutto ciò che è puramente .NET e non traducibile: portalo dopo `AsEnumerable()` oppure dopo materializzazione.
+
+## 9. AsEnumerable(), AsQueryable() e IAsyncEnumerable\<T\>
+
+Questi metodi segnano il confine tra mondi diversi.
+
+### 9.1 `AsEnumerable()`
+
+`AsEnumerable()` non esegue la query da solo: cambia il tipo statico della pipeline e fa sì che gli operatori successivi vengano risolti come LINQ to Objects.
+
+```cs
+var query = _context.Prodotti
+    .Where(p => p.Prezzo > 100)
+    .AsEnumerable()
+    .Where(p => AlgoritmoComplesso(p));
+```
+
+Qui:
+
+- il primo `Where` può diventare SQL;
+- il secondo `Where` è sicuramente C# in memoria.
+
+### 9.2 `AsQueryable()`
+
+`AsQueryable()` è utile per esporre una sorgente come query componibile, spesso in test o in librerie generiche.
+
+```cs
+List<int> lista = new() { 1, 2, 3 };
 IQueryable<int> q = lista.AsQueryable();
 ```
 
+Attenzione: questo non crea un vero provider SQL. Hai solo un `IQueryable<T>` basato su LINQ to Objects.
+
+### 9.3 `IAsyncEnumerable<T>` e `await foreach`
+
+Con dati remoti o stream lunghi, oggi è molto importante anche `IAsyncEnumerable<T>`, che rappresenta una sequenza asincrona.
+
+```cs
+await foreach (var prodotto in _context.Prodotti
+    .Where(p => p.Prezzo > 100)
+    .AsAsyncEnumerable())
+{
+    Console.WriteLine($"{prodotto.Nome} - {prodotto.Prezzo}");
+}
+```
+
+Concetti chiave:
+
+- `IEnumerable<T>`: iterazione sincrona.
+- `IAsyncEnumerable<T>`: iterazione asincrona elemento per elemento.
+- `await foreach`: consuma la sequenza senza bloccare il thread durante le attese I/O.
+
+A livello di pattern, `IAsyncEnumerable<T>` usa l'equivalente asincrono dell'iterator pattern:
+
+- `GetAsyncEnumerator()`;
+- `MoveNextAsync()`;
+- `Current`.
+
+```cs
+public async IAsyncEnumerable<int> LeggiNumeriAsync()
+{
+    for (int i = 1; i <= 3; i++)
+    {
+        await Task.Delay(100);
+        yield return i;
+    }
+}
+```
+
+Il compilatore genera anche qui una state machine, ma stavolta combina:
+
+- semantica iterator (`yield return`);
+- semantica async (`await`);
+- avanzamento tramite `ValueTask<bool>` in `MoveNextAsync()`.
+
+### 9.4 Quando usare cosa
+
+| Situazione | Scelta consigliata |
+|---|---|
+| Dati già in memoria (`List`, `Array`) | `IEnumerable<T>` |
+| Query su database con filtro, sort, paging | `IQueryable<T>` |
+| Regole riusabili traducibili in SQL | `Expression<Func<T, bool>>` o Specification |
+| Logica non traducibile | `AsEnumerable()` o materializzazione esplicita |
+| Stream asincroni di risultati | `IAsyncEnumerable<T>` |
+| Riduzione payload e performance | `Select` con DTO/proiezioni |
+
+In sintesi:
+
+- `IEnumerable<T>` significa iterazione e composizione in memoria.
+- `IQueryable<T>` significa descrizione di query traducibile.
+- `IAsyncEnumerable<T>` significa streaming asincrono.
+- `ToList()` e simili trasformano una pipeline lazy in risultati bufferizzati.
+- `Select` è spesso l'ottimizzazione più sottovalutata.
+- il vero problema non è solo la sintassi, ma **dove** paghi CPU, RAM, rete e round-trip.
 ## 10. Quiz
 
 import Quiz from '../../../components/Quiz.jsx';
