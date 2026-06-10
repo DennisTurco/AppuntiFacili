@@ -8,9 +8,9 @@ const { title, lastItem, children, icon } = Astro.props;
 <li class="relative">
   <DropdownContainer class="group">
     <button
-      class="flex items-center gap-1 w-full lg:w-auto lg:px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+      class="flex items-center gap-1 w-full lg:w-auto lg:px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
     >
-      {icon && <Icon name={icon} class="w-4 h-4 text-gray-500" />}
+      {icon && <Icon name={icon} class="w-4 h-4 text-gray-500 dark:text-gray-400" />}
       <span>{title}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -31,9 +31,9 @@ const { title, lastItem, children, icon } = Astro.props;
           lastItem ? "lg:right-0 origin-top-right" : "lg:left-0 origin-top-left",
         ]}
       >
-        <div class="px-3 lg:py-2 lg:bg-white lg:rounded-md lg:shadow-sm lg:border flex flex-col">
+        <div class="px-3 lg:py-2 lg:bg-white dark:lg:bg-slate-800 lg:rounded-md lg:shadow-sm lg:border dark:lg:border-gray-700 flex flex-col">
           {children.map((item) => (
-            <a href={item.path} class="py-1 text-gray-600 hover:text-gray-900 transition-colors">
+            <a href={item.path} class="py-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               {item.title}
             </a>
           ))}

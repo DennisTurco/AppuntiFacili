@@ -5,6 +5,7 @@ import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 import { Icon } from "astro-icon/components";
 import { supabase } from "../../lib/supabaseClient.js";
 import UserMenu from "@/components/UserMenu.jsx";
+import DarkModeToggle from "@/components/DarkModeToggle";
 import type { User } from '@supabase/supabase-js';
 
 // menuitems definiti qui
@@ -44,14 +45,14 @@ const logout = async () => {
 ---
 
 <Container>
-  <header class="flex flex-col lg:flex-row justify-between items-center my-5">
+  <header class="flex flex-col lg:flex-row justify-between items-center my-5 bg-white dark:bg-slate-900 transition-colors duration-200">
     <Astronav>
       <div class="flex w-full lg:w-auto items-center justify-between">
         <a href="/" class="text-lg">
-          <span class="font-bold text-slate-800">Appunti</span><span class="text-slate-500">Facili</span>
+          <span class="font-bold text-slate-800 dark:text-slate-100">Appunti</span><span class="text-slate-500 dark:text-slate-400">Facili</span>
         </a>
         <div class="block lg:hidden">
-          <MenuIcon class="w-4 h-4 text-gray-800" />
+          <MenuIcon class="w-4 h-4 text-gray-800 dark:text-gray-200" />
         </div>
       </div>
 
@@ -74,17 +75,12 @@ const logout = async () => {
                   <li>
                     <a
                       href={item.path}
-                      class="flex items-center gap-1 lg:px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      class="flex items-center gap-1 lg:px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                       {item.icon && (
-                        <Icon name={item.icon} class="w-4 h-4 text-gray-500" />
+                        <Icon name={item.icon} class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       )}
                       <span>{item.title}</span>
-                      {/* {item.badge && (
-                        <span class="ml-1 px-2 py-0.5 text-[10px] animate-pulse font-semibold uppercase text-white bg-indigo-600 rounded-full">
-                          New
-                        </span>
-                      )} */}
                     </a>
                   </li>
                 )}
@@ -93,21 +89,23 @@ const logout = async () => {
           }
         </ul>
 
-        <!-- Qui inserisci il componente React -->
         <div class="flex gap-2 ml-4">
           <UserMenu client:load />
         </div>
 
-        <!-- Icona Discord (uniformata) -->
-        <div class="ml-4 hidden lg:flex items-center">
+        <div class="ml-2 hidden lg:flex items-center gap-1">
+          <!-- Dark mode toggle -->
+          <DarkModeToggle client:load />
+
+          <!-- Discord -->
           <a
             href="https://discord.com/invite/9Jb4Gt3HhB"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center justify-center rounded-md p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            class="flex items-center justify-center rounded-md p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Discord"
           >
-            <Icon name="fa6-brands:discord" class="w-5 h-5 text-gray-500" />
+            <Icon name="fa6-brands:discord" class="w-5 h-5" />
           </a>
         </div>
       </MenuItems>

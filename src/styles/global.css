@@ -3,6 +3,9 @@
 
 @plugin '@tailwindcss/typography';
 
+/* Class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans:
     Bricolage Grotesque Variable, Inter Variable, Inter, ui-sans-serif,
@@ -26,16 +29,98 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #111827;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark body {
+    background-color: #0f172a;
+    color: #f1f5f9;
+  }
 }
 
 .prose code:not(pre code) {
-  background-color: #e4e2e2; /* Light gray */
-  color: #b40707; /* Rosso acceso */
+  background-color: #e4e2e2;
+  color: #b40707;
   padding: 0.2rem 0.5rem;
   border-radius: 0.35rem;
   font-family: 'Fira Code', monospace;
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.dark .prose code:not(pre code) {
+  background-color: #2d2d2d;
+  color: #f87171;
+}
+
+/* Prose dark mode */
+.dark .prose {
+  color: #d1d5db;
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #f9fafb;
+}
+
+.dark .prose strong {
+  color: #f9fafb;
+}
+
+.dark .prose a {
+  color: #93c5fd;
+}
+
+.dark .prose a:hover {
+  color: #bfdbfe;
+}
+
+.dark .prose blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+.dark .prose table thead {
+  background-color: #1e293b;
+  color: #f9fafb;
+}
+
+.dark .prose table tbody tr {
+  border-bottom-color: #374151;
+}
+
+.dark .prose table tbody tr:nth-child(even) {
+  background-color: #1e293b;
+}
+
+.dark .prose pre {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .prose hr {
+  border-color: #374151;
+}
+
+.dark .prose ul li::marker,
+.dark .prose ol li::marker {
+  color: #9ca3af;
 }
 
 .katex {
@@ -48,23 +133,42 @@
   top: 0;
   right: 0;
   background-color: #eeeeee;
+  color: #374151;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   line-height: 1rem;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .copy-code:hover {
   background-color: #e4e4e4;
 }
 
-/* Mermaid diagrams: force white background */
+.dark .copy-code {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+.dark .copy-code:hover {
+  background-color: #4b5563;
+}
+
+/* Mermaid diagrams */
 pre.mermaid,
 pre.mermaid svg {
   background: #ffffff !important;
 }
 pre.mermaid svg rect.background {
   fill: #ffffff !important;
+}
+
+.dark pre.mermaid,
+.dark pre.mermaid svg {
+  background: #1e293b !important;
+}
+.dark pre.mermaid svg rect.background {
+  fill: #1e293b !important;
 }
 
 .mermaid-container {
