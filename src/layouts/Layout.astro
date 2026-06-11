@@ -46,6 +46,19 @@ export interface Props {
         }
       })();
     </script>
+    <!-- View Transitions: preserve dark class across page swaps -->
+    <script>
+      document.addEventListener('astro:before-swap', (e) => {
+        // Copy the current theme class to the incoming document before the DOM swap.
+        // Without this, Astro replaces <html> with the new page's <html> (no class="dark")
+        // and the theme is lost on every navigation.
+        if (document.documentElement.classList.contains('dark')) {
+          e.newDocument.documentElement.classList.add('dark');
+        } else {
+          e.newDocument.documentElement.classList.remove('dark');
+        }
+      });
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"/>
     <link rel="sitemap" href="/sitemap-index.xml" />
     <SEO
@@ -94,12 +107,58 @@ export interface Props {
 
         const { default: mermaid } = await import('mermaid');
 
+        const isDark = document.documentElement.classList.contains('dark');
+
         mermaid.initialize({
           startOnLoad: false,
-          theme: document.documentElement.classList.contains('dark') ? 'dark' : 'forest',
+          theme: isDark ? 'base' : 'forest',
           flowchart: { curve: 'basis' },
-          themeVariables: {
-            background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff'
+          themeVariables: isDark ? {
+            // Dark mode: colori completamente espliciti per garantire leggibilità
+            background:                   '#1e293b',
+            mainBkg:                      '#1e293b',
+            nodeBorder:                   '#60a5fa',
+            clusterBkg:                   '#0f172a',
+            titleColor:                   '#f1f5f9',
+            edgeLabelBackground:          '#1e293b',
+            primaryColor:                 '#1d4ed8',
+            primaryTextColor:             '#f1f5f9',
+            primaryBorderColor:           '#60a5fa',
+            secondaryColor:               '#0f172a',
+            secondaryTextColor:           '#f1f5f9',
+            secondaryBorderColor:         '#94a3b8',
+            tertiaryColor:                '#0f172a',
+            tertiaryTextColor:            '#f1f5f9',
+            tertiaryBorderColor:          '#94a3b8',
+            lineColor:                    '#94a3b8',
+            textColor:                    '#f1f5f9',
+            labelColor:                   '#f1f5f9',
+            labelTextColor:               '#f1f5f9',
+            loopTextColor:                '#f1f5f9',
+            noteBkgColor:                 '#1e3a5f',
+            noteTextColor:                '#f1f5f9',
+            noteBorderColor:              '#60a5fa',
+            activationBkgColor:           '#1d4ed8',
+            activationBorderColor:        '#60a5fa',
+            sequenceNumberColor:          '#f1f5f9',
+            actorBkg:                     '#1e293b',
+            actorBorder:                  '#60a5fa',
+            actorTextColor:               '#f1f5f9',
+            actorLineColor:               '#94a3b8',
+            signalColor:                  '#94a3b8',
+            signalTextColor:              '#f1f5f9',
+            fillType0:                    '#1d4ed8',
+            fillType1:                    '#0f172a',
+            fillType2:                    '#1e293b',
+            fillType3:                    '#172554',
+            fillType4:                    '#1e3a5f',
+            fillType5:                    '#0c4a6e',
+            fillType6:                    '#164e63',
+            fillType7:                    '#134e4a',
+            attributeBackgroundColorEven: '#1e293b',
+            attributeBackgroundColorOdd:  '#0f172a',
+          } : {
+            background: '#ffffff',
           },
         });
 

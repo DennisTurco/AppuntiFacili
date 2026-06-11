@@ -165,10 +165,10 @@ pre.mermaid svg rect.background {
 
 .dark pre.mermaid,
 .dark pre.mermaid svg {
-  background: #1e293b !important;
+  background: transparent !important;
 }
 .dark pre.mermaid svg rect.background {
-  fill: #1e293b !important;
+  fill: transparent !important;
 }
 
 .mermaid-container {

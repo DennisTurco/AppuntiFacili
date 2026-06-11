@@ -4,15 +4,15 @@ const { url, title, icon } = Astro.props;
 
 <a
   href={url}
-  class="group block rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 p-6 shadow-sm transition transform hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
+  class="group block rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 p-6 shadow-sm transition transform hover:-translate-y-1 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600"
 >
   <div class="flex items-center gap-3">
     <span class="text-2xl">{icon}</span>
-    <h2 class="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
       {title}
     </h2>
   </div>
-  <p class="mt-3 text-gray-700 text-sm">
+  <p class="mt-3 text-gray-700 dark:text-gray-400 text-sm">
     Appunti e risorse su {title.toLowerCase()}.
   </p>
 </a>
