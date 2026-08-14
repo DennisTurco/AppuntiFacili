@@ -1,0 +1,219 @@
+---
+title: "Optional Chaining and Non-null Assertion"
+order: 8
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "optional-chaining", "non-null-assertion", "undefined"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. The problem: values that might be `undefined`
+
+Many operations on arrays and objects can legitimately produce `undefined`. A classic example is `Array.prototype.pop()`: if the array is empty, there's nothing to return, so `pop()` returns `undefined`. TypeScript reflects this in its types, and that has consequences for any code chained after it.
+
+```ts
+const arr = [{ name: "tim" }, { name: "joe" }, { name: "jane" }];
+
+// const el = arr.pop().name; // error: Object is possibly 'undefined'
+```
+
+The compiler is right to complain: `arr.pop()` has type `{ name: string } | undefined`, and `undefined` has no `.name` property. Accessing `.name` directly would compile in plain JavaScript and simply throw `TypeError: Cannot read properties of undefined` at runtime if the array happened to be empty. TypeScript catches that possibility before you ever run the code.
+
+## 2. Optional chaining (`?.`)
+
+The **optional chaining** operator `?.` solves this cleanly: it accesses a property only if the value on its left is not `null`/`undefined`, and short-circuits to `undefined` otherwise.
+
+```ts
+const el = arr.pop()?.name;
+console.log(el); // el has type: string | undefined
+```
+
+Read `?.` as "if the thing on the left exists, continue; otherwise stop here and produce `undefined`". The type of `el` correctly reflects both possible outcomes: `string` (a real name) or `undefined` (the array was empty).
+
+`?.` also works for calling functions that might not exist, and for indexing into arrays/objects that might not exist:
+
+```ts
+obj.method?.();       // calls method only if it exists, otherwise evaluates to undefined
+config?.settings?.theme; // safely drills into a possibly-missing nested structure
+list?.[0];             // indexes only if list is not null/undefined
+```
+
+<Aside variant="tip">
+Optional chaining can be repeated as many times as needed in a single expression: `a?.b?.c?.d`. As soon as any link in the chain is `null`/`undefined`, the whole expression short-circuits to `undefined` without throwing.
+</Aside>
+
+## 3. Non-null assertion (`!`)
+
+The **non-null assertion** operator `!` tells the compiler "ignore the possibility that this is `null` or `undefined` — I know better". It doesn't check anything at runtime; it purely silences the compiler.
+
+```ts
+const arr2 = [[{ name: "tim" }]];
+const el2 = arr2.pop()!.pop()!.name;
+console.log(el2); // string
+```
+
+Here, `arr2.pop()` returns `{ name: string }[] | undefined`. The first `!` tells TypeScript "trust me, this popped value is not `undefined`", letting you call `.pop()` on it directly. The second `!` does the same for the inner `.pop()`. The result, `el2`, is typed simply as `string` — the compiler has been told to stop worrying about the `undefined` cases entirely.
+
+<Aside variant="danger">
+`!` performs no runtime check. If either `pop()` call actually returns `undefined` (for example, because one of the arrays was empty), this code throws a runtime error exactly like accessing a property on `undefined` in plain JavaScript — the compiler simply won't warn you beforehand anymore.
+</Aside>
+
+### 3.1 `?.` vs `!`: two very different philosophies
+
+- `?.` **checks and then moves forward**: it verifies the value exists before continuing, and gracefully produces `undefined` if it doesn't.
+- `!` **forces you to move forward**: it assumes the value exists, no matter what, and if you're wrong the program crashes at runtime.
+
+As a general guideline, prefer `?.` — it's inherently safer, since it acknowledges and handles the possibility of a missing value rather than assuming it away. Reach for `!` only when you have context the compiler genuinely cannot infer (for example, you just checked the value a few lines above in a way TypeScript's narrowing can't follow, or you have an external guarantee that the value will always exist, such as a required DOM element you know is in the page).
+
+## 4. Nullish coalescing (`??`)
+
+Optional chaining pairs naturally with the **nullish coalescing** operator `??`, which supplies a default value when the expression on its left is `null` or `undefined`.
+
+```ts
+const el = arr.pop()?.name;
+const value = el ?? "default";
+console.log(value); // "default" if el was undefined, otherwise the name itself
+```
+
+`??` is deliberately narrower than the `||` operator: `||` falls back to the right-hand side for *any* falsy value (`0`, `""`, `false`, `NaN`, `null`, `undefined`), while `??` only falls back for `null`/`undefined`. This distinction matters in practice:
+
+```ts
+const count = 0;
+console.log(count || 10); // 10  (0 is falsy, so || replaces it — probably not what you want)
+console.log(count ?? 10); // 0   (0 is not null/undefined, so ?? keeps it)
+```
+
+<Aside variant="warning">
+If a legitimate value like `0`, `""`, or `false` should be preserved, use `??` instead of `||`. Using `||` for defaults is a common source of subtle bugs when zero or empty-string are valid values.
+</Aside>
+
+## 5. Putting it together
+
+A very common real-world pattern combines optional chaining with nullish coalescing to safely read a possibly-missing value and provide a fallback in one expression:
+
+```ts
+interface User {
+    profile?: {
+        nickname?: string;
+    };
+}
+
+function getDisplayName(user: User): string {
+    return user.profile?.nickname ?? "Anonymous";
+}
+```
+
+This single line safely handles: `user.profile` being `undefined`, `user.profile.nickname` being `undefined`, and falls back to `"Anonymous"` in either case — with no runtime risk at all, unlike a chain of `!` assertions.
+
+## 6. Further reading
+
+- [TypeScript Handbook — Optional Chaining (release notes, TS 3.7)](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html)
+- [MDN — Optional chaining (?.)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining)
+- [MDN — Nullish coalescing operator (??)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 7. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does `arr.pop()?.name` do if `arr` is empty?",
+answers:{
+a:"It throws a runtime error",
+b:"It evaluates to undefined without throwing",
+c:"It returns an empty string",
+d:"It does not compile"
+},
+correctAnswer:"b"
+},
+{
+question:"What does the `!` non-null assertion operator do at runtime?",
+answers:{
+a:"It checks that the value is not null and throws a descriptive error if it is",
+b:"It performs no runtime check at all, it only affects compile-time type checking",
+c:"It converts null/undefined into a default value",
+d:"It logs a warning to the console"
+},
+correctAnswer:"b"
+},
+{
+question:"Which operator is generally recommended over the other, and why?",
+answers:{
+a:"`!` is preferred because it is shorter to type",
+b:"`?.` is preferred because it safely checks before proceeding instead of assuming",
+c:"They are interchangeable in all situations",
+d:"`!` is preferred because it always throws clear errors"
+},
+correctAnswer:"b"
+},
+{
+question:"What is the type of `el` in `const el = arr.pop()?.name;` assuming arr's elements have a string `name`?",
+answers:{
+a:"string",
+b:"undefined",
+c:"string | undefined",
+d:"any"
+},
+correctAnswer:"c"
+},
+{
+question:"What does `obj.method?.()` do if `obj.method` does not exist?",
+answers:{
+a:"It throws a TypeError",
+b:"It evaluates to undefined instead of throwing",
+c:"It does not compile",
+d:"It calls a default no-op function"
+},
+correctAnswer:"b"
+},
+{
+question:"Given `const count = 0;`, what does `count ?? 10` evaluate to?",
+answers:{
+a:"10, because 0 is falsy",
+b:"0, because ?? only falls back on null/undefined",
+c:"undefined",
+d:"It causes a compile error"
+},
+correctAnswer:"b"
+},
+{
+question:"Why might `||` be a risky choice for providing default values compared to `??`?",
+answers:{
+a:"|| does not exist in TypeScript",
+b:"|| falls back on any falsy value, including 0, \"\" and false, not just null/undefined",
+c:"|| only works with booleans",
+d:"|| is slower at runtime"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 8. Exercises
+
+### 8.1 Exercise
+
+**Scenario**: You're building a user profile card component that reads deeply nested, partially optional data coming from an API.
+
+**Task**:
+1. Define an interface `User` with an optional `address` object containing an optional `city: string`.
+2. Write a function `getCity(user: User): string` that uses optional chaining and nullish coalescing to safely return the city or `"Unknown city"` if missing at any level.
+3. Test the function with a user that has a full address, one with a missing `address`, and one with an `address` but no `city`.
+4. Rewrite the same function using `!` non-null assertions instead, and explain in a comment why this version is less safe.
+
+*Learning objective: compare optional chaining plus nullish coalescing against non-null assertions for handling deeply nested optional data.*
+
+### 8.2 Exercise
+
+**Scenario**: You maintain a small event system where handlers are optional callback properties on a configuration object.
+
+**Task**:
+1. Define an interface `WidgetConfig` with optional callback properties `onOpen?: () => void` and `onClose?: () => void`.
+2. Write a function `triggerOpen(config: WidgetConfig): void` that safely invokes `onOpen` only if it exists, using `?.()`.
+3. Add a counter variable that should default to `0` if a `count` field on the config is `null` or `undefined`, using `??` (not `||`), and explain why `||` would be the wrong choice if `count` can legitimately be `0`.
+
+*Learning objective: practice optional chaining on function calls and understand the practical difference between `??` and `||` for numeric defaults.*

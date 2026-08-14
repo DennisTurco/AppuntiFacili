@@ -1,0 +1,176 @@
+---
+title: "Setting up a Project with Vite"
+order: 3
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "vite", "tooling", "setup"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. What is Vite?
+
+[Vite](https://vitejs.dev/) (French for "fast") is a modern frontend build tool. It provides two things most web projects need:
+
+- an extremely fast **development server**, with instant startup and near-instant hot module reload (changes show up in the browser almost immediately, without a full page reload);
+- an optimized **production build** command, which bundles and minifies your code for deployment.
+
+Manually configuring a compiler, a bundler, a dev server, and TypeScript support from scratch is a lot of tedious setup. Vite ships with sensible defaults for all of this out of the box, which is why it has become one of the most popular ways to start a new frontend (or general TypeScript) project.
+
+<Aside variant="tip">
+Vite isn't tied to one framework. It has official templates for vanilla TypeScript, React, Vue, Svelte, and more — the underlying dev server and build pipeline are the same either way.
+</Aside>
+
+## 2. Scaffolding a project from a template
+
+Vite can generate a ready-to-use project structure from a **template**, so you don't start from an empty folder:
+
+```bash
+npm init vite@latest vite_project -- --template vanilla-ts
+```
+
+Let's break this command down:
+
+- `npm init vite@latest` fetches and runs the latest version of Vite's project-creation tool (via `create-vite`) without installing anything globally.
+- `vite_project` is the name of the folder that will be created for your new project.
+- `-- --template vanilla-ts` passes extra arguments *through* `npm init` to the underlying tool: `--template vanilla-ts` tells it to use the **vanilla TypeScript** template — plain TypeScript with no UI framework attached, ideal for learning the language itself.
+
+<Aside variant="info">
+The double dash `--` is npm's way of saying "everything after this belongs to the program being run, not to npm itself." Without it, npm might try to interpret `--template` as its own flag.
+</Aside>
+
+Other common templates follow the same pattern, for example `react-ts`, `vue-ts`, or `svelte-ts` — swap `vanilla-ts` for any of these if you want a specific framework instead.
+
+## 3. Entering and running the project
+
+```bash
+cd vite_project
+```
+
+Move into the freshly generated folder. Vite has already created a working project structure for you, roughly:
+
+```text
+vite_project/
+├── index.html
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── main.ts
+│   └── style.css
+└── public/
+```
+
+From here, the usual flow is:
+
+```bash
+npm install   # install the project's dependencies (Vite itself, etc.)
+npm run dev   # start the development server
+```
+
+`npm run dev` starts Vite's dev server (typically at `http://localhost:5173`) and watches your files: every time you save, the browser updates almost instantly.
+
+When you're ready to ship:
+
+```bash
+npm run build
+```
+
+This produces an optimized, minified bundle of plain JavaScript/HTML/CSS in a `dist/` folder, ready to be deployed to any static hosting.
+
+## 4. Why Vite over a manual `tsc` setup
+
+Compare this to the manual workflow from the previous two lessons (`npm init`, install `typescript`, `tsc --init`, then `tsc` + `node` by hand):
+
+- Vite gives you an **HTML entry point**, a **dev server**, **hot reload**, and a **production bundler** for free.
+- A manual `tsc` setup only compiles TypeScript to JavaScript — it does not bundle assets, serve HTML, or optimize a build for the browser.
+- For pure Node.js scripts/back-end code, the manual setup (or `tsx`) is often simpler and lighter. For anything that runs in a browser, Vite (or a similar bundler) is usually the better starting point.
+
+## 5. Further reading
+
+- [Vite — official guide](https://vitejs.dev/guide/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What is Vite primarily used for?",
+answers:{
+a:"Running unit tests only",
+b:"Providing a fast dev server and an optimized production build for frontend projects",
+c:"Replacing npm as a package manager",
+d:"Managing databases"
+},
+correctAnswer:"b"
+},
+{
+question:"In `npm init vite@latest vite_project -- --template vanilla-ts`, what does `vanilla-ts` refer to?",
+answers:{
+a:"The name of the output folder",
+b:"The Vite version to install",
+c:"The project template to scaffold (plain TypeScript, no framework)",
+d:"A Node.js runtime flag"
+},
+correctAnswer:"c"
+},
+{
+question:"What is the purpose of the `--` before `--template` in the init command?",
+answers:{
+a:"It comments out the rest of the line",
+b:"It separates npm's own flags from arguments meant for the underlying tool",
+c:"It forces a dry run",
+d:"It has no effect and can be omitted"
+},
+correctAnswer:"b"
+},
+{
+question:"Which command starts Vite's development server?",
+answers:{
+a:"npm run build",
+b:"npm run dev",
+c:"npx tsc",
+d:"npm init vite"
+},
+correctAnswer:"b"
+},
+{
+question:"What does `npm run build` produce in a Vite project?",
+answers:{
+a:"A new tsconfig.json",
+b:"An optimized, bundled output in a dist folder",
+c:"A fresh node_modules folder",
+d:"A new project template"
+},
+correctAnswer:"b"
+},
+{
+question:"Why might you choose a manual tsc setup instead of Vite?",
+answers:{
+a:"Because tsc supports more programming languages",
+b:"Because Vite cannot be installed via npm",
+c:"Because for plain Node.js scripts with no browser/HTML involved, a bundler and dev server are unnecessary overhead",
+d:"Because tsc produces smaller node_modules folders"
+},
+correctAnswer:"c"
+}
+]} />
+
+## 7. Exercises
+
+**Scenario**: You want to build a small interactive TypeScript demo that runs in the browser, with live reload while you develop it.
+
+**Task**:
+
+1. Scaffold a new project with `npm init vite@latest my-demo -- --template vanilla-ts`.
+2. `cd` into the folder, run `npm install`, then `npm run dev`, and open the printed local URL in your browser.
+3. Edit `src/main.ts` to change some text or add a `console.log`, save, and observe how quickly the browser updates.
+4. Run `npm run build` and inspect the generated `dist/` folder's contents.
+5. Compare this workflow to the manual `tsc`/`node` workflow from the previous lesson — write down two concrete differences you noticed.
+
+*Learning objective: understand what a bundler/dev-server tool like Vite adds on top of the raw TypeScript compiler, and get hands-on with scaffolding a real project from a template.*

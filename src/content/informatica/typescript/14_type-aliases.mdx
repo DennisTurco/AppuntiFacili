@@ -1,0 +1,213 @@
+---
+title: "Type Aliases"
+order: 14
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["typescript", "type-aliases", "custom-types"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+A **type alias**, declared with the `type` keyword, gives a name to any type expression — a primitive, a tuple, an object shape, a function signature, or a union of several types. It doesn't create a new type; it just gives an existing type a reusable, readable name.
+
+```ts
+type Coordinate = [number, number]; // custom type
+```
+
+`Coordinate` is a **tuple type**: a fixed-length array where each position has its own specific type — here, exactly two `number`s, always in that order. Without the alias you'd have to repeat `[number, number]` everywhere you needed this shape; with it, you write `Coordinate` once and reuse the name.
+
+## 2. Using a type alias
+
+Once declared, a type alias can be used anywhere a type annotation is expected — function parameters, return types, variable declarations, array element types, and so on.
+
+```ts
+function compareCoords(p1: Coordinate, p2: Coordinate): Coordinate {
+    return [p1[0], p2[1]];
+}
+
+const coords: Coordinate[] = [];
+```
+
+`compareCoords` takes two coordinates and combines the x of the first with the y of the second, returning a new `Coordinate`. `coords` is declared as `Coordinate[]` — an array of tuples — reading far more clearly than `[number, number][]` would have.
+
+<Aside variant="tip">
+Tuples are stricter than plain arrays: `p1[0]` and `p1[1]` are individually typed as `number`, and TypeScript knows the tuple has exactly two elements — accessing `p1[2]` is a compile error, whereas a plain `number[]` would silently allow it (and just report `undefined` at runtime).
+</Aside>
+
+## 3. What else can a type alias name?
+
+Tuples are just one example. A `type` alias can name essentially any type expression:
+
+### 3.1 Primitives and unions
+
+```ts
+type ID = string | number;
+
+function findUser(id: ID) {
+    // id could be a numeric database ID or a string UUID
+}
+```
+
+`ID` is a **union type**: a value that is *either* a `string` *or* a `number`. This is something a plain `interface` cannot express at all — interfaces only describe object shapes, while unions can combine any types, including primitives.
+
+### 3.2 Function types
+
+```ts
+type Handler = (event: string) => void;
+
+function onClick(handler: Handler) {
+    handler("click");
+}
+
+const logHandler: Handler = (event) => console.log(`Event received: ${event}`);
+onClick(logHandler);
+```
+
+`Handler` names an entire function signature — a callback that receives a `string` and returns nothing. Naming function types like this makes APIs that accept callbacks much easier to read than repeating `(event: string) => void` at every call site.
+
+### 3.3 Object shapes
+
+```ts
+type Point3D = {
+    x: number;
+    y: number;
+    z: number;
+};
+
+function distanceFromOrigin(p: Point3D): number {
+    return Math.sqrt(p.x ** 2 + p.y ** 2 + p.z ** 2);
+}
+```
+
+This looks just like an `interface` would, and for a simple object shape like this, either works equally well.
+
+## 4. `type` vs `interface`, revisited
+
+We touched on this briefly in the [Interfaces lesson](/informatica/typescript/10_interfaces). Now that you've seen tuples, unions, and function types, the practical distinction is clearer:
+
+- A `type` alias can name **anything**: primitives, unions, tuples, function signatures, and object shapes.
+- An `interface` can only describe **object shapes** (including callable/method signatures on that object), but it supports `extends` and **declaration merging** (re-opening the same interface name to add more members later), which a `type` alias cannot do.
+
+```ts
+// This is only possible with `type` — there is no equivalent interface form:
+type Result = { success: true; value: number } | { success: false; error: string };
+
+function handleResult(result: Result) {
+    if (result.success) {
+        console.log(result.value);
+    } else {
+        console.log(result.error);
+    }
+}
+```
+
+<Aside variant="info">
+This pattern — a union of object shapes distinguished by a shared literal field like `success` — is called a **discriminated union**, and it's one of the most powerful and common uses of `type` aliases in real TypeScript code. TypeScript automatically narrows `result` to the correct branch inside each `if`, based on the value of `success`.
+</Aside>
+
+<Aside variant="warning">
+A common mistake is trying to "extend" a `type` alias with the same `extends` syntax used for interfaces. Type aliases don't support `extends` — instead you combine them with an **intersection** (`&`): `type Employee = Person & { employeeId: number };`. The end result is similar, but the syntax and mental model differ.
+</Aside>
+
+## 5. Further reading
+
+- [TypeScript Handbook — Object Types (aliases and interfaces)](https://www.typescriptlang.org/docs/handbook/2/objects.html)
+- [TypeScript Handbook — Narrowing (discriminated unions)](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does `type Coordinate = [number, number];` declare?",
+answers:{
+a:"An interface with two number properties",
+b:"A tuple type: a fixed-length array with two number elements in order",
+c:"A union of two number types",
+d:"A generic class"
+},
+correctAnswer:"b"
+},
+{
+question:"What kind of type is `type ID = string | number;`?",
+answers:{
+a:"A tuple type",
+b:"A union type",
+c:"A function type",
+d:"An intersection type"
+},
+correctAnswer:"b"
+},
+{
+question:"Why can't a plain `interface` express something like `type ID = string | number;`?",
+answers:{
+a:"Interfaces can only describe object shapes, not unions of primitives",
+b:"Interfaces don't support the pipe character",
+c:"Interfaces require a class implementation",
+d:"They actually can, it's identical syntax"
+},
+correctAnswer:"a"
+},
+{
+question:"What does `type Handler = (event: string) => void;` name?",
+answers:{
+a:"An object with a method called Handler",
+b:"A function signature: takes a string, returns nothing",
+c:"A generic type parameter",
+d:"A tuple of one string element"
+},
+correctAnswer:"b"
+},
+{
+question:"How do you combine two type aliases into one that has all members of both?",
+answers:{
+a:"Using `extends`, exactly like with interfaces",
+b:"Using the intersection operator `&`",
+c:"Type aliases cannot be combined",
+d:"By redeclaring the type with the same name"
+},
+correctAnswer:"b"
+},
+{
+question:"What is a 'discriminated union' commonly used for?",
+answers:{
+a:"Declaring multiple unrelated global variables",
+b:"Representing one of several possible object shapes, narrowed by a shared literal field",
+c:"Merging two interfaces with the same name",
+d:"Declaring an abstract class"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 7. Exercises
+
+### 7.1 Exercise
+
+**Scenario**: You're modeling geometric data and simple event callbacks for a small graphics utility library.
+
+**Task**:
+1. Define a `type Coordinate = [number, number];` and a function `midpoint(a: Coordinate, b: Coordinate): Coordinate` that returns the midpoint of two coordinates.
+2. Define a `type ShapeId = string | number;` and a function `logShapeId(id: ShapeId): void` that logs the id along with whether it came in as a string or a number (hint: use `typeof`).
+3. Define a `type ResizeHandler = (width: number, height: number) => void;` and write a function `onResize(handler: ResizeHandler)` that calls the handler with sample values.
+
+*Learning objective: practice declaring and using type aliases for tuples, unions, and function signatures.*
+
+### 7.2 Exercise
+
+**Scenario**: You're building a small API-response modeling layer and want to represent success/failure without throwing exceptions.
+
+**Task**:
+1. Define `type ApiResult<T> = { success: true; data: T } | { success: false; error: string };` (a generic discriminated union — combining what you learned about generics with type aliases).
+2. Write a function `fetchUser(id: number): ApiResult<{ name: string; age: number }>` that returns a failure result if `id <= 0`, and a success result with a fake user otherwise.
+3. Write a function `printResult(result: ApiResult<{ name: string; age: number }>): void` that uses an `if (result.success)` check to safely narrow and print either the user's name or the error message.
+4. Explain in a comment why accessing `result.data` or `result.error` without first checking `result.success` would be a compile error.
+
+*Learning objective: combine generics and discriminated unions built with `type` aliases to model success/failure results safely.*

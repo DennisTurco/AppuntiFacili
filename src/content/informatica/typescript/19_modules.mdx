@@ -1,0 +1,240 @@
+---
+title: "Modules"
+order: 19
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "advanced"
+tags: ["typescript", "modules", "import", "export"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+Any real TypeScript project is split across multiple files. **Modules** are how those files share code with each other: a file **exports** the values, functions, classes, or types it wants to make available, and other files **import** them. TypeScript's module system builds directly on top of JavaScript's **ES Modules** (ESM) syntax, adding full type-checking across file boundaries.
+
+There are two flavors of exports — **named exports** and a **default export** — and understanding the difference (and when to reach for each) is fundamental to organizing a codebase well.
+
+## 2. Named exports
+
+A **named export** exposes a value under a specific, fixed name. A module can have as many named exports as it wants:
+
+```ts
+// math-utils.ts
+export function add(x: number, y: number): number {
+  return x + y;
+}
+
+export const VALUE = 42;
+```
+
+Anything marked `export` becomes importable, by that exact name, from other files.
+
+## 3. Default export
+
+A module can *also* have a single **default export** — at most one per file:
+
+```ts
+// math-utils.ts (continued)
+function test() {
+  return "test";
+}
+
+export default test;
+```
+
+<Aside variant="tip">
+Default export is convenient when a module has one clear "main" thing to offer (a component, a class, a single function). The importing file is free to name it however it likes, since there's no fixed export name to match against.
+</Aside>
+
+Putting the whole file together:
+
+```ts
+// math-utils.ts
+function test() {
+  return "test";
+}
+
+export function add(x: number, y: number): number {
+  return x + y;
+}
+
+export const VALUE = 42;
+
+export default test;
+```
+
+## 4. Importing named exports
+
+To import one or more named exports, use curly braces and match the exact exported name:
+
+```ts
+// main.ts
+import { add, VALUE } from "./math-utils";
+
+console.log(add(1, 10)); // 11
+console.log(VALUE); // 42
+```
+
+<Aside variant="warning">
+Named imports must match the exported name exactly (you can rename locally with `as`, e.g. `import { add as sum } from "./math-utils";`, but the original export name still has to exist). Misspelling a named import is a compile error, not a silent `undefined`.
+</Aside>
+
+## 5. Importing the default export
+
+The default export can be imported under **any local name you choose** — that's the whole point of it being "default" rather than named:
+
+```ts
+// main.ts (continued)
+import Something from "./math-utils";
+
+console.log(Something()); // "test"
+```
+
+Nothing forces the imported name to be `test`, `Something`, or anything related to the original name — the module only ever exposes *one* default, so there's no ambiguity about which value you're importing.
+
+Combining a default import with named imports in the same statement is also valid:
+
+```ts
+import Something, { add, VALUE } from "./math-utils";
+```
+
+## 6. Namespace-style imports
+
+Instead of listing individual named exports, you can import everything a module exports as a single namespace object:
+
+```ts
+// main.ts
+import * as MathUtils from "./math-utils";
+
+console.log(MathUtils.add(2, 3)); // 5
+console.log(MathUtils.VALUE); // 42
+console.log(MathUtils.default()); // "test" — the default export becomes a `.default` property
+```
+
+This style is handy when a module exports many related utilities and you want to keep them grouped under one recognizable prefix, or when you want to avoid naming collisions between imports from different modules.
+
+## 7. Re-exporting from another module
+
+A module can also forward another module's exports without importing them locally first — a **re-export**. This is common in "barrel" files that aggregate several modules into one entry point:
+
+```ts
+// index.ts
+export * from "./math-utils";
+export * from "./string-utils";
+```
+
+Consumers can now do `import { add } from "./index";` without knowing that `add` actually lives in `math-utils.ts`. You can also re-export selectively:
+
+```ts
+// index.ts
+export { add, VALUE } from "./math-utils";
+```
+
+<Aside variant="info">
+`export * from "./math-utils"` re-exports every **named** export, but it does **not** forward a default export. To re-export a default as well, you need an explicit `export { default } from "./math-utils";` (optionally renaming it, e.g. `export { default as test } from "./math-utils";`).
+</Aside>
+
+## 8. How this connects to `tsconfig.json`
+
+The `import`/`export` syntax you write is the same regardless of target environment, but *how TypeScript compiles it down* to actual JavaScript module code depends on the `module` and `moduleResolution` options in `tsconfig.json` (covered in the very first lesson of this section). Modern JavaScript runtimes (browsers, current Node.js versions) understand **ESM** natively, while older Node.js tooling historically relied on **CommonJS** (`require`/`module.exports`). Setting `"module": "ESNext"` or `"module": "NodeNext"` versus `"module": "CommonJS"` changes the emitted output — and can also affect small but important details like whether a default import needs interop handling. When in doubt, match the `module`/`moduleResolution` settings to whatever runtime or bundler is actually going to execute the compiled code.
+
+## 9. Further reading
+
+- [TypeScript Handbook — Modules](https://www.typescriptlang.org/docs/handbook/2/modules.html)
+- [MDN — JavaScript modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 10. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"How many default exports can a single TypeScript module have?",
+answers:{
+a:"Unlimited",
+b:"Exactly one",
+c:"Exactly two",
+d:"Zero, default exports don't exist in TypeScript"
+},
+correctAnswer:"b"
+},
+{
+question:"What must match exactly when importing a named export?",
+answers:{
+a:"Nothing, named imports can use any local name",
+b:"The exported name (unless explicitly renamed with `as`)",
+c:"The file extension",
+d:"The order of declaration in the file"
+},
+correctAnswer:"b"
+},
+{
+question:"Why can `import Something from \"./math-utils\";` use any local name?",
+answers:{
+a:"Because it's importing a named export called Something",
+b:"Because it is importing the module's single default export, which has no fixed name to match",
+c:"Because TypeScript ignores default exports",
+d:"Because the file has no exports at all"
+},
+correctAnswer:"b"
+},
+{
+question:"What does `import * as MathUtils from \"./math-utils\";` do?",
+answers:{
+a:"It imports only the default export",
+b:"It imports every export as properties of a single namespace object",
+c:"It fails to compile because * is not valid syntax",
+d:"It deletes all exports from the module"
+},
+correctAnswer:"b"
+},
+{
+question:"Does `export * from \"./math-utils\";` forward the module's default export?",
+answers:{
+a:"Yes, always",
+b:"No — named exports are forwarded, but the default export needs an explicit re-export",
+c:"Only if the file has no named exports",
+d:"Only in CommonJS mode"
+},
+correctAnswer:"b"
+},
+{
+question:"What tsconfig.json option primarily controls how import/export syntax is compiled to JavaScript (ESM vs CommonJS)?",
+answers:{
+a:"strict",
+b:"module (and moduleResolution)",
+c:"target",
+d:"outDir"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 11. Exercises
+
+**Scenario**: You are organizing a small utilities library with separate files for string helpers and math helpers, plus a single entry point for consumers.
+
+**Task**:
+
+1. Create `string-utils.ts` with two named exports: `capitalize(s: string): string` and `slugify(s: string): string`.
+2. Create `math-utils.ts` with named exports `add`, `VALUE` and a default export `test`, as shown in this lesson.
+3. Create an `index.ts` that re-exports everything from both files using `export * from "./string-utils";` and `export * from "./math-utils";`.
+4. Write a `main.ts` that imports `capitalize`, `add`, and `VALUE` all from `./index` (not from the original files directly), and confirm it type-checks and runs correctly.
+5. Add an explicit re-export of `math-utils`'s default export from `index.ts` (e.g. `export { default as mathTest } from "./math-utils";`) and import `mathTest` in `main.ts`.
+
+*Learning objective: practice organizing named and default exports across multiple files and aggregating them through a barrel file with re-exports.*
+
+**Scenario**: You're deciding between a namespace-style import and individual named imports for a module that exports a dozen small helper functions.
+
+**Task**:
+
+1. Take the `math-utils.ts` module from this lesson and add three more named exports of your choice (e.g. `subtract`, `multiply`, `divide`).
+2. In one file, import all four arithmetic functions individually with named imports and use them.
+3. In a second file, import the whole module with `import * as MathUtils from "./math-utils";` and call the same four functions through the namespace object.
+4. Write a short comment comparing the two files: which reads more clearly, and which would be easier to maintain if `math-utils.ts` grew to twenty exports?
+
+*Learning objective: compare named imports against namespace imports in practice and form an opinion on when each style is preferable.*

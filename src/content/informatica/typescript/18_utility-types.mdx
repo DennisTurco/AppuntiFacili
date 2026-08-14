@@ -1,0 +1,285 @@
+---
+title: "Utility Types"
+order: 18
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "advanced"
+tags: ["typescript", "utility-types", "partial", "readonly", "pick", "record"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+TypeScript ships with a set of **built-in utility types** that let you transform an existing type into a new one, without repeating its structure by hand. They're globally available — no import needed — and they're heavily used across real-world TypeScript codebases, so understanding what each one does (and doesn't do) is essential.
+
+We'll start from a shared `Todo` interface:
+
+```ts
+interface Todo {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+```
+
+<Aside variant="tip">
+Compared to some textbook examples, `completed: boolean` has been added to `Todo` here on purpose — it's what a realistic "to-do" concept needs, and it's the property several utility types below (`Pick`, `Omit`) will operate on.
+</Aside>
+
+## 2. `Partial<T>`
+
+`Partial<T>` produces a new type where **every property of `T` becomes optional**. It's the classic shape for "update" functions, where the caller only supplies the fields they want to change:
+
+```ts
+const updateTodo = (id: number, todo: Partial<Todo>) => {
+  // todo might only contain { completed: true }, and that's valid
+};
+
+updateTodo(1, { completed: true });
+updateTodo(2, { title: "Buy groceries", description: "Milk, eggs, bread" });
+```
+
+Without `Partial`, both calls above would fail to compile, since `Todo` normally requires all three properties.
+
+## 3. `Readonly<T>`
+
+`Readonly<T>` produces a type where all properties become **read-only** — they can be assigned once when the object is created, but never reassigned afterward:
+
+```ts
+const myTodo: Readonly<Todo> = {
+  title: "Learn TypeScript",
+  description: "",
+  completed: false
+};
+
+myTodo.completed = true; // Error: Cannot assign to 'completed' because it is a read-only property.
+```
+
+<Aside variant="warning">
+`Readonly<T>` is a compile-time guarantee only. It does not freeze the object at runtime the way `Object.freeze()` does — if the value crosses into plain JavaScript code, or is cast with `as`, nothing stops a mutation there. Use `Object.freeze()` alongside it if you need actual runtime immutability.
+</Aside>
+
+## 4. `Record<K, T>`
+
+`Record<K, T>` builds an object type whose keys are of type `K` and whose values are all of type `T`. It's the type-safe way to describe a "dictionary" or "map"-like object:
+
+```ts
+interface PageInfo {
+  title: string;
+}
+
+const pages: Record<string, PageInfo> = {
+  home: { title: "Home" },
+  about: { title: "About" },
+  contact: { title: "Contact" }
+};
+
+const pagesByIndex: Record<number, PageInfo> = {
+  0: { title: "Home" },
+  1: { title: "About" },
+  2: { title: "Contact" }
+};
+```
+
+Both the key and value types are checked: attempting `pages.home = { title: 42 }` (a number instead of a string) would fail, and so would using a key type that doesn't match `K`.
+
+## 5. `Pick<T, K>`
+
+`Pick<T, K>` builds a new type containing only the properties named in `K` (a union of string literal keys) from `T`:
+
+```ts
+type TodoPreview = Pick<Todo, "title" | "completed">;
+
+const todo: TodoPreview = {
+  title: "Clean room",
+  completed: false
+};
+```
+
+`TodoPreview` only has `title` and `completed` — `description` isn't part of it, and trying to access `todo.description` would be a compile error.
+
+<Aside variant="danger">
+A very common mistake is picking a key that doesn't actually exist on the source type — for example `Pick<Todo, "title" | "priority">` when `Todo` has no `priority` field. TypeScript will reject this at the type level with an error like "Type '\"priority\"' does not satisfy the constraint...". Always double check the source interface's actual property names before writing a `Pick`.
+</Aside>
+
+## 6. More utility types worth knowing
+
+Beyond the four above, a handful of other built-in utility types come up constantly.
+
+### 6.1 `Required<T>`
+
+The opposite of `Partial<T>`: makes every property **required**, even ones that were originally declared optional.
+
+```ts
+interface Draft {
+  title?: string;
+  description?: string;
+}
+
+type PublishedPost = Required<Draft>;
+// { title: string; description: string }
+
+const post: PublishedPost = { title: "Hello", description: "World" };
+```
+
+### 6.2 `Omit<T, K>`
+
+The inverse of `Pick`: builds a type with **all properties except** the ones listed in `K`.
+
+```ts
+type TodoWithoutDescription = Omit<Todo, "description">;
+// { title: string; completed: boolean }
+
+const shortTodo: TodoWithoutDescription = { title: "Ping Marco", completed: true };
+```
+
+### 6.3 `Exclude<T, U>`
+
+Works on **union types** rather than object shapes: it removes from `T` any member that is assignable to `U`.
+
+```ts
+type Status = "draft" | "published" | "archived";
+type ActiveStatus = Exclude<Status, "archived">;
+// "draft" | "published"
+```
+
+### 6.4 `ReturnType<T>`
+
+Extracts the **return type** of a function type — useful when you don't want to (or can't) name a type explicitly and want to derive it from an existing function instead.
+
+```ts
+function createTodo(title: string): Todo {
+  return { title, description: "", completed: false };
+}
+
+type CreatedTodo = ReturnType<typeof createTodo>;
+// Todo
+```
+
+<Aside variant="tip">
+Notice the `typeof createTodo` inside `ReturnType<...>` — `typeof` here is a TypeScript **type-level** operator that reads the type of a value (in this case, a function), which is different from the runtime `typeof` operator used in `typeof value === "string"` checks from the type-guards lesson.
+</Aside>
+
+## 7. Choosing the right utility type
+
+| Situation | Utility type |
+|---|---|
+| Update function accepting partial input | `Partial<T>` |
+| Value that shouldn't be reassigned | `Readonly<T>` |
+| Dictionary/map keyed by a known type | `Record<K, T>` |
+| Subset of properties for a "preview" | `Pick<T, K>` |
+| All properties, but all required | `Required<T>` |
+| Everything except a few properties | `Omit<T, K>` |
+| Remove specific members from a union | `Exclude<T, U>` |
+| Derive a type from a function's return value | `ReturnType<T>` |
+
+## 8. Further reading
+
+- [TypeScript Handbook — Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
+- [TypeScript Handbook — Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 9. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does `Partial<Todo>` produce?",
+answers:{
+a:"A type with all properties of Todo made optional",
+b:"A type with only the first property of Todo",
+c:"A type where all properties become readonly",
+d:"An array of Todo objects"
+},
+correctAnswer:"a"
+},
+{
+question:"What guarantee does `Readonly<T>` actually provide?",
+answers:{
+a:"Runtime immutability equivalent to Object.freeze()",
+b:"A compile-time check preventing reassignment of properties after creation",
+c:"Automatic deep cloning of the object",
+d:"It makes all properties optional"
+},
+correctAnswer:"b"
+},
+{
+question:"Given `interface PageInfo { title: string }`, what does `Record<string, PageInfo>` describe?",
+answers:{
+a:"An array of PageInfo objects",
+b:"An object type whose keys are strings and whose values are all PageInfo",
+c:"A function returning PageInfo",
+d:"A union of string and PageInfo"
+},
+correctAnswer:"b"
+},
+{
+question:"What happens if you write `Pick<Todo, \"title\" | \"priority\">` when Todo has no `priority` property?",
+answers:{
+a:"TypeScript silently ignores the invalid key",
+b:"It compiles fine and priority becomes undefined",
+c:"TypeScript raises a compile error because 'priority' does not satisfy the constraint",
+d:"It automatically adds priority to Todo"
+},
+correctAnswer:"c"
+},
+{
+question:"Which utility type builds a type with all properties EXCEPT the ones you list?",
+answers:{
+a:"Pick<T, K>",
+b:"Omit<T, K>",
+c:"Partial<T>",
+d:"Record<K, T>"
+},
+correctAnswer:"b"
+},
+{
+question:"What does `Exclude<Status, \"archived\">` do, given `type Status = \"draft\" | \"published\" | \"archived\"`?",
+answers:{
+a:"It removes \"archived\" from the union, leaving \"draft\" | \"published\"",
+b:"It keeps only \"archived\"",
+c:"It makes all members optional",
+d:"It converts the union into an object type"
+},
+correctAnswer:"a"
+},
+{
+question:"What does `ReturnType<typeof createTodo>` extract?",
+answers:{
+a:"The parameter types of createTodo",
+b:"The return type of the createTodo function",
+c:"The name of the function as a string literal type",
+d:"Nothing — ReturnType only works on classes"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 10. Exercises
+
+**Scenario**: You are building a small task-management API and want to use utility types instead of hand-writing near-duplicate interfaces.
+
+**Task**:
+
+1. Start from `interface Task { id: number; title: string; assignee: string; done: boolean; }`.
+2. Create a `CreateTaskInput` type using `Omit<Task, "id" | "done">` to represent the payload for creating a new task (the server assigns `id`, and `done` always starts `false`).
+3. Create an `UpdateTaskInput` type using `Partial<Omit<Task, "id">>` to represent a partial update payload.
+4. Create a `TaskSummary` type using `Pick<Task, "id" | "title" | "done">` for a lightweight list view.
+5. Write three functions — `createTask`, `updateTask`, `listTaskSummaries` — using these types in their signatures (implementations can be simple stubs).
+
+*Learning objective: compose multiple utility types (Omit, Partial, Pick) to model realistic request/response shapes derived from a single source interface.*
+
+**Scenario**: A reporting module needs a lookup table of report generators keyed by report name, plus a way to derive types from existing functions rather than duplicating them.
+
+**Task**:
+
+1. Write a function `generateSalesReport(year: number): { total: number; year: number }`.
+2. Use `ReturnType<typeof generateSalesReport>` to define a type `SalesReport` without repeating the shape manually.
+3. Define `type ReportName = "sales" | "inventory" | "payroll";` and build `type ReportRegistry = Record<ReportName, () => void>` representing a lookup of report-generating functions.
+4. Populate a `reportRegistry: ReportRegistry` object with a function for each key, and call `reportRegistry.sales()` to confirm it type-checks.
+
+*Learning objective: practice deriving types from functions with ReturnType and building strongly-typed lookup tables with Record.*

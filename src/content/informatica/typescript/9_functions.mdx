@@ -1,0 +1,262 @@
+---
+title: "Functions"
+order: 9
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "functions", "overloads", "rest-parameters", "optional-parameters"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Typed parameters and return types
+
+In TypeScript, function parameters and return values can be annotated the same way variables are. This lets the compiler check both the inputs you pass in and how you use what comes back out.
+
+```ts
+function add(x: number, y: number): number | string {
+    if (x == 0) {
+        return "invalid";
+    }
+    return x + y;
+}
+console.log(add(4, 6)); // 10
+```
+
+The return type `number | string` is a union: `add` can legitimately return either type, and TypeScript will require callers to handle both possibilities before treating the result as, say, a number they can do arithmetic on.
+
+<Aside variant="tip">
+You rarely need to annotate the return type explicitly — TypeScript infers it from the `return` statements. Writing it out is still good practice for public/exported functions, since it documents the contract and catches accidental changes to what the function returns.
+</Aside>
+
+## 2. Optional parameters
+
+A parameter followed by `?` is optional: callers may omit it, and inside the function its type includes `undefined`.
+
+```ts
+function makeName(firstName: string, lastName: string, middleName?: string) {
+    return firstName + " " + (middleName ? middleName + " " : "") + lastName;
+}
+
+const name = makeName("Dennis", "Turco");
+console.log(name); // "Dennis Turco"
+```
+
+`middleName` has type `string | undefined` inside the function body, so before using it as a plain string (concatenating it, reading `.length`, etc.) you typically check it, exactly like the ternary above does.
+
+<Aside variant="warning">
+Optional parameters must come after all required parameters. `function f(a?: string, b: string)` is not valid TypeScript — the compiler would have no way to tell, from a single argument, whether it was meant for `a` or `b`.
+</Aside>
+
+## 3. Functions as parameters
+
+Since functions are first-class values in JavaScript (and therefore in TypeScript), a parameter can itself be typed as a function. The type describes the expected parameter list and return type of whatever function is passed in.
+
+```ts
+function callFunc(
+    func: (f: string, l: string, m?: string) => string,
+    param1: string,
+    param2: string
+) {
+    return func(param1, param2);
+}
+
+callFunc(makeName, "Dennis", "Turco");
+```
+
+Here, `func`'s type `(f: string, l: string, m?: string) => string` matches the signature of `makeName`, so passing `makeName` directly compiles: TypeScript checks that the function you hand over is compatible with the expected shape, parameter by parameter.
+
+### 3.1 Arrays of function types, paired with tuples
+
+This idea composes with everything covered in earlier lessons — arrays and tuples included. An array of functions, applied to a matching array of tuple arguments, is a natural (if slightly advanced) pattern:
+
+```ts
+function mul(x: number, y: number): number {
+    return x * y;
+}
+function div(x: number, y: number): number {
+    return x / y;
+}
+
+function applyFunc(
+    funcs: ((a: number, b: number) => number)[],
+    values: [number, number][]
+): number[] {
+    const results: number[] = [];
+    for (let i = 0; i < funcs.length; i++) {
+        const args = values[i]!;
+        const result = funcs[i]!(args[0], args[1]);
+        results.push(result);
+    }
+    return results;
+}
+
+const res = applyFunc([mul, div], [[1, 2], [4, 5]]);
+console.log(res); // [2, 0.8]
+```
+
+`funcs` is typed as "an array of functions that take two numbers and return a number", and `values` is "an array of `[number, number]` tuples". The `!` non-null assertions on `values[i]` and `funcs[i]` tell the compiler to trust that the index is in range — TypeScript's `noUncheckedIndexedAccess` setting (when enabled) would otherwise type array indexing as possibly `undefined`, since indexing out of bounds is always possible in JavaScript.
+
+## 4. Rest parameters
+
+A **rest parameter**, written with `...`, lets a function accept an unlimited number of arguments of a given type, collected into a single array inside the function body.
+
+```ts
+function sum(str: string, ...numbers: number[]) {
+    // numbers is a number[] here, however many arguments were passed
+}
+
+sum("hello", 1, 2, 3);
+sum("");
+sum("...", 1, 5, 18, 90, 32);
+```
+
+A rest parameter must be the last parameter in the list, and there can only be one per function — the compiler wouldn't otherwise know where the rest of the arguments should be split. This is TypeScript's typed version of the same rest-parameter syntax that plain JavaScript already supports.
+
+## 5. Function overloads
+
+Sometimes a single function needs to behave differently — with genuinely different return types — depending on the type of argument it receives. **Overloads** let you declare multiple call signatures for the same function name, followed by a single general implementation that handles all of them.
+
+```ts
+function getItemLength(name: string): number;
+function getItemLength(names: string[]): string;
+// this is the implementation signature, which handles both cases above
+function getItemLength(nameOrNames: unknown): unknown {
+    if (typeof nameOrNames == "string") {
+        return nameOrNames.length;
+    } else if (Array.isArray(nameOrNames)) {
+        return "this is an array";
+    }
+    return 0;
+}
+
+console.log(getItemLength("Hello"));           // number: 5
+console.log(getItemLength(["Hello", "World"])); // string: "this is an array"
+```
+
+Callers only ever see the overload signatures (`getItemLength(name: string): number` and `getItemLength(names: string[]): string`) — the broader implementation signature, typed with `unknown`, is not itself callable from the outside. This is what lets `getItemLength("Hello")` be correctly typed as returning a `number`, while `getItemLength(["Hello"])` is correctly typed as returning a `string`, even though a single function body handles both.
+
+<Aside variant="info">
+Overloads are best reserved for cases where the relationship between input and output type genuinely can't be expressed with a plain union return type. If a union return (like the `number | string` from Section 1) is enough and callers are expected to narrow it themselves, that's usually simpler than declaring overloads.
+</Aside>
+
+## 6. Further reading
+
+- [TypeScript Handbook — Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html)
+- [TypeScript Handbook — More on Functions (Function Overloads)](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 7. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"In `function add(x: number, y: number): number | string`, what does the return type mean?",
+answers:{
+a:"The function must always return a number",
+b:"The function can return either a number or a string, and callers must handle both",
+c:"The function returns a string that represents a number",
+d:"This is invalid TypeScript syntax"
+},
+correctAnswer:"b"
+},
+{
+question:"Where must optional parameters be placed in a function's parameter list?",
+answers:{
+a:"Anywhere, order does not matter",
+b:"Always first",
+c:"After all required parameters",
+d:"Optional parameters are not supported in TypeScript"
+},
+correctAnswer:"c"
+},
+{
+question:"What does a rest parameter like `...numbers: number[]` allow?",
+answers:{
+a:"Exactly one additional optional argument",
+b:"An unlimited number of number arguments collected into an array",
+c:"A single tuple of numbers only",
+d:"Passing numbers only as strings"
+},
+correctAnswer:"b"
+},
+{
+question:"How many rest parameters can a single function declaration have, and where?",
+answers:{
+a:"Unlimited, anywhere in the parameter list",
+b:"Exactly one, and it must be the last parameter",
+c:"Exactly two, at the start and the end",
+d:"Rest parameters cannot be combined with other parameters"
+},
+correctAnswer:"b"
+},
+{
+question:"In a function overload setup, which signatures are visible to callers?",
+answers:{
+a:"Only the implementation signature",
+b:"Only the overload signatures, not the general implementation signature",
+c:"All signatures are equally callable including the implementation one",
+d:"None, overloads are resolved only at runtime"
+},
+correctAnswer:"b"
+},
+{
+question:"Why is the implementation signature of an overloaded function often typed with `unknown` or a union?",
+answers:{
+a:"Because it must handle all the different argument shapes declared by the overloads",
+b:"Because TypeScript requires all implementations to use unknown",
+c:"Because unknown makes the function run faster",
+d:"Because overloads cannot have typed parameters"
+},
+correctAnswer:"a"
+},
+{
+question:"What type does `funcs: ((a: number, b: number) => number)[]` describe?",
+answers:{
+a:"A single function that returns an array",
+b:"An array of functions, each taking two numbers and returning a number",
+c:"A tuple of exactly two functions",
+d:"A function that takes an array of numbers"
+},
+correctAnswer:"b"
+},
+{
+question:"Why might `values[i]!` be used when `values` is an array?",
+answers:{
+a:"To convert values[i] into a string",
+b:"To assert to the compiler that the indexed element is not undefined, bypassing the possible out-of-bounds case",
+c:"To make the array readonly",
+d:"To force a runtime bounds check"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 8. Exercises
+
+### 8.1 Exercise
+
+**Scenario**: You are writing a small text-formatting utility library.
+
+**Task**:
+1. Write a function `formatLabel(name: string, prefix?: string): string` that returns `prefix + name` if a prefix is given, or just `name` otherwise.
+2. Write a function `joinWords(separator: string, ...words: string[]): string` using a rest parameter, that joins all the words with the given separator.
+3. Write a function `applyFormatter(formatter: (s: string) => string, values: string[]): string[]` that takes a function as a parameter and applies it to every value in the array.
+4. Call `applyFormatter` with a formatter of your own (e.g. one that uppercases the string) against a list of at least 4 words.
+
+*Learning objective: combine optional parameters, rest parameters, and functions-as-parameters in realistic small utilities.*
+
+### 8.2 Exercise
+
+**Scenario**: You need a utility function that can compute the "size" of either a single item or a collection, returning a different, meaningfully typed result for each case.
+
+**Task**:
+1. Declare two overload signatures for a function `describeSize`: one taking a `string` and returning a `number` (the string's length), one taking a `number[]` and returning a `string` (e.g. `"array of N numbers"`).
+2. Implement the general signature using `unknown` as the parameter type, and narrow it with `typeof` / `Array.isArray` inside the body.
+3. Call the function once with a string and once with a number array, and verify (via `console.log` and comments) that TypeScript correctly infers a `number` in the first case and a `string` in the second.
+4. Explain, in a comment, why a single function with a `string | number[]` parameter and a `number | string` return type would be less precise for callers than the overloaded version.
+
+*Learning objective: practice designing and implementing function overloads, and understand what precision they add over a plain union-typed function.*

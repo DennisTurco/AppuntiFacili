@@ -1,0 +1,237 @@
+---
+title: "Generics"
+order: 13
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["typescript", "generics", "reusability", "type-parameters"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+Imagine writing a `DataStore` class that holds a list of items — but you want it to work equally well for numbers, strings, or any custom object, without giving up type safety. Without generics you'd have two bad options: write one version per type (`NumberDataStore`, `StringDataStore`, ...), or type everything as `any` and lose all compile-time checking.
+
+**Generics** solve this by letting a class, function, or interface be written once, with a *type parameter* — a placeholder for "whatever type gets used at this call site" — that TypeScript fills in and checks for you.
+
+```ts
+class DataStore<T> {
+    private items: T[] = [];
+
+    public addItem(item: T): void {
+        this.items.push(item);
+    }
+
+    public getItem(index: number): T {
+        return this.items[index]!;
+    }
+
+    public removeItem(index: number): void {
+        this.items.splice(index, 1);
+    }
+
+    public getAllItems(): T[] {
+        return this.items;
+    }
+}
+```
+
+`T` is the type parameter — a conventional single-letter placeholder name (short for "Type"). Everywhere `T` appears inside the class, it will be replaced by whatever concrete type is supplied when the class is instantiated.
+
+<Aside variant="info">
+The `!` after `this.items[index]` is the **non-null assertion operator**. It tells TypeScript "trust me, this won't be `undefined`" — useful here because TypeScript's array indexing doesn't automatically narrow out-of-bounds access, but it also means you lose the safety net if `index` really is out of range. Use it sparingly.
+</Aside>
+
+## 2. Using a generic class
+
+You specify the concrete type in angle brackets when you instantiate the class:
+
+```ts
+const data1 = new DataStore<number>();
+data1.addItem(10);
+data1.addItem(23);
+data1.addItem(2);
+data1.addItem(-45);
+data1.addItem(3.7);
+data1.removeItem(0);
+data1.removeItem(1);
+data1.removeItem(2);
+console.log(data1);
+
+const data2 = new DataStore<string>();
+data2.addItem("hi");
+data2.addItem("bob");
+data2.addItem("my");
+data2.addItem("name");
+data2.addItem("is");
+data2.removeItem(0);
+data2.removeItem(1);
+data2.removeItem(2);
+console.log(data2);
+```
+
+`data1` is a `DataStore<number>` — calling `data1.addItem("hello")` would now be a compile-time error, because every `T` inside that particular instance has been locked to `number`. `data2` is a completely separate `DataStore<string>`, with its own independent locking to `string`. The *same class definition* is reused for both, with full type safety in each case.
+
+<Aside variant="tip">
+This is the core benefit generics give you over `any`: with `any`, `addItem` would accept literally anything and `getItem` would return literally anything — you'd lose autocomplete and the compiler would never catch a mismatched type. With `DataStore<T>`, every method call is checked against the specific `T` you chose, while still reusing one implementation.
+</Aside>
+
+## 3. Generic functions with multiple type parameters
+
+Generics aren't limited to classes — a function can also take one or more type parameters:
+
+```ts
+function getValue<K, V>(key: K, value1: V, value2: V): V {
+    if (key) {
+        return value1;
+    }
+    return value2;
+}
+```
+
+Here `K` is the type of the `key` parameter, and `V` is the type shared by `value1`, `value2`, and the return value. Using the *same* letter `V` in three places is what tells TypeScript they must all be the same type — you couldn't pass a `number` for `value1` and a `string` for `value2`.
+
+### 3.1 Explicit type arguments
+
+```ts
+const n1: number = 1;
+const n2: number = 2;
+getValue<string, number>("hello", n1, n2);
+```
+
+Here we explicitly told TypeScript `K = string` and `V = number`.
+
+### 3.2 Type inference
+
+In practice, you rarely need to write out `<string, number>` explicitly — TypeScript can usually **infer** the type parameters just by looking at the arguments you pass:
+
+```ts
+getValue("hello", n1, n2); // TypeScript infers K = string, V = number automatically
+```
+
+Both calls behave identically; the explicit form is only needed when TypeScript can't figure out the types on its own (for example, if there were no arguments to infer from, only a return-type context).
+
+## 4. Generic constraints
+
+Sometimes you want to accept "any type, but it must have at least these members." The `extends` keyword (a different use of the word than in class inheritance) lets you constrain a type parameter:
+
+```ts
+interface HasLength {
+    length: number;
+}
+
+function logLength<T extends HasLength>(value: T): void {
+    console.log(value.length);
+}
+
+logLength("hello");        // OK: strings have .length
+logLength([1, 2, 3]);      // OK: arrays have .length
+// logLength(42);          // Error: number has no .length property
+```
+
+Without the constraint, `T` could be anything, and `value.length` would be an error since not every type has a `length` property. With `T extends HasLength`, TypeScript only accepts types that are structurally compatible with `HasLength`, while still preserving the *specific* type passed in (so `logLength("hi")` still knows `T` is `string`, not just `HasLength`).
+
+<Aside variant="warning">
+A common beginner mistake is reaching for generics when a plain union type would do. If a function only ever needs to handle exactly two known types (e.g. `string | number`), a union is simpler and clearer than a generic. Reach for generics specifically when you need to *preserve a relationship* between an input type and an output type (or between multiple inputs), as with `DataStore<T>` and `getValue<K, V>` above.
+</Aside>
+
+## 5. Further reading
+
+- [TypeScript Handbook — Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html)
+- [TypeScript Handbook — Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What problem do generics primarily solve?",
+answers:{
+a:"They make code run faster at runtime",
+b:"They let one implementation work with multiple types while preserving type safety",
+c:"They remove the need for interfaces",
+d:"They allow classes to have multiple constructors"
+},
+correctAnswer:"b"
+},
+{
+question:"In `class DataStore<T> { ... }`, what does `T` represent?",
+answers:{
+a:"A fixed type that always means 'text'",
+b:"A type parameter that gets replaced by a concrete type at usage time",
+c:"A required generic named exactly 'T' by the language",
+d:"A runtime variable"
+},
+correctAnswer:"b"
+},
+{
+question:"After `const data1 = new DataStore<number>();`, what happens if you call `data1.addItem(\"hello\")`?",
+answers:{
+a:"It silently converts the string to a number",
+b:"It works fine because DataStore accepts any type",
+c:"It is a compile-time type error",
+d:"It only fails at runtime"
+},
+correctAnswer:"c"
+},
+{
+question:"In `function getValue<K, V>(key: K, value1: V, value2: V): V`, why must value1 and value2 share the type parameter V?",
+answers:{
+a:"Because TypeScript requires all parameters to share one type parameter",
+b:"Because the function guarantees both are the same type as each other and as the return value",
+c:"Because V must always be a number",
+d:"There's no real reason, it's just convention"
+},
+correctAnswer:"b"
+},
+{
+question:"What does calling `getValue(\"hello\", n1, n2)` without explicit type arguments rely on?",
+answers:{
+a:"TypeScript inferring the type parameters from the argument types",
+b:"A default generic type of any",
+c:"An explicit interface implementation",
+d:"Manual casting inside the function"
+},
+correctAnswer:"a"
+},
+{
+question:"What does `function logLength<T extends HasLength>(value: T)` achieve?",
+answers:{
+a:"It forces T to always be exactly HasLength",
+b:"It restricts T to types structurally compatible with HasLength while preserving the specific type passed",
+c:"It makes the function only accept arrays",
+d:"It disables type inference for this function"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 7. Exercises
+
+### 7.1 Exercise
+
+**Scenario**: You're building a small type-safe queue utility to be reused across several parts of an application (task queues, print queues, etc.).
+
+**Task**:
+1. Create a generic class `Queue<T>` with a private array field, an `enqueue(item: T): void` method, a `dequeue(): T | undefined` method, and a `peek(): T | undefined` method.
+2. Instantiate a `Queue<string>` and a `Queue<number>` and exercise all three methods on each.
+3. Try (and observe the compiler error) pushing a `number` into the `Queue<string>` instance.
+
+*Learning objective: practice defining and using a generic class with multiple instantiations locked to different concrete types.*
+
+### 7.2 Exercise
+
+**Scenario**: You need a reusable helper that finds the first item in an array satisfying a condition, working for any array element type.
+
+**Task**:
+1. Write a generic function `findFirst<T>(items: T[], predicate: (item: T) => boolean): T | undefined`.
+2. Add a generic constraint version `findFirstById<T extends { id: number }>(items: T[], id: number): T | undefined` that specifically searches by an `id` field.
+3. Test both functions against an array of numbers and an array of custom objects (e.g. `{ id: number; name: string }`).
+4. Explain in a comment why `findFirstById` needs the `extends { id: number }` constraint but `findFirst` does not.
+
+*Learning objective: understand the difference between fully generic functions and constrained generics, and when a constraint is necessary.*

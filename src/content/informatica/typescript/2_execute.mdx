@@ -1,0 +1,208 @@
+---
+title: "Compiling and Running TypeScript"
+order: 2
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "tsc", "node", "npm-scripts", "compiling"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. The basic workflow
+
+TypeScript files use the `.ts` extension. Once you have a project set up (see the previous lesson), the simplest possible workflow is:
+
+1. Create a file, e.g. `test.ts`.
+2. Write some TypeScript code in it.
+3. Compile it to JavaScript.
+4. Run the resulting JavaScript with Node.js.
+
+```ts
+// test.ts
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("world"));
+```
+
+## 2. Compiling with `tsc`
+
+The TypeScript compiler, `tsc`, reads your `.ts` files, type-checks them, and emits plain `.js` files:
+
+```bash
+npx tsc test.ts
+```
+
+This produces a `test.js` file next to `test.ts` (or inside `outDir`, if your `tsconfig.json` defines one). You can then run the compiled output with Node.js like any regular JavaScript file:
+
+```bash
+node test.js
+```
+
+<Aside variant="info">
+If you run `npx tsc` with no file argument, it compiles the whole project according to `tsconfig.json` instead of a single file.
+</Aside>
+
+## 3. Running `.ts` files more directly
+
+Typing `tsc` and then `node` every time is tedious, so the ecosystem offers a few shortcuts:
+
+### 3.1 Node's built-in type stripping
+
+Recent versions of Node.js can run `.ts` files directly, without a separate compile step, by **stripping** the type annotations at load time (it does not perform full type-checking — it just removes the types so the remaining code is valid JavaScript):
+
+```bash
+node --experimental-strip-types test.ts
+```
+
+In newer Node.js releases this behavior is being stabilized and may not require the flag at all — check your installed Node version's documentation, since this feature is still evolving.
+
+### 3.2 `ts-node`
+
+[`ts-node`](https://typestrong.org/ts-node/) is a popular community tool that compiles and executes TypeScript on the fly, with full type-checking:
+
+```bash
+npx ts-node test.ts
+```
+
+### 3.3 `tsx`
+
+[`tsx`](https://github.com/privatenumber/tsx) is a faster, zero-config alternative built on `esbuild`, widely used for quick scripts and development servers:
+
+```bash
+npx tsx test.ts
+```
+
+<Aside variant="tip">
+For learning and small scripts, any of these options is fine. For production builds, most teams still run a real `tsc` compile step (or a bundler like Vite/esbuild) so the shipped code is plain, already-checked JavaScript.
+</Aside>
+
+## 4. Automating with npm scripts
+
+Typing long commands by hand gets old fast. `package.json` has a `scripts` section where you can define shortcuts:
+
+```json
+{
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node test.ts"
+  }
+}
+```
+
+Here a `dev` script was added that runs `node test.ts` (assuming your Node.js version supports running `.ts` files directly, per section 3.1 — otherwise point it at `tsx test.ts` or a `tsc && node dist/test.js` chain). Now, instead of remembering the exact command, you simply run:
+
+```bash
+npm run dev
+```
+
+`npm run <script-name>` looks up `<script-name>` inside `package.json`'s `scripts` object and executes it. This is the same mechanism behind commands you have probably already seen in other projects, like `npm run build` or `npm run start`.
+
+### 4.1 A more complete example
+
+A common pattern combines a type-check/build script with a dev script:
+
+```json
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/test.js",
+    "dev": "tsx watch test.ts"
+  }
+}
+```
+
+- `npm run build` compiles the whole project according to `tsconfig.json`.
+- `npm run start` runs the already-compiled output.
+- `npm run dev` re-runs the script automatically whenever the file changes (thanks to `tsx watch`), which is convenient during development.
+
+## 5. Further reading
+
+- [TypeScript Handbook — introduction](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play) — compile snippets instantly and inspect the emitted JavaScript
+- [Node.js type stripping — TypeScript blog](https://devblogs.microsoft.com/typescript/)
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does `npx tsc test.ts` do?",
+answers:{
+a:"It runs test.ts directly without compiling it",
+b:"It compiles test.ts into a JavaScript file",
+c:"It deletes test.ts",
+d:"It installs TypeScript globally"
+},
+correctAnswer:"b"
+},
+{
+question:"After compiling test.ts to test.js, how do you run the result?",
+answers:{
+a:"tsc test.js",
+b:"npm init test.js",
+c:"node test.js",
+d:"npx test.js"
+},
+correctAnswer:"c"
+},
+{
+question:"What is a key limitation of Node's built-in type-stripping for .ts files?",
+answers:{
+a:"It only works on Windows",
+b:"It removes type annotations but does not perform full type-checking",
+c:"It compiles code to WebAssembly",
+d:"It requires a tsconfig.json to be absent"
+},
+correctAnswer:"b"
+},
+{
+question:"What is the purpose of the `scripts` section in package.json?",
+answers:{
+a:"It stores type declarations",
+b:"It defines shortcut commands runnable via `npm run <name>`",
+c:"It lists installed npm packages",
+d:"It configures the TypeScript compiler target"
+},
+correctAnswer:"b"
+},
+{
+question:"Which tool is described as a fast, zero-config alternative built on esbuild for running TypeScript directly?",
+answers:{
+a:"tsc",
+b:"npm",
+c:"tsx",
+d:"webpack"
+},
+correctAnswer:"c"
+},
+{
+question:"If package.json defines `\"dev\": \"node test.ts\"`, how do you invoke it?",
+answers:{
+a:"node dev",
+b:"npm run dev",
+c:"npx dev",
+d:"tsc dev"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 7. Exercises
+
+**Scenario**: You want a smooth day-to-day workflow for a small TypeScript utility script, without typing long commands every time.
+
+**Task**:
+
+1. Create `greet.ts` with a typed function that takes a `name: string` and returns a greeting string, and log the result.
+2. Compile it manually with `npx tsc greet.ts` and run the output with `node greet.js`.
+3. Add a `dev` script to `package.json` that compiles and runs the file in one command (you can chain two commands with `&&`, e.g. `"dev": "tsc greet.ts && node greet.js"`).
+4. Run it via `npm run dev` and confirm it behaves the same as step 2.
+5. Optionally, install `tsx` as a dev dependency and add a second script, `"dev:tsx": "tsx greet.ts"`, to compare the two approaches.
+
+*Learning objective: understand the difference between compiling and running TypeScript as separate steps versus using a direct runner, and practice wiring both into npm scripts.*

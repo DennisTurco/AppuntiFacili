@@ -1,0 +1,221 @@
+---
+title: "Basic Types"
+order: 4
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "types", "type-inference", "primitives"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Explicit vs implicit typing
+
+TypeScript lets you write a variable's type explicitly, or let the compiler figure it out on its own.
+
+### 1.1 Explicit typing
+
+```ts
+let x: number = 3;
+```
+
+Here `: number` is an **explicit type annotation** — you are telling the compiler exactly what type `x` must hold, rather than letting it guess.
+
+### 1.2 Implicit typing (type inference)
+
+```ts
+let z = 10;
+```
+
+No annotation was written, but TypeScript still assigns `z` the type `number`. This is called **type inference**: the compiler looks at the initial value (`10`) and infers the type from it, without you having to spell it out.
+
+<Aside variant="tip">
+Type inference is one of TypeScript's most useful features: you often don't need to annotate every single variable, because the compiler can figure out simple cases on its own. Explicit annotations become more valuable for function parameters, return types, and anywhere the type isn't obvious from context.
+</Aside>
+
+## 2. Once inferred, a type sticks
+
+Whether a type was written explicitly or inferred, it becomes fixed for that variable. Unlike plain JavaScript, TypeScript will not let you later assign a value of a different, incompatible type:
+
+```ts
+let z = 10;
+
+// z = "Hello world"; // Error: Type 'string' is not assignable to type 'number'.
+```
+
+This is exactly the kind of mistake TypeScript is designed to catch: in plain JavaScript this reassignment would run without complaint (see the previous lesson's `myVariable` example) and could quietly break code further down the line that assumed `z` was still a number.
+
+<Aside variant="warning">
+This does not mean the *value* can never change — `z = 42;` is perfectly fine. Only the *type* is locked in: whatever new value you assign must still be compatible with `number`.
+</Aside>
+
+## 3. The `number` type and its special values
+
+TypeScript's `number` type covers every numeric value JavaScript supports: positive numbers, negative numbers, zero, floating-point numbers, and also a few special values inherited from JavaScript itself:
+
+```ts
+let x: number = 3;
+
+x = -7;         // negative
+x = 0;          // zero
+x = 3.14;       // floating point
+x = Infinity;   // special numeric value
+x = -Infinity;  // also valid
+// x = NaN;     // "Not a Number" — also typed as number, ironically
+```
+
+All of these are still of type `number` — TypeScript doesn't have separate types for integers, floats, or "infinite" values the way some other languages do; JavaScript (and therefore TypeScript) only has one numeric type.
+
+## 4. Strings and template literals
+
+The `string` type works as you'd expect, but it's worth knowing about **template literals**, a JavaScript feature TypeScript fully understands and types correctly:
+
+```ts
+let s: string;
+
+s = `${x}`; // template literal: embeds the value of x inside a string
+```
+
+Backticks (`` ` ``) create a *template string*, and `${...}` embeds an expression's value inside it, automatically converted to text. This is usually clearer than manual string concatenation (`"" + x`), and TypeScript will type-check the whole expression, still resulting in a `string`.
+
+```ts
+let age: number = 30;
+let message: string = `You are ${age} years old.`;
+console.log(message); // "You are 30 years old."
+```
+
+## 5. `null` and `undefined`
+
+TypeScript (following JavaScript) distinguishes between two different flavors of "no value":
+
+- **`null`** — used when you want to **explicitly** state that something is empty or intentionally has no value.
+- **`undefined`** — used (often implicitly) as a placeholder meaning a variable has been **declared but not yet assigned** a value.
+
+```ts
+let user: string | null = null; // explicitly: "there is no user right now"
+
+let result: number | undefined = undefined; // "not assigned yet"
+result = 2; // now it has a value
+```
+
+<Aside variant="info">
+`let x;` in plain JavaScript automatically starts as `undefined`. TypeScript keeps that behavior, but with `strict` mode's `strictNullChecks` enabled, it forces you to be explicit about *whether* a variable is allowed to be `null`/`undefined` at all, via a union type.
+</Aside>
+
+## 6. Union types with `| undefined`
+
+`number | undefined` is a **union type**: it means "this variable can hold either a `number`, or `undefined` — nothing else." This is how TypeScript expresses "this value might not exist yet" in a way the compiler can check.
+
+```ts
+let result: number | undefined = undefined;
+
+result = 2;      // OK — 2 is a number
+// result = "2"; // Error — string is not part of the union
+
+console.log(result + 1); // TypeScript may still warn: result could theoretically be undefined
+```
+
+<Aside variant="warning">
+A very common beginner mistake is forgetting that a variable typed `T | undefined` might genuinely still be `undefined` when you use it. TypeScript's strict null checks will flag arithmetic or method calls on such a variable until you narrow it down (e.g. with an `if (result !== undefined)` check).
+</Aside>
+
+Without the union (`let result: number = undefined;`), TypeScript would reject the assignment outright, because plain `number` does not include `undefined` as a valid value under strict mode.
+
+## 7. Further reading
+
+- [TypeScript Handbook — Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Handbook — Narrowing (working with union types)](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 8. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What is the difference between `let x: number = 3;` and `let z = 10;`?",
+answers:{
+a:"The first uses an explicit type annotation, the second relies on type inference",
+b:"There is no difference at all",
+c:"The second one has no type and can hold any value",
+d:"The first one cannot be reassigned, ever"
+},
+correctAnswer:"a"
+},
+{
+question:"After `let z = 10;`, why does `z = \"Hello world\";` fail to compile?",
+answers:{
+a:"Because strings cannot be assigned to any variable in TypeScript",
+b:"Because z's type was inferred as number, and string is not compatible with it",
+c:"Because z was declared with const",
+d:"Because template literals are required for strings"
+},
+correctAnswer:"b"
+},
+{
+question:"Which of these is NOT a valid value for a variable of type `number` in TypeScript?",
+answers:{
+a:"Infinity",
+b:"-3.14",
+c:"0",
+d:"\"42\" (the string \"42\")"
+},
+correctAnswer:"d"
+},
+{
+question:"What does the template literal `` `${x}` `` do?",
+answers:{
+a:"It declares x as a template type",
+b:"It embeds the value of x inside a string",
+c:"It converts x into a number",
+d:"It creates a regular expression"
+},
+correctAnswer:"b"
+},
+{
+question:"What is the conventional difference between `null` and `undefined`?",
+answers:{
+a:"null is used to explicitly mark 'no value'; undefined typically means 'not yet assigned'",
+b:"They are strictly identical in every context",
+c:"undefined can only appear in arrays",
+d:"null is a numeric type and undefined is a string type"
+},
+correctAnswer:"a"
+},
+{
+question:"What does the type `number | undefined` mean?",
+answers:{
+a:"A number that must always be defined",
+b:"A value that can be either a number or undefined, and nothing else",
+c:"A number that is optional only in arrays",
+d:"An error — this syntax is invalid in TypeScript"
+},
+correctAnswer:"b"
+},
+{
+question:"Why might TypeScript warn about `console.log(result + 1)` when `result: number | undefined`?",
+answers:{
+a:"Because console.log cannot accept numbers",
+b:"Because result could still be undefined at that point, making the addition unsafe",
+c:"Because + is not allowed with variables",
+d:"Because result was never initialized in JavaScript"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 9. Exercises
+
+**Scenario**: You are writing a small script that tracks a shopping cart's running total, where the total may not be known yet at the start.
+
+**Task**:
+
+1. Declare a variable `itemPrice` with an explicit `number` type and assign it a value.
+2. Declare a variable `itemCount` without an explicit type annotation, letting TypeScript infer it, and confirm (e.g. by hovering in an editor, or trying an invalid reassignment) that it was inferred as `number`.
+3. Declare `cartTotal: number | undefined = undefined;`, then write an `if` check that only computes `cartTotal = itemPrice * itemCount;` once you've confirmed values are ready.
+4. Use a template literal to log a message like `` `Cart total: ${cartTotal}` ``.
+5. Try (and observe the compiler error for) assigning a string to `itemPrice` after it has been declared as `number`.
+
+*Learning objective: practice the difference between explicit and inferred types, understand why a variable's inferred type still restricts future assignments, and use union types with `undefined` to model values that may not be ready yet.*

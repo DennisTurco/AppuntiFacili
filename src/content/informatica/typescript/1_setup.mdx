@@ -1,0 +1,208 @@
+---
+title: "Project Setup"
+order: 1
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "npm", "tsconfig", "setup"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Overview
+
+Before writing any TypeScript, you need three things in your project folder:
+
+1. A **package manager configuration** (`package.json`), so the project knows its dependencies and scripts.
+2. The **TypeScript compiler** installed as a project dependency.
+3. A **TypeScript configuration file** (`tsconfig.json`), so the compiler knows how to check and build your code.
+
+All three come from a handful of `npm`/`npx` commands. Let's go through them one at a time.
+
+<Aside variant="info">
+`npm` (Node Package Manager) ships with Node.js. If `npm -v` fails in your terminal, install Node.js first — everything else in this lesson depends on it.
+</Aside>
+
+## 2. Initializing an npm project
+
+```bash
+npm init -y
+```
+
+This creates a **`package.json`** file in the current folder. `package.json` is the manifest of your project: it records the project's name, version, scripts, and — crucially — its dependencies (which packages your project needs, and which exact versions).
+
+The `-y` flag skips the interactive questionnaire (project name, version, description, etc.) and accepts all the defaults, which is convenient for a quick learning project. Without `-y`, `npm init` asks you a series of questions before generating the same file.
+
+A freshly generated `package.json` looks roughly like this:
+
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
+```
+
+## 3. Installing TypeScript
+
+```bash
+npm install typescript --save-dev
+```
+
+This installs the `typescript` package **as a dev dependency** — a dependency you need while developing/building the project, but not something your shipped application code depends on at runtime. Two things get created as a result:
+
+- **`node_modules/`**: a folder containing the actual installed packages (here, the TypeScript compiler itself, plus its own dependencies). You should never edit this folder by hand, and it's normally excluded from version control via `.gitignore`.
+- **`package-lock.json`**: a file that records the *exact* versions of every installed package (including nested dependencies). This guarantees that anyone else who runs `npm install` on this project gets byte-for-byte the same dependency tree you have — reproducible builds.
+
+<Aside variant="tip">
+`--save-dev` (or its shorthand `-D`) is the right choice for TypeScript itself, linters, test runners, and build tools — anything used only while developing. Runtime libraries your app actually imports and ships (like a UI framework) are installed without that flag.
+</Aside>
+
+After this step, `package.json` gains a new section:
+
+```json
+"devDependencies": {
+  "typescript": "^5.x.x"
+}
+```
+
+## 4. Creating the TypeScript configuration
+
+```bash
+npx tsc --init
+```
+
+`npx` runs a locally installed package's executable without needing to install it globally first — here, it runs the `tsc` (TypeScript Compiler) binary that now lives in `node_modules/.bin/`. The `--init` flag tells `tsc` to generate a starter **`tsconfig.json`** file.
+
+`tsconfig.json` is the configuration file that tells the compiler:
+
+- which files belong to the project;
+- how strictly to check types;
+- which JavaScript version to emit;
+- where to put the compiled output.
+
+A trimmed, commented example of the options you'll actually touch early on:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true
+  }
+}
+```
+
+### 4.1 Key options worth knowing
+
+- **`target`**: which JavaScript version the compiler outputs (e.g. `ES2020`, `ES2022`). Older targets are more compatible with old runtimes, but miss out on modern, more concise JS features.
+- **`module`**: which module system to emit (`commonjs` for classic Node.js `require`, `ESNext`/`NodeNext` for modern ES modules with `import`/`export`).
+- **`rootDir`**: where your TypeScript source files live (commonly `./src`).
+- **`outDir`**: where the compiled `.js` output should be written (commonly `./dist`), keeping source and build output separate.
+- **`strict`**: turns on the full set of strict type-checking rules (no implicit `any`, strict null checks, and more). Almost always worth enabling — it is the single option most responsible for TypeScript actually catching bugs.
+
+<Aside variant="warning">
+The generated `tsconfig.json` contains dozens of options, most of them commented out. Don't feel like you need to understand every single one on day one — `target`, `module`, `rootDir`, `outDir` and `strict` are enough to get productive.
+</Aside>
+
+## 5. Recap: the three commands
+
+```bash
+npm init -y                       # creates package.json
+npm install typescript --save-dev # creates package-lock.json and node_modules/
+npx tsc --init                    # creates tsconfig.json
+```
+
+After running these, your folder contains everything needed to start writing and compiling TypeScript files. The next lesson covers how to actually compile and run them.
+
+## 6. Further reading
+
+- [TypeScript Handbook — tsconfig reference](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
+- [TypeScript Handbook — introduction](https://www.typescriptlang.org/docs/handbook/intro.html)
+
+## 7. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does `npm init -y` create?",
+answers:{
+a:"tsconfig.json",
+b:"package.json, using default answers",
+c:"node_modules folder",
+d:"A compiled JavaScript file"
+},
+correctAnswer:"b"
+},
+{
+question:"Why is TypeScript typically installed with `--save-dev`?",
+answers:{
+a:"Because it's needed only during development/build, not at runtime",
+b:"Because it's a security requirement of npm",
+c:"Because dev dependencies install faster",
+d:"Because production dependencies cannot include compilers"
+},
+correctAnswer:"a"
+},
+{
+question:"What is the purpose of `package-lock.json`?",
+answers:{
+a:"It stores your source code",
+b:"It records the exact resolved versions of all installed dependencies for reproducible installs",
+c:"It configures the TypeScript compiler",
+d:"It lists which files to exclude from git"
+},
+correctAnswer:"b"
+},
+{
+question:"What command generates the tsconfig.json file?",
+answers:{
+a:"npm init tsconfig",
+b:"tsc build",
+c:"npx tsc --init",
+d:"npm install tsconfig"
+},
+correctAnswer:"c"
+},
+{
+question:"What does the `strict` compiler option do?",
+answers:{
+a:"It enables the full set of strict type-checking rules",
+b:"It disables all type checking for faster builds",
+c:"It forces the use of ES5 output",
+d:"It deletes the node_modules folder before building"
+},
+correctAnswer:"a"
+},
+{
+question:"What is the role of `outDir` in tsconfig.json?",
+answers:{
+a:"It specifies where compiled JavaScript files should be written",
+b:"It specifies where TypeScript source files are located",
+c:"It sets the npm registry URL",
+d:"It lists third-party type declaration files"
+},
+correctAnswer:"a"
+}
+]} />
+
+## 8. Exercises
+
+**Scenario**: You are starting a brand-new TypeScript project from an empty folder, with nothing installed yet.
+
+**Task**:
+
+1. Create a new empty folder and run `npm init -y` inside it. Inspect the generated `package.json`.
+2. Install TypeScript as a dev dependency and confirm that `node_modules/` and `package-lock.json` were created.
+3. Run `npx tsc --init` and open the generated `tsconfig.json`. Locate the `target`, `module`, `strict`, `rootDir` and `outDir` options (some may be commented out — uncomment and set them).
+4. Create a `src` folder and set `rootDir` to `./src` and `outDir` to `./dist` in `tsconfig.json`.
+
+*Learning objective: get comfortable with the standard npm + TypeScript project bootstrap sequence and understand what each generated file/folder is for.*

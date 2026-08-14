@@ -1,0 +1,206 @@
+---
+title: "any and unknown"
+order: 7
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "any", "unknown", "type-safety", "type-guards"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. The `any` type
+
+The `any` type allows a variable to hold anything and be used in any way — it turns off type checking for that variable entirely. It's the escape hatch of the TypeScript type system: flexible, but it sacrifices the compile-time safety that TypeScript exists to provide.
+
+```ts
+let x: any = 1;
+console.log(x.length); // no compile error, but this crashes at runtime
+```
+
+Compare that with a properly typed variable:
+
+```ts
+let n: number = 1;
+console.log(n.length); // compile error: Property 'length' does not exist on type 'number'
+```
+
+This side-by-side is the whole point of the lesson. `n` is declared as `number`, and numbers don't have a `.length` property — TypeScript catches the mistake immediately, while you're still writing the code. `x` is declared as `any`, so the compiler simply stops checking anything about it: `x.length` compiles cleanly, and the bug only surfaces when the code actually runs and throws `undefined is not a function`-style errors (or, for primitives, silently returns `undefined`).
+
+<Aside variant="danger">
+`any` is "contagious": once a value of type `any` flows into other variables, function parameters, or return values, TypeScript stops checking those too, unless you explicitly re-annotate them. A single `any` in the wrong place can quietly disable type safety across a much larger part of your codebase.
+</Aside>
+
+### 1.1 When is `any` legitimate?
+
+`any` earns its place in a few real situations:
+
+- You're gradually migrating a plain JavaScript codebase to TypeScript, and `any` is a temporary placeholder while types are added incrementally.
+- You're interfacing with a library that has no type definitions and writing a proper type would take disproportionate effort right now.
+- You genuinely cannot predict, even conceptually, what shape a value will take (rare, but it happens with certain dynamic/reflective code).
+
+Outside of those cases, reaching for `any` is usually a sign that a more precise type — even a broad one like `unknown` or a union — would serve you better.
+
+## 2. The `unknown` type
+
+`unknown` is the type-safe counterpart to `any`. Like `any`, a variable of type `unknown` can hold a value of any type. Unlike `any`, TypeScript will not let you *do* anything with an `unknown` value until you've proven, through a type check, what it actually is.
+
+```ts
+let y: unknown = 1;
+
+if (typeof y == "number") {
+    const result = y + 1; // ok: TypeScript now knows y is a number here
+    console.log(result);
+} else if (typeof y == "string") {
+    const result = y.length; // ok: TypeScript now knows y is a string here
+    console.log(result);
+}
+```
+
+This pattern — checking the type before using the value — is called **narrowing**, and the `if`/`typeof` check is a **type guard**. Inside each branch, TypeScript "narrows" `y`'s type from `unknown` down to `number` or `string`, and only then allows the corresponding operations.
+
+If you try to use `y` directly without narrowing first, the compiler stops you:
+
+```ts
+let y: unknown = 1;
+// console.log(y + 1); // error: Object is of type 'unknown'
+```
+
+This is exactly the safety `any` throws away: `unknown` forces you to handle the uncertainty explicitly, instead of letting a wrong assumption slip through to runtime.
+
+### 2.1 Casting with `as`
+
+Sometimes you know more about a value than the compiler can infer — for example, right after parsing JSON, or when reading from an API response you trust. In that case you can use a **type assertion** (a cast) to tell the compiler what type to treat the value as:
+
+```ts
+let y: unknown = 1;
+const result = (y as number) + 1;
+```
+
+<Aside variant="warning">
+A cast with `as` doesn't perform any real conversion or runtime check — it purely tells the compiler "trust me, treat this as a `number`". If you're wrong, the mistake won't be caught at compile time and can cause a runtime error, exactly like `any` would. Prefer narrowing (`typeof`, `instanceof`, custom type guards) over casting whenever you can actually verify the type instead of just asserting it.
+</Aside>
+
+## 3. `any` vs `unknown` at a glance
+
+| | `any` | `unknown` |
+|---|---|---|
+| Can hold any value | Yes | Yes |
+| Can be used freely without checks | Yes | No — must be narrowed first |
+| Assignable to other types without a cast | Yes | No |
+| Type-safe | No | Yes |
+| Typical use | Legacy code, quick prototyping, escape hatch | Data from an untrusted or unknown source (JSON, `fetch`, user input) |
+
+<Aside variant="tip">
+As a rule of thumb: if you're not sure what type a value will be, reach for `unknown`, not `any`. You get the same flexibility to accept anything, but the compiler forces you to check before you use it — which is exactly the safety net you want at the boundary of your program (parsing input, reading a network response, catching an error).
+</Aside>
+
+## 4. Further reading
+
+- [TypeScript Handbook — Everyday Types (any)](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Handbook — Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 5. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Why does `let n: number = 1; console.log(n.length);` fail to compile?",
+answers:{
+a:"Because `number` values never exist in TypeScript",
+b:"Because `number` has no `.length` property and TypeScript checks this at compile time",
+c:"Because `console.log` cannot accept numbers",
+d:"Because `n` was never initialized"
+},
+correctAnswer:"b"
+},
+{
+question:"Why does `let x: any = 1; console.log(x.length);` compile without error?",
+answers:{
+a:"Because `any` disables type checking for that value",
+b:"Because all values in JavaScript have a `.length` property",
+c:"Because TypeScript infers `x` as `string`",
+d:"Because `any` is the same as `unknown`"
+},
+correctAnswer:"a"
+},
+{
+question:"What must you do before using a value of type `unknown`?",
+answers:{
+a:"Nothing, it behaves exactly like `any`",
+b:"Cast it to `any` first",
+c:"Narrow its type with a check like `typeof` or `instanceof`",
+d:"Declare it as `const`"
+},
+correctAnswer:"c"
+},
+{
+question:"What is the technical term for checking a value's type before using it, as in `if (typeof y === \"number\")`?",
+answers:{
+a:"Hoisting",
+b:"Narrowing",
+c:"Currying",
+d:"Widening"
+},
+correctAnswer:"b"
+},
+{
+question:"What does `(y as number) + 1` actually do at runtime?",
+answers:{
+a:"It converts y to a number if it isn't one already",
+b:"It performs no real conversion, it only tells the compiler to treat y as a number",
+c:"It throws if y is not already a number",
+d:"It parses y using Number.parseFloat"
+},
+correctAnswer:"b"
+},
+{
+question:"Which of the following is generally considered the safer choice for data of unpredictable shape, like a parsed JSON response?",
+answers:{
+a:"any",
+b:"unknown",
+c:"They are equally safe",
+d:"Neither, always use string"
+},
+correctAnswer:"b"
+},
+{
+question:"What is a legitimate use case for `any`?",
+answers:{
+a:"Whenever you want to skip writing a real type, regardless of the situation",
+b:"Interfacing with an untyped third-party library or incrementally migrating JS to TS",
+c:"Any time a variable holds a number",
+d:"Only inside test files"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 6. Exercises
+
+### 6.1 Exercise
+
+**Scenario**: You're writing a function that parses a value coming from `JSON.parse`, which TypeScript types as `any` by default.
+
+**Task**:
+1. Write a function `parseConfig(json: string): unknown` that wraps `JSON.parse` and returns its result typed as `unknown` instead of `any`.
+2. Write a function `readPort(config: unknown): number` that uses narrowing (`typeof`, and checking it's an object with a `port` property) to safely extract a numeric `port` field, throwing an `Error` if the shape doesn't match.
+3. Demonstrate calling `readPort` with a valid config object and with an invalid one (e.g. missing `port`), handling the thrown error.
+
+*Learning objective: practice replacing an unsafe `any` boundary with a properly narrowed `unknown` one.*
+
+### 6.2 Exercise
+
+**Scenario**: A teammate's code stores form input values as `any` and it has caused several runtime bugs in production.
+
+**Task**:
+1. Take a variable `let formValue: any = "42";` and rewrite it as `unknown`.
+2. Write a function `toNumberOrDefault(value: unknown, fallback: number): number` that narrows `value` and returns it as a number if it's already a number, parses it if it's a numeric string, or returns `fallback` otherwise.
+3. Test the function with a number, a numeric string, a non-numeric string, and `null`.
+4. In a short comment, explain which of these cases would have silently produced `NaN` or a hidden bug if `value` had stayed typed as `any`.
+
+*Learning objective: understand the practical risk of `any` versus the safety `unknown` plus narrowing provides in real-world input handling.*

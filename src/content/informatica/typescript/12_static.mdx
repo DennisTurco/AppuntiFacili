@@ -1,0 +1,216 @@
+---
+title: "Static Members"
+order: 12
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["typescript", "classes", "static", "oop"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+Every property and method you've seen so far in the [Classes lesson](/informatica/typescript/11_classes) belongs to an **instance** — each object created with `new` gets its own independent copy of the instance fields. The `static` keyword flips that: a static member belongs to the **class itself**, not to any particular instance. There is exactly one copy of it, shared by everyone.
+
+Think of the difference this way: instance members answer "what does *this specific* object know?", while static members answer "what does the *class as a whole* know?".
+
+```ts
+class Dog {
+    static instanceCounter: number = 0;
+    private name: string;
+
+    public constructor(name: string) {
+        Dog.instanceCounter++;
+        this.name = name;
+    }
+
+    static decreaseCount() {
+        this.instanceCounter--;
+    }
+}
+```
+
+## 2. Accessing static members
+
+Static members are accessed through the **class name**, never through an instance variable:
+
+```ts
+const dog1 = new Dog("Franco"); // instanceCounter = 1
+console.log(Dog.instanceCounter);
+
+const dog2 = new Dog("Bruschetta"); // instanceCounter = 2
+console.log(Dog.instanceCounter);
+
+Dog.decreaseCount();
+console.log(Dog.instanceCounter); // 1
+```
+
+Notice that `dog1.instanceCounter` is *not* how you'd read this value — it doesn't belong to `dog1`, it belongs to `Dog`. In fact, TypeScript will flag `dog1.instanceCounter` as an error: instance variables cannot see static members through `this`.
+
+<Aside variant="warning">
+A common beginner mistake is expecting each instance to carry its own copy of a static field. It doesn't — every instance of `Dog` shares the *exact same* `instanceCounter`. Incrementing it from any constructor call affects the value every other instance (and the class itself) will see.
+</Aside>
+
+## 3. `this` inside a static method
+
+Inside the constructor, `Dog.instanceCounter++` explicitly names the class. But inside `decreaseCount()`, the code uses `this.instanceCounter--` instead. Why does that work?
+
+Inside a `static` method, `this` refers to the **class itself** (the constructor function), not to an instance — because static methods are never called on an instance in the first place (`Dog.decreaseCount()`, not `dog1.decreaseCount()`). So `this.instanceCounter` inside a static method is equivalent to `Dog.instanceCounter`.
+
+<Aside variant="tip">
+Using `this` instead of the hardcoded class name inside static methods has a practical benefit: if a subclass inherits the static method, `this` will correctly refer to the *subclass*, not the base class. This matters for patterns like static factory methods that need to work correctly across an inheritance chain.
+</Aside>
+
+## 4. Static properties vs instance properties
+
+```ts
+class Counter {
+    static total: number = 0;       // one copy, shared by the whole class
+    private id: number;             // one copy per instance
+
+    constructor() {
+        Counter.total++;
+        this.id = Counter.total;
+    }
+
+    public getId(): number {
+        return this.id;
+    }
+}
+
+const a = new Counter();
+const b = new Counter();
+
+console.log(a.getId());       // 1
+console.log(b.getId());       // 2
+console.log(Counter.total);   // 2
+```
+
+`id` is different for every `Counter` instance (each one remembers its own creation order), while `total` is one single number that every instance contributed to and that lives on the class, not on any object.
+
+## 5. Common use cases for static members
+
+- **Counters** — tracking how many instances of a class have been created (as in the `Dog` example above).
+- **Factory methods** — a static method that constructs and returns instances, often validating input first:
+  ```ts
+  class User {
+      private constructor(public name: string) {}
+
+      static create(name: string): User {
+          if (!name.trim()) {
+              throw new Error("Name cannot be empty");
+          }
+          return new User(name);
+      }
+  }
+
+  const u = User.create("Dennis");
+  ```
+- **Shared caches or registries** — a static `Map` shared by every instance to look up or memoize values.
+- **Constants tied to a class** — e.g. `static readonly MAX_SPEED = 300;` on a `Car` class, since the value belongs conceptually to the *type*, not any one car.
+
+<Aside variant="info">
+Note the `private constructor` in the factory example: combining a private constructor with a public static method is a common pattern to force all object creation to go through validated, controlled entry points instead of a bare `new User(...)`.
+</Aside>
+
+## 6. Further reading
+
+- [TypeScript Handbook — Classes: Static Members](https://www.typescriptlang.org/docs/handbook/2/classes.html#static-members)
+- [MDN — static keyword (JavaScript classes)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 7. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does the `static` keyword mean when applied to a class member?",
+answers:{
+a:"The member is read-only after construction",
+b:"The member belongs to the class itself, shared across all instances",
+c:"The member can only be accessed inside the constructor",
+d:"The member is only available in abstract classes"
+},
+correctAnswer:"b"
+},
+{
+question:"How should you access a static property named `total` on a class `Counter`?",
+answers:{
+a:"new Counter().total",
+b:"this.total from anywhere",
+c:"Counter.total",
+d:"Counter.prototype.total only"
+},
+correctAnswer:"c"
+},
+{
+question:"Inside a static method, what does `this` refer to?",
+answers:{
+a:"The most recently created instance",
+b:"undefined, always",
+c:"The class itself",
+d:"The global object"
+},
+correctAnswer:"c"
+},
+{
+question:"If `Dog.instanceCounter` is incremented in the constructor every time `new Dog(...)` runs, what happens to previously created instances?",
+answers:{
+a:"Each keeps its own separate counter value from when it was created",
+b:"They all observe the same updated shared counter value",
+c:"They throw a runtime error",
+d:"Only the last instance sees the updated value"
+},
+correctAnswer:"b"
+},
+{
+question:"Which of these is a typical real-world use case for a static method?",
+answers:{
+a:"Storing a unique per-instance name",
+b:"A factory method that validates input before constructing an instance",
+c:"Storing the result of a single instance's computation",
+d:"Overriding an instance method"
+},
+correctAnswer:"b"
+},
+{
+question:"Why might combining a `private constructor` with a `static create()` method be useful?",
+answers:{
+a:"It prevents the class from ever being instantiated",
+b:"It forces all instance creation to go through a validated entry point",
+c:"It automatically makes all fields static",
+d:"It is required syntax for any static method"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 8. Exercises
+
+### 8.1 Exercise
+
+**Scenario**: You're building a simple ticketing system where every issued ticket needs a unique, sequential ID.
+
+**Task**:
+1. Create a class `Ticket` with a `static nextId: number = 1` and a `private readonly id: number`.
+2. In the constructor, assign `this.id = Ticket.nextId` and then increment `Ticket.nextId`.
+3. Add a public method `getId(): number` and a static method `static getIssuedCount(): number` that returns how many tickets have been issued so far.
+4. Create several `Ticket` instances and print each one's ID plus the total issued count.
+
+*Learning objective: understand how static fields maintain shared state across all instances, distinct from per-instance fields.*
+
+### 8.2 Exercise
+
+**Scenario**: You want a small in-memory cache shared by every instance of a `Config` class, so expensive lookups aren't repeated.
+
+**Task**:
+1. Create a class `Config` with a `private static cache: Map<string, string> = new Map()`.
+2. Add a static method `static getOrCompute(key: string, compute: () => string): string` that returns the cached value if present, otherwise computes it with `compute()`, stores it in the cache, and returns it.
+3. Call `getOrCompute` twice with the same key but a `compute` callback that logs `"computing..."` — verify the log only appears once.
+4. Explain in a comment why `cache` needed to be `static` rather than an instance field for this to work.
+
+*Learning objective: apply static members to implement a shared cache pattern and clarify the difference between per-instance and per-class state.*

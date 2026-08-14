@@ -1,0 +1,220 @@
+---
+title: "Union and Intersection Types"
+order: 15
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "advanced"
+tags: ["typescript", "union-types", "intersection-types"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+TypeScript's type system is not limited to plain, single types. Two operators let you combine existing types into new, more expressive ones:
+
+- the **union** operator `|`, which means "one type OR another";
+- the **intersection** operator `&`, which means "all of these types AT ONCE".
+
+They look similar syntactically, but they express opposite ideas. Getting comfortable switching between them is one of the most useful skills in day-to-day TypeScript.
+
+## 2. Union types
+
+A union type describes a value that can be **one of several types**. You build it by separating the candidate types with `|`:
+
+```ts
+type StringOrNumber = string | number | boolean;
+
+function acceptValue(val: StringOrNumber) {
+  // val could be a string, a number, or a boolean here
+}
+```
+
+<Aside variant="warning">
+Despite its name, `StringOrNumber` here is actually `string | number | boolean` — three member types, not two. This is a naming quirk you'll run into constantly in real codebases: type aliases drift as requirements grow, and nobody renames them. Always check the actual definition instead of trusting the name.
+</Aside>
+
+Inside `acceptValue`, TypeScript only lets you use members and methods that are **guaranteed to exist on every member of the union**. For `string | number | boolean` that's basically nothing useful (no shared method beyond what `Object` provides), so before doing anything type-specific you need to **narrow** the union down to a single concrete type — the subject of the next lesson.
+
+```ts
+function acceptValueSafely(val: StringOrNumber) {
+  if (typeof val === "string") {
+    console.log(val.toUpperCase()); // OK: val is string here
+  }
+}
+```
+
+## 3. Intersection types
+
+An intersection type combines multiple types into a single type that must satisfy **all** of them simultaneously. You build it with `&`:
+
+```ts
+interface BusinessPartner {
+  name: string;
+}
+
+interface ContactDetails {
+  email: string;
+  phone: string;
+}
+
+type BusinessContract = BusinessPartner & ContactDetails;
+
+const contract: BusinessContract = {
+  name: "dennis",
+  email: "dennis@gmail.com",
+  phone: "123456789"
+};
+```
+
+`BusinessContract` requires **every** property from both `BusinessPartner` and `ContactDetails`. If you forget one — say `phone` — the compiler rejects the object literal. Intersections are additive: the more types you `&` together, the *more* properties the resulting shape needs, not fewer.
+
+<Aside variant="tip">
+A simple mental model: `|` narrows the set of possible *values* you might receive (any one member is enough), while `&` widens the set of *properties* a single value must have (every member's shape is required).
+</Aside>
+
+## 4. Combining unions and intersections
+
+Real-world modeling often mixes both. Consider two kinds of contract holders:
+
+```ts
+interface Individual {
+  name: string;
+  birthday: Date;
+}
+
+interface Organization {
+  companyName: string;
+  workPhone: string;
+}
+
+// A ContractType is EITHER an Individual OR an Organization
+type ContractType = Individual | Organization;
+
+// A CompContract must satisfy BOTH shapes at once
+type CompContract = Individual & Organization;
+```
+
+`ContractType` models "this contract belongs to a person OR a company" — a realistic, mutually exclusive scenario. `CompContract`, on the other hand, forces a single object to carry `name`, `birthday`, `companyName` and `workPhone` all together — rarely what you actually want for two conceptually different entities, but perfectly valid TypeScript, and a good illustration of how easy it is to reach for the wrong operator by accident.
+
+<Aside variant="danger">
+A common mistake is using `&` when you meant `|` (or vice versa). If your intersection type becomes impossible to construct in practice, or your union type lets through nonsensical combinations, double-check which operator you actually needed.
+</Aside>
+
+## 5. Working with a union: a preview of narrowing
+
+Because `ContractType` is a union, you cannot access `birthday` or `companyName` directly — TypeScript doesn't know which branch you have. You need a **type guard** to check at runtime and let the compiler narrow the type inside each branch:
+
+```ts
+function addContract(contract: ContractType) {
+  if ("birthday" in contract) {
+    // TypeScript now knows contract is Individual
+    console.log(contract.name, contract.birthday);
+  } else {
+    // and here it knows contract is Organization
+    console.log(contract.companyName, contract.workPhone);
+  }
+}
+```
+
+The `"birthday" in contract` check is a form of **narrowing**: TypeScript inspects the condition and infers a more specific type inside each branch of the `if`. This is exactly the topic of the next lesson, where we cover `typeof`, `instanceof`, the `in` operator, and custom type guards in depth.
+
+## 6. Further reading
+
+- [TypeScript Handbook — Union Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)
+- [TypeScript Handbook — Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 7. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does the union operator | mean in a type definition?",
+answers:{
+a:"The value must satisfy every listed type at once",
+b:"The value can be any one of the listed types",
+c:"The type is deprecated",
+d:"The types must be numeric"
+},
+correctAnswer:"b"
+},
+{
+question:"What does the intersection operator & mean in a type definition?",
+answers:{
+a:"The value can be any one of the listed types",
+b:"Only the first type is enforced",
+c:"The resulting type must satisfy all combined types simultaneously",
+d:"It creates an enum"
+},
+correctAnswer:"c"
+},
+{
+question:"In `type StringOrNumber = string | number | boolean;`, how many member types does the union actually have?",
+answers:{
+a:"One",
+b:"Two",
+c:"Three",
+d:"It cannot be determined"
+},
+correctAnswer:"c"
+},
+{
+question:"Why can't you freely access `contract.companyName` inside a function that takes `contract: Individual | Organization`?",
+answers:{
+a:"Because unions cannot have object properties",
+b:"Because TypeScript doesn't know at that point which member of the union the value actually is",
+c:"Because companyName is private",
+d:"Because unions are only allowed for primitive types"
+},
+correctAnswer:"b"
+},
+{
+question:"What is the effect of `type CompContract = Individual & Organization;` given the two interfaces in this lesson?",
+answers:{
+a:"It creates a type that only needs name and birthday",
+b:"It creates a type requiring all four properties: name, birthday, companyName and workPhone",
+c:"It is a syntax error",
+d:"It behaves exactly like Individual | Organization"
+},
+correctAnswer:"b"
+},
+{
+question:"Which technique lets TypeScript narrow a union type inside an if branch, as shown with `\"birthday\" in contract`?",
+answers:{
+a:"Type casting",
+b:"A type guard",
+c:"An intersection type",
+d:"A generic constraint"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 8. Exercises
+
+**Scenario**: You are building a small invoicing module that needs to represent either a private customer or a company customer, and separately, a combined internal record that always needs contact information regardless of customer kind.
+
+**Task**:
+
+1. Define interfaces `PrivateCustomer` (`fullName: string`, `taxCode: string`) and `CompanyCustomer` (`companyName: string`, `vatNumber: string`).
+2. Create a union type `Customer = PrivateCustomer | CompanyCustomer`.
+3. Define an interface `ContactInfo` (`email: string`, `phone: string`).
+4. Create an intersection type `CustomerWithContact` that combines `ContactInfo` with `Customer` (hint: you can intersect a union with another type — the result is still a union of two combined shapes).
+5. Write a function `printCustomer(customer: Customer)` that uses `"taxCode" in customer` to branch and print the right fields for each case.
+
+*Learning objective: practice building union and intersection types from scratch and distinguishing when each is appropriate.*
+
+**Scenario**: You are reviewing a legacy TypeScript file (similar to the `BusinessContract` example) and want to spot type-design smells before they cause bugs.
+
+**Task**:
+
+1. Take the `Individual` and `Organization` interfaces from this lesson.
+2. Try to construct a valid literal value of type `Individual & Organization`. List every property it must contain.
+3. Explain in a short comment why this intersection is unlikely to model a real-world entity well, compared to the union `Individual | Organization`.
+4. Rewrite the scenario using a **discriminated union** with a `kind: "individual" | "organization"` tag field on each interface (you'll cover this pattern properly in the next lessons) and note how it removes the ambiguity of the `in` check.
+
+*Learning objective: recognize when an intersection produces an impractical type and see a preview of how tagged/discriminated unions solve the same modeling problem more safely.*

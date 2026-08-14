@@ -1,0 +1,238 @@
+---
+title: "Literal Types and Enums"
+order: 6
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "literal-types", "enums", "constants"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Literal types
+
+A **literal** is the textual representation of a value exactly as it is written in source code: `23` is a number literal, `"Hello"` is a string literal. In most languages a literal is only ever used to *produce* a value. TypeScript goes one step further and lets you use literals as **types** themselves.
+
+```ts
+let direction: "north" | "south" | "east" | "west";
+direction = "north"; // ok
+// direction = "hello"; // error: Type '"hello"' is not assignable to type '"north" | "south" | "east" | "west"'
+```
+
+The type of `direction` is not "any string" — it is exactly one of four specific strings. This is called a **union of literal types**, and it turns what used to be a runtime bug (passing an unexpected string) into a compile-time error.
+
+```ts
+let responseCode: 200 | 404 | 201;
+responseCode = 201;
+console.log(responseCode);
+```
+
+The same idea works with numbers, booleans, or any combination of them. Literal unions are extremely common for representing a fixed, known set of options — HTTP status codes, UI variants, days of the week — without introducing a separate type declaration.
+
+<Aside variant="tip">
+Literal types are what makes autocomplete so useful in TypeScript: your editor can suggest exactly `"north" | "south" | "east" | "west"` instead of "any string".
+</Aside>
+
+## 2. Enums
+
+**Enums** let you define a set of named constants (called *members* or *enumerators*), each associated with a value. Unlike a literal union, an enum is a real construct: it exists as a value at runtime, not just as a compile-time type.
+
+```ts
+enum Size {
+    Small,
+    Medium,
+    Large
+}
+
+var size: Size = 0; // Small
+
+if (size === Size.Small) {
+    // ...
+}
+```
+
+### 2.1 Numeric enums
+
+By default, enum members are numbered starting from `0`, incrementing by one for each subsequent member — `Small` is `0`, `Medium` is `1`, `Large` is `2`. You can also assign your own starting number, and TypeScript will auto-increment from there:
+
+```ts
+enum StatusCode {
+    Ok = 200,
+    NotFound = 404,
+    ServerError = 500
+}
+```
+
+A subtle downside of numeric enums is that they are **bidirectional**: `Size[0]` gives you back `"Small"`, and `Size.Small` gives you `0`. This is convenient for debugging, but it also means a plain number like `2` can be assigned where a `Size` is expected, even if it wasn't meant to represent that enum.
+
+### 2.2 String enums
+
+String enums fix that ambiguity: each member is a specific string, so there's no accidental numeric coercion, and the value you see while debugging (in logs, in the debugger) is meaningful instead of an opaque index.
+
+```ts
+enum Direction {
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT"
+}
+
+console.log(Direction.Up); // "UP"
+```
+
+Unlike numeric enums, string enum members do **not** auto-increment — every member must be explicitly initialized with its own string.
+
+```ts
+enum Description {
+    SmallText = "this is some sub text to read",
+}
+
+console.log(Description.SmallText);
+```
+
+### 2.3 const enums
+
+Prefixing an enum with `const` tells the compiler to fully inline its values wherever they are used, and to avoid generating a runtime object for the enum at all:
+
+```ts
+const enum Level {
+    Low,
+    Medium,
+    High
+}
+
+let l = Level.Medium; // compiles to: let l = 1;
+```
+
+`const enum` produces smaller, faster output when you don't need to iterate over the enum's members or look values up by reverse mapping — but be aware it can't be used with certain build tools that only transpile files in isolation (like Babel), since it requires whole-program type information to inline correctly.
+
+<Aside variant="warning">
+`const enum` is not supported by all bundlers/transpilers. If you hit strange build issues, check whether your toolchain (isolated-modules transpilation especially) supports it before reaching for it.
+</Aside>
+
+<Aside variant="info">
+Food for thought: many modern TypeScript style guides — and even members of the TypeScript team — suggest preferring a union of string literals (`type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT"`) over enums for simple cases. Literal unions have no runtime footprint, serialize naturally to JSON, and avoid the numeric-enum pitfalls above. Enums remain a legitimate, widely used tool — just know the trade-off exists.
+</Aside>
+
+## 3. Choosing between literal unions and enums
+
+| | Literal union | Enum |
+|---|---|---|
+| Exists at runtime | No (type-only) | Yes (object, unless `const enum`) |
+| Bidirectional numeric mapping | No | Numeric enums only |
+| Extra syntax needed | No | Yes (`enum` keyword) |
+| Good for simple fixed value sets | Yes | Yes |
+| Good when you need to iterate members / attach behavior | Less convenient | Yes |
+
+Both approaches solve the same underlying problem — restricting a variable to a fixed, known set of values — and the right choice usually comes down to whether you need the enum to exist as a real JavaScript value at runtime.
+
+## 4. Further reading
+
+- [TypeScript Handbook — Enums](https://www.typescriptlang.org/docs/handbook/enums.html)
+- [TypeScript Handbook — Everyday Types (Literal Types section)](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play)
+
+## 5. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What is a literal type in TypeScript?",
+answers:{
+a:"A type that only exists for arrays",
+b:"A type derived from a single specific value written in source code",
+c:"A synonym for 'any'",
+d:"A runtime-only construct with no type-checking benefit"
+},
+correctAnswer:"b"
+},
+{
+question:"What value does `Size.Small` have by default in `enum Size { Small, Medium, Large }`?",
+answers:{
+a:"1",
+b:"\"Small\"",
+c:"0",
+d:"undefined"
+},
+correctAnswer:"c"
+},
+{
+question:"What is a key difference between numeric and string enums?",
+answers:{
+a:"String enum members do not auto-increment and must each be explicitly assigned",
+b:"Numeric enums cannot be compared with ===",
+c:"String enums cannot be logged to the console",
+d:"There is no difference in behavior"
+},
+correctAnswer:"a"
+},
+{
+question:"What does prefixing an enum with `const` do?",
+answers:{
+a:"It makes every member optional",
+b:"It inlines the enum's values at compile time and avoids generating a runtime object",
+c:"It converts the enum into a literal union automatically",
+d:"It forces all members to be strings"
+},
+correctAnswer:"b"
+},
+{
+question:"Why can numeric enums be considered less type-safe than string enums?",
+answers:{
+a:"Because they are bidirectional and a raw number can be assigned where the enum is expected",
+b:"Because they cannot be used in if statements",
+c:"Because they always throw at runtime",
+d:"Because they don't support auto-increment"
+},
+correctAnswer:"a"
+},
+{
+question:"Which of these is a valid literal union type declaration?",
+answers:{
+a:"let x: string[] = [\"a\", \"b\"];",
+b:"let x: 200 | 404 | 201;",
+c:"let x: enum(200, 404, 201);",
+d:"let x: Array<200, 404, 201>;"
+},
+correctAnswer:"b"
+},
+{
+question:"What is a commonly cited advantage of a literal union over an enum for simple fixed value sets?",
+answers:{
+a:"Literal unions run faster in loops",
+b:"Literal unions have no runtime footprint and serialize naturally to JSON",
+c:"Literal unions support inheritance",
+d:"Literal unions can only contain numbers"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 6. Exercises
+
+### 6.1 Exercise
+
+**Scenario**: You are building the settings panel of an app and need to represent a fixed set of theme options.
+
+**Task**:
+1. Declare a literal union type `Theme` with values `"light"`, `"dark"`, and `"system"`.
+2. Write a function `applyTheme(theme: Theme): void` that logs a different message per theme using an `if`/`else` or `switch`.
+3. Try assigning an invalid string to a variable typed as `Theme` and observe the compiler error.
+4. Rewrite the same concept using a string enum `ThemeEnum` and compare the two approaches in a short comment.
+
+*Learning objective: understand literal union types, and compare them directly against string enums for the same use case.*
+
+### 6.2 Exercise
+
+**Scenario**: You need to model HTTP-like response statuses for a small mock API layer.
+
+**Task**:
+1. Create a numeric enum `HttpStatus` with members `Ok = 200`, `NotFound = 404`, `ServerError = 500`.
+2. Write a function `describeStatus(code: HttpStatus): string` returning a human-readable description for each status.
+3. Demonstrate the enum's reverse mapping by logging `HttpStatus[200]`.
+4. Convert the enum to a `const enum` and explain, in a comment, what changes about the generated output.
+
+*Learning objective: practice defining and consuming numeric enums, understand reverse mapping, and see the effect of `const enum`.*

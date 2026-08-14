@@ -1,0 +1,222 @@
+---
+title: "Arrays and Tuples"
+order: 5
+draft: false
+lastUpdateDate: "2026-08-14"
+subject: "TypeScript"
+category: "Informatica"
+difficulty: "beginner"
+tags: ["typescript", "arrays", "tuples", "collections"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Arrays
+
+An **array** is a collection of items stored in contiguous positions, all accessible by a numeric index starting at `0`. In plain JavaScript an array can freely mix types, but TypeScript lets you declare *what kind of values* an array is allowed to hold, so the compiler can catch mistakes before the code ever runs.
+
+```ts
+let arr: number[] = [1, 2, 3];
+arr.push(4);      // ok
+// arr.push("5"); // error: Argument of type 'string' is not assignable to parameter of type 'number'
+```
+
+The type `number[]` reads as "an array of numbers". You can use the same idea with any type: `string[]`, `boolean[]`, `Person[]`, and so on.
+
+### 1.1 The generic array syntax
+
+TypeScript also accepts an equivalent generic form, `Array<T>`:
+
+```ts
+let names: Array<string> = ["Anna", "Luca"];
+```
+
+`string[]` and `Array<string>` mean exactly the same thing. The bracket syntax is more common in everyday code; the generic form becomes handy when the element type itself is complex (for example a union type), because it avoids extra parentheses.
+
+### 1.2 Nested arrays
+
+An array can contain other arrays. The type simply nests the same way the values do:
+
+```ts
+var arr2: string[][] = [["Hello", "World"], ["Hi"], []];
+```
+
+Here `arr2` is "an array of arrays of strings". Each inner array is independently a `string[]`, and an empty array `[]` is perfectly valid too, since it's still an array of zero strings.
+
+<Aside variant="tip">
+Read nested array types from right to left: `string[][]` is `(string[])[]` — "an array whose elements are each a `string[]`".
+</Aside>
+
+## 2. Tuples
+
+A **tuple** looks like an array at first glance, but it is a **fixed-length array with a specific type defined for each position**. Where `number[]` says "any number of numbers", a tuple says "exactly these types, in exactly this order".
+
+```ts
+const coord: [number, string] = [1, "2"];
+console.log(coord[0]);        // 1        (typed as number)
+console.log(coord[1].length); // 1        (typed as string, so .length is valid)
+```
+
+The compiler knows that `coord[0]` is always a `number` and `coord[1]` is always a `string` — not "a number or a string", but *specifically* that one at that specific position. That's why `coord[1].length` compiles: TypeScript knows position `1` is a `string`, and strings have a `.length` property.
+
+### 2.1 Why not just use an array?
+
+If you declared `coord` as `(number | string)[]`, TypeScript would only know that *each* element is "a number or a string", without remembering which one goes where or how many elements there are. A tuple encodes structure, an array encodes a homogeneous collection. Use a tuple whenever a fixed number of values with fixed, distinct meanings travel together — a coordinate pair, an RGB triplet, a `[key, value]` entry.
+
+<Aside variant="warning">
+Tuples are a compile-time concept only. At runtime a tuple is a plain JavaScript array, so nothing stops you from calling `.push()` on it and breaking the "fixed length" guarantee unless you also mark it `readonly` (see below).
+</Aside>
+
+### 2.2 Combining arrays and tuples
+
+Arrays and tuples compose naturally. An array of tuples is a common and very useful pattern:
+
+```ts
+const coords: [number, number[]][] = [
+    [1.1, [1, 2]],
+    [-1, [3, 4.4]]
+];
+console.log(coords[0]); // [1.1, [1, 2]]
+```
+
+Here each element of `coords` is a tuple `[number, number[]]`: a single number paired with an array of numbers. This kind of nesting is exactly how you would model, for example, a list of `[id, relatedIds]` pairs.
+
+## 3. Readonly arrays and tuples
+
+Sometimes you want to guarantee that a collection is never mutated after creation. TypeScript supports a `readonly` modifier for both arrays and tuples:
+
+```ts
+const readonlyNumbers: readonly number[] = [1, 2, 3];
+// readonlyNumbers.push(4); // error: Property 'push' does not exist on type 'readonly number[]'
+
+const readonlyCoord: readonly [number, string] = [1, "2"];
+// readonlyCoord[0] = 5; // error: Cannot assign to '0' because it is a read-only property
+```
+
+`readonly` removes mutating methods (`push`, `pop`, `splice`, index assignment, ...) from the type, so the compiler stops you from accidentally changing something that's meant to stay fixed — like a tuple representing a constant coordinate.
+
+## 4. Optional and rest elements in tuples
+
+Tuples can also model "at least these, maybe more" shapes using optional (`?`) and rest (`...`) elements, the same syntax used in function parameters.
+
+```ts
+// second element is optional
+let pair: [number, string?] = [1];
+pair = [1, "one"]; // also valid
+
+// a required first element, followed by any number of strings
+let entry: [number, ...string[]];
+entry = [1];
+entry = [1, "a", "b", "c"];
+```
+
+An optional tuple element (`string?`) can be omitted entirely; a rest element (`...string[]`) can be repeated zero or more times. Combining both, tuples become a flexible way to describe function-argument-like shapes with strong typing.
+
+## 5. Further reading
+
+- [TypeScript Handbook — Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript Handbook — Object Types (arrays, tuples and readonly)](https://www.typescriptlang.org/docs/handbook/2/objects.html)
+- [TypeScript Playground](https://www.typescriptlang.org/play) — try the snippets above interactively
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"What does the type `number[]` describe?",
+answers:{
+a:"A tuple with exactly one number",
+b:"An array containing only numbers, of any length",
+c:"A function returning a number",
+d:"A readonly array of strings"
+},
+correctAnswer:"b"
+},
+{
+question:"What is the key difference between a tuple and a regular array?",
+answers:{
+a:"A tuple can only contain numbers",
+b:"A tuple has a fixed length with a specific type per position",
+c:"A tuple cannot be nested",
+d:"There is no difference at runtime or compile time"
+},
+correctAnswer:"b"
+},
+{
+question:"Given `const coord: [number, string] = [1, \"2\"];`, why does `coord[1].length` compile?",
+answers:{
+a:"Because all tuple elements are treated as `any`",
+b:"Because TypeScript knows position 1 is typed as `string`",
+c:"Because `.length` works on any type in TypeScript",
+d:"Because tuples are automatically converted to strings"
+},
+correctAnswer:"b"
+},
+{
+question:"Which declaration is equivalent to `let names: string[];`?",
+answers:{
+a:"let names: Array<string>;",
+b:"let names: [string];",
+c:"let names: string;",
+d:"let names: Tuple<string>;"
+},
+correctAnswer:"a"
+},
+{
+question:"What happens if you `.push()` onto a `readonly number[]`?",
+answers:{
+a:"It works, but only once",
+b:"It silently does nothing",
+c:"The compiler reports an error because push is not available",
+d:"It converts the array to a mutable one automatically"
+},
+correctAnswer:"c"
+},
+{
+question:"What does `[number, ...string[]]` describe?",
+answers:{
+a:"A tuple of exactly two elements",
+b:"An array of only numbers",
+c:"A required number followed by zero or more strings",
+d:"A tuple where every element is optional"
+},
+correctAnswer:"c"
+},
+{
+question:"At runtime, what is a TypeScript tuple actually represented as?",
+answers:{
+a:"A special immutable Tuple object",
+b:"A plain JavaScript array",
+c:"A Map",
+d:"A fixed-size typed buffer"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 7. Exercises
+
+### 7.1 Exercise
+
+**Scenario**: You are building a small utility that stores geographic waypoints for a hiking app.
+
+**Task**:
+1. Declare a tuple type `Waypoint` as `[number, number, string]` representing latitude, longitude, and a label.
+2. Create an array of at least 4 `Waypoint` values.
+3. Write a function `describeWaypoint(w: Waypoint): string` that returns a formatted string using all three values.
+4. Add a `readonly` version of one waypoint and verify (by trying to mutate it) that the compiler rejects the change.
+
+*Learning objective: practice defining and consuming tuple types, and understand the guarantees `readonly` adds on top of them.*
+
+### 7.2 Exercise
+
+**Scenario**: You need to model a small dataset of student grades where each student has a name and a variable-length list of numeric scores.
+
+**Task**:
+1. Declare a type using a tuple with a rest element: `[string, ...number[]]`.
+2. Build an array of these tuples for at least 3 students with different numbers of scores.
+3. Write a function that computes the average score for a given student tuple.
+4. Extend the function signature to also accept an optional tuple element representing a "bonus" score (`string, number?, ...number[]` is not valid TypeScript — figure out and explain why optional elements must come before rest elements in a tuple).
+
+*Learning objective: understand rest and optional tuple elements, their ordering rules, and how they combine to model variable-length structured data.*
