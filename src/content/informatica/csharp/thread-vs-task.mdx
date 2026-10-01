@@ -41,7 +41,7 @@ L'evoluzione storica è lineare: `Thread` (.NET 2.0), poi il `ThreadPool` per ri
 
 Se crei 1000 thread per 1000 richieste lente, memoria e scheduling esplodono molto prima che il problema sia il codice applicativo.
 
-```cs
+```cs norun
 using System;
 using System.Threading;
 
@@ -67,7 +67,7 @@ class Program
 
 `Thread` non restituisce valori e non riporta gli errori al chiamante. Devi passare tutto attraverso variabili condivise, gestendo a mano visibilità e sincronizzazione:
 
-```cs
+```cs norun
 using System;
 using System.Threading;
 
@@ -104,7 +104,7 @@ Un'eccezione non gestita dentro un `Thread` non arriva al chiamante: termina **l
 
 Oggi raramente: integrazione con API legacy o primitive OS che richiedono un thread dedicato, un **foreground thread** che tenga vivo il processo, oppure controllo esplicito di `IsBackground`, `Priority` o apartment state.
 
-```cs
+```cs norun
 Thread servizio = new Thread(LoopServizio)
 {
     IsBackground = false,   // tiene vivo il processo
@@ -158,7 +158,7 @@ Il vantaggio non è "creare un thread", ma riusare un thread del pool, ottenere 
 
 `Task.Factory.StartNew` offre opzioni avanzate (scheduler esplicito, `AttachedToParent`, `LongRunning`). L'unico caso comune è `LongRunning`, che suggerisce al runtime di usare un thread dedicato invece di occupare a lungo un thread del pool:
 
-```cs
+```cs norun
 Task loop = Task.Factory.StartNew(
     () => LoopBloccante(),
     CancellationToken.None,
@@ -184,7 +184,7 @@ int valore = await Task.Run(async () => { await Task.Delay(500); return 42; });
 
 Prima di `await`, la composizione si faceva con `ContinueWith`. Oggi `await` è quasi sempre preferibile: più leggibile, flusso delle eccezioni naturale, meno rischi legati allo scheduler.
 
-```cs
+```cs norun
 // Stile vecchio
 await CalcolaAsync().ContinueWith(t => Console.WriteLine(t.Result));
 
@@ -197,7 +197,7 @@ Console.WriteLine(risultato);
 
 Bloccando con `.Wait()` o `.Result`, le eccezioni arrivano incapsulate in `AggregateException`. Con `await`, invece, vengono rilanciate nel loro **tipo originale**:
 
-```cs
+```cs norun
 using System;
 using System.Threading.Tasks;
 
@@ -241,7 +241,7 @@ In sintesi: `Thread` controlla *come* un'unità gira, `Task` descrive *cosa* dev
 
 Nelle app UI (WPF, WinForms, MAUI) esiste un `SynchronizationContext` legato al thread della finestra: dopo un `await`, la continuazione torna su quel contesto, così puoi aggiornare la UI in sicurezza.
 
-```cs
+```cs norun
 // WPF / WinForms
 private async void BottoneCarica_Click(object sender, EventArgs e)
 {
@@ -252,7 +252,7 @@ private async void BottoneCarica_Click(object sender, EventArgs e)
 
 Nel codice di libreria, che non tocca la UI, puoi evitare il ritorno al contesto:
 
-```cs
+```cs norun
 string json = await httpClient.GetStringAsync(url).ConfigureAwait(false);
 ```
 

@@ -17,7 +17,7 @@ Nella [parte 1](/informatica/csharp/thread-vs-task) abbiamo visto che `Thread` �
 
 `Thread.Abort()` è deprecato (e non supportato in .NET moderno) perché interrompe l'esecuzione in un punto arbitrario, lasciando risorse e invarianti in stato incerto. Con `Thread` si usa quindi un **flag manuale**:
 
-```cs
+```cs norun
 static volatile bool fermati;
 
 Thread worker = new Thread(() =>
@@ -166,7 +166,7 @@ static async Task<int> SimulaAsync(int valore, int delay)
 
 `Parallel.For`, `Parallel.ForEach` e `Parallel.Invoke` servono a **spremere i core** su lavoro CPU-bound. Sono chiamate **sincrone**: bloccano finché tutte le iterazioni non terminano.
 
-```cs
+```cs norun
 using System;
 using System.Threading.Tasks;
 
@@ -191,7 +191,7 @@ class Program
 
 L'ordine di esecuzione delle iterazioni **non è garantito**. Il problema più comune, però, è lo stato condiviso:
 
-```cs
+```cs norun
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -222,7 +222,7 @@ Per I/O asincrono su una collezione con concorrenza limitata esiste `Parallel.Fo
 
 PLINQ aggiunge parallelismo alle query LINQ con `AsParallel()`:
 
-```cs
+```cs norun
 using System;
 using System.Linq;
 
@@ -288,14 +288,14 @@ La legge di Gustafson, $S_G(n) = n - \alpha(n - 1)$ con $\alpha$ frazione serial
 
 **`Task.Run` sopra I/O già asincrono**: aggiunge solo overhead.
 
-```cs
+```cs norun
 await Task.Run(() => httpClient.GetStringAsync(url)); // inutile
 string html = await httpClient.GetStringAsync(url);    // corretto
 ```
 
 **Blocco sincrono su codice async**: `.Result` e `.Wait()` sprecano un thread e possono causare deadlock.
 
-```cs
+```cs norun
 // In un'app UI: il thread UI si blocca aspettando il task,
 // ma il task deve tornare sul thread UI per completarsi -> deadlock
 string dati = CaricaAsync().Result;

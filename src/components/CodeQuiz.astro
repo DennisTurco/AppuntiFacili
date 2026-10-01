@@ -1,0 +1,41 @@
+---
+/**
+ * Quiz con il codice evidenziato: prepara l'HTML dei blocchi di codice con Shiki
+ * (in fase di build) e poi mostra il componente React Quiz.
+ * Accetta le stesse domande di Quiz.jsx (vedi i tipi "output" e "bug" lì).
+ * Non serve scrivere client:load: il componente si attiva da solo.
+ *
+ *   <CodeQuiz questions={[
+ *     { type: "output", question: "Cosa stampa?", lang: "python", code: `print(2 ** 3)`, expected: "8" },
+ *     { type: "bug", question: "Trova il bug", lang: "python", code: `...`, bugLine: 2, fix: `...` },
+ *   ]} />
+ */
+import { codeToHtml } from "shiki";
+import Quiz from "./Quiz.jsx";
+
+interface Props {
+  questions: Array<Record<string, any>>;
+  title?: string;
+  shuffle?: boolean;
+}
+
+const { questions, title, shuffle } = Astro.props;
+
+const highlight = (code: string, lang = "text") =>
+  codeToHtml(String(code).replace(/^\n/, "").replace(/\n$/, ""), {
+    lang,
+    themes: { light: "rose-pine-dawn", dark: "github-dark-dimmed" },
+    // stessa classe dei blocchi delle lezioni: riusa i colori del tema scuro in global.css
+    transformers: [{ pre(node) { this.addClassToHast(node, "astro-code"); } }],
+  });
+
+const prepared = await Promise.all(
+  questions.map(async (q) => ({
+    ...q,
+    codeHtml: q.code ? await highlight(q.code, q.lang) : undefined,
+    fixHtml: q.fix ? await highlight(q.fix, q.lang) : undefined,
+  })),
+);
+---
+
+<Quiz client:visible questions={prepared} title={title} shuffle={shuffle} />

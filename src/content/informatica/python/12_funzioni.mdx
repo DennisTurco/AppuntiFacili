@@ -117,7 +117,7 @@ Noi sappiamo per logica che nome dovrebbe essere una stringa e eta dovrebbe esse
 
 Quindi il chiamante potrebbe fare una chiamata di questo tipo, senza beccare nessun tipo di errore:
 
-```python
+```python norun
 saluta(789, 'd')
 ```
 
@@ -423,6 +423,92 @@ d: "Una lambda"
 },
 correctAnswer: "c"
 }
+]} />
+
+### Leggi il codice: cosa stampa? dov'è il bug?
+
+<CodeQuiz title="Leggi il codice" questions={[
+  {
+    type: "output",
+    question: "Cosa stampa questo codice?",
+    lang: "python",
+    code: `x = 10
+
+def modifica():
+    x = 20
+    print(x)
+
+modifica()
+print(x)`,
+    expected: "20\n10",
+    explanation: "Dentro la funzione `x = 20` crea una variabile **locale**: la `x` globale resta 10. Per modificarla servirebbe `global x`."
+  },
+  {
+    type: "output",
+    question: "Cosa stampa questo codice?",
+    lang: "python",
+    code: `def conta(*args, **kwargs):
+    print(len(args), len(kwargs))
+
+conta(1, 2, 3, a=4, b=5)`,
+    expected: "3 2",
+    explanation: "Gli argomenti posizionali finiscono nella tupla `args` (3 elementi), quelli con nome nel dizionario `kwargs` (2 chiavi)."
+  },
+  {
+    type: "output",
+    question: "Attenzione al valore di default: cosa stampa?",
+    lang: "python",
+    code: `def aggiungi(x, lista=[]):
+    lista.append(x)
+    return lista
+
+print(aggiungi(1))
+print(aggiungi(2))`,
+    expected: "[1]\n[1, 2]",
+    explanation: "Il valore di default `[]` viene creato **una sola volta**, quando si definisce la funzione: le chiamate successive riusano la stessa lista. Si usa `lista=None` e poi `if lista is None: lista = []`."
+  },
+  {
+    type: "bug",
+    question: "Questa funzione ricorsiva non termina mai. Clicca la riga con il bug.",
+    lang: "python",
+    code: `def fattoriale(n):
+    if n == 0:
+        return 1
+    return n * fattoriale(n)
+
+print(fattoriale(5))`,
+    bugLine: 4,
+    fix: `def fattoriale(n):
+    if n == 0:
+        return 1
+    return n * fattoriale(n - 1)
+
+print(fattoriale(5))`,
+    explanation: "La chiamata ricorsiva deve avvicinarsi al caso base: con `fattoriale(n)` il valore di `n` non cambia mai e si ottiene un `RecursionError`."
+  },
+  {
+    type: "bug",
+    question: "La funzione dovrebbe restituire il numero più grande, ma con questa lista stampa 0. Dov'è il bug?",
+    lang: "python",
+    code: `def massimo(numeri):
+    m = 0
+    for n in numeri:
+        if n > m:
+            m = n
+    return m
+
+print(massimo([-5, -2, -9]))  # atteso: -2`,
+    bugLine: 2,
+    fix: `def massimo(numeri):
+    m = numeri[0]
+    for n in numeri[1:]:
+        if n > m:
+            m = n
+    return m
+
+print(massimo([-5, -2, -9]))  # -2`,
+    explanation: "Partendo da 0, nessun numero negativo è mai \"più grande\": il massimo va inizializzato con il primo elemento della lista."
+  }
 ]} />
 
 ## 13. Esercizi

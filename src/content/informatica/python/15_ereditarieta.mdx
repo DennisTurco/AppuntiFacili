@@ -42,7 +42,7 @@ class Animale:
 
 Ora creiamo una **classe derivata** che eredita da `Animale`:
 
-```python
+```python norun
 class Cane(Animale):
     def parla(self):
         print("Bau!")
@@ -50,7 +50,7 @@ class Cane(Animale):
 
 Uso:
 
-```python
+```python norun
 a = Animale("Creatura")
 c = Cane("Fido")
 
@@ -81,7 +81,7 @@ class Cane(Animale):
 
 Uso:
 
-```python
+```python norun
 c = Cane("Fido", "Labrador")
 print(c.nome, c.razza) # Output: Fido Labrador
 ```
@@ -155,13 +155,13 @@ La **MRO** definisce l'ordine in cui Python cerca un attributo o metodo nelle cl
 
 Possibile visualizzarla con:
 
-```python
+```python norun
 print(Anatra.mro())
 ```
 
 Output (esempio):
 
-```python
+```python norun
 [<class '__main__.Anatra'>, <class '__main__.Volante'>, <class '__main__.Nuotante'>, <class 'object'>]
 ```
 
@@ -185,7 +185,7 @@ class Cane(Animale):
 
 Uso:
 
-```python
+```python norun
 c = Cane()
 c.parla()
 ```

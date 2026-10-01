@@ -152,10 +152,16 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
     </aside>
 
     <!-- Contenuto -->
-    <article class="min-w-0 pt-8 pb-16">
+    <!-- Indicizzato dalla ricerca (Pagefind); le bozze restano fuori -->
+    <article
+      class="min-w-0 pt-8 pb-16"
+      data-pagefind-body={data.draft ? undefined : ""}
+      data-pagefind-filter={`sezione:${sectionName}`}
+      data-pagefind-meta={`categoria:${category.label}`}
+    >
       <div class="mx-auto max-w-3xl">
         <!-- Breadcrumb -->
-        <nav aria-label="Breadcrumb" class="text-sm text-slate-500 dark:text-slate-400">
+        <nav aria-label="Breadcrumb" class="text-sm text-slate-500 dark:text-slate-400" data-pagefind-ignore>
           <ol class="flex flex-wrap items-center gap-1.5">
             <li><a href="/" class="hover:text-slate-900 dark:hover:text-white">Home</a></li>
             <li aria-hidden="true">/</li>
@@ -170,7 +176,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
             {data.title}
           </h1>
 
-          <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
+          <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-400" data-pagefind-ignore>
             <span class="inline-flex items-center gap-1.5">
               <Icon name="fa6-solid:user" class="h-3.5 w-3.5 opacity-60" />
               {data.author}
@@ -189,7 +195,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
           </div>
 
           {data.tags?.length > 0 && (
-            <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Tag">
+            <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Tag" data-pagefind-ignore>
               {data.tags.map((tag) => (
                 <li class="badge bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">#{tag}</li>
               ))}
@@ -206,7 +212,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
 
         <!-- Indice (mobile / tablet) -->
         {toc.length > 0 && (
-          <details class="card mt-6 xl:hidden">
+          <details class="card mt-6 xl:hidden" data-pagefind-ignore>
             <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
               <Icon name="fa6-solid:list" class="h-3.5 w-3.5 text-slate-400" />
               In questa lezione
@@ -230,7 +236,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
         </div>
 
         <!-- Azioni -->
-        <div class="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-200 pt-6 text-sm dark:border-slate-800">
+        <div data-pagefind-ignore class="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-200 pt-6 text-sm dark:border-slate-800">
           <a
             id="report-link"
             href="https://github.com/DennisTurco/AppuntiFacili/issues/new"
@@ -254,7 +260,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
 
         <!-- Precedente / successiva -->
         {(prevLesson || nextLesson) && (
-          <nav class="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Navigazione tra le lezioni">
+          <nav class="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Navigazione tra le lezioni" data-pagefind-ignore>
             {prevLesson ? (
               <a href={`/${collection}/${prevLesson.slug}`} class="card card-hover group flex flex-col p-4">
                 <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
@@ -277,7 +283,7 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
         )}
 
         <!-- CTA lezioni private -->
-        <aside class="callout mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <aside data-pagefind-ignore class="callout mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
           <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
             <Icon name="fa6-solid:chalkboard-user" class="h-5 w-5" />
           </span>
@@ -387,6 +393,10 @@ const description = `${data.title}: appunti di ${category.label} (${sectionName.
     pointer-events: auto;
   }
 </style>
+
+<script>
+  import "@/scripts/playground";
+</script>
 
 <script>
   let cleanup: (() => void) | null = null;

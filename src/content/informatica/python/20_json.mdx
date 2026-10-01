@@ -45,7 +45,7 @@ Per importarlo: `import json`
 
 Per leggere un file JSON e trasformarlo in un oggetto Python (di solito un dizionario o una lista):
 
-```python
+```python norun
 import json
 
 with open("dati.json", "r") as file:
@@ -85,7 +85,7 @@ with open("persona.json", "w") as file:
 
 Per creare un file JSON più leggibile, è possibile aggiungere parametri a `json.dump()`:
 
-```python
+```python norun
 json.dump(persona, file, indent=4, ensure_ascii=False, sort_keys=True)
 ```
 
@@ -171,7 +171,7 @@ finally:
 
 Spesso serve leggere, modificare, poi riscrivere il file:
 
-```python
+```python norun
 import json
 
 with open("utenti.json", "r", encoding="utf-8") as file:
@@ -200,7 +200,7 @@ json.dumps(dati)
 
 Soluzione: fornire una funzione personalizzata per la conversione.
 
-```python
+```python norun
 def converti(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()  # formato leggibile
@@ -224,7 +224,7 @@ JSON può contenere **strutture annidate** (liste di dizionari o dizionari di li
 
 In Python:
 
-```python
+```python norun
 import json
 
 with open("utenti.json", "r", encoding="utf-8") as file:

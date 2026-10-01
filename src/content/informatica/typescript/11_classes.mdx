@@ -67,7 +67,7 @@ Adding an access modifier (`private`, `public`, `protected`, or even `readonly`)
 
 A class can extend another class with `extends`, inheriting its public and protected members and gaining the ability to add or override behavior.
 
-```ts
+```ts norun
 class Employee extends Person {
     public callMe() {
         console.log(this.getName());
@@ -152,7 +152,7 @@ These two keywords look similar but mean very different things:
 | Inherits behavior? | Yes — actual method bodies are inherited | No — only the shape is enforced, you write all the code |
 | How many? | A class can `extends` only one class | A class can `implements` multiple interfaces |
 
-```ts
+```ts norun
 class ElectricCar extends Car implements Vehicle {
     // extends Car: reuses Car's implementation
     // implements Vehicle: also promises to satisfy Vehicle's shape (already true via Car)

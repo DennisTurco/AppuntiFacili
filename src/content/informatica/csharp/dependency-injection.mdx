@@ -45,7 +45,7 @@ Esempio: `OrdineService` (alto livello, dominio) non deve dipendere da `EmailSer
 
 ## 2. Il problema senza DI
 
-```cs
+```cs norun
 // SENZA DI: accoppiamento forte
 public class OrdineService
 {
@@ -76,7 +76,7 @@ In sostanza la classe mescola due responsabilità: logica di business e costruzi
 
 Un errore comune è sostituire `new` con una richiesta a un contenitore globale:
 
-```cs
+```cs norun
 public class OrdineService
 {
     public void ConfermaOrdine(int ordineId)
@@ -124,7 +124,7 @@ public class OrdineService
 
 Ora la classe non sa quale implementazione riceverà, non conosce il container e dichiara esplicitamente le sue collaborazioni. La DI **non richiede un container**: si può fare "a mano" (Pure DI) nel composition root.
 
-```cs
+```cs norun
 // Composition root manuale: scegli l'implementazione in un solo punto
 INotificaService notifica = args.Contains("--sms")
     ? new SmsService()
@@ -143,7 +143,7 @@ ordini.ConfermaOrdine(42);
 | **Property Injection** | proprietà pubblica con setter | dipendenze opzionali con un default sensato |
 | **Method Injection** | parametro del metodo | dipendenza necessaria a una sola operazione |
 
-```cs
+```cs norun
 public class MioServizio
 {
     // Property injection: default sicuro se nessuno la imposta
@@ -166,7 +166,7 @@ Preferisci sempre la constructor injection. Se un costruttore arriva a 6-7 param
 - `IServiceProvider`: **risolve** i servizi costruendo l'object graph;
 - `IServiceScope`: delimita la vita dei servizi scoped.
 
-```cs
+```cs norun
 // Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
@@ -193,7 +193,7 @@ graph TD
 
 In ASP.NET Core viene creato uno scope per ogni request. In un'app console o in un background service lo scope si crea a mano:
 
-```cs
+```cs norun
 using var scope = app.Services.CreateScope();
 var service = scope.ServiceProvider.GetRequiredService<IOrdineService>();
 service.ConfermaOrdine(10);
@@ -226,7 +226,7 @@ graph TD
 
 Esempio concreto: ogni servizio genera un `Guid` nel costruttore.
 
-```cs
+```cs norun
 public class Contatore { public Guid Id { get; } = Guid.NewGuid(); }
 
 var services = new ServiceCollection();
@@ -254,7 +254,7 @@ Un singleton è condiviso da tutti i thread: deve essere thread-safe e non deve 
 
 Errore classico: un **singleton che dipende da uno scoped**. Lo scoped nasce per vivere una request, ma il singleton lo trattiene per tutta la vita dell'app (con un `DbContext` significa connessioni e change tracker condivisi tra richieste e thread).
 
-```cs
+```cs norun
 // SBAGLIATO: AddSingleton<ReportCache>() + AddScoped<AppDbContext>()
 public class ReportCache
 {
@@ -264,7 +264,7 @@ public class ReportCache
 
 La soluzione è iniettare `IServiceScopeFactory` e creare uno scope solo quando serve:
 
-```cs
+```cs norun
 public class ReportCache
 {
     private readonly IServiceScopeFactory _scopeFactory;
@@ -291,7 +291,7 @@ Con la validazione degli scope attiva (default in ambiente Development) .NET lan
 
 Quando il costruttore richiede valori non risolvibili dal container, si registra una **factory**:
 
-```cs
+```cs norun
 builder.Services.AddTransient<ReportService>(sp =>
 {
     var logger = sp.GetRequiredService<ILogger<ReportService>>();
@@ -302,7 +302,7 @@ builder.Services.AddTransient<ReportService>(sp =>
 
 I **generici aperti** permettono una sola registrazione per tutti i tipi: chiedendo `IRepository<User>` il container crea `Repository<User>`.
 
-```cs
+```cs norun
 public interface IRepository<T> { T? GetById(int id); }
 public class Repository<T> : IRepository<T> { public T? GetById(int id) => default; }
 
@@ -313,7 +313,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 Se registri più implementazioni della stessa interfaccia, iniettando l'interfaccia ottieni **l'ultima registrata**, mentre iniettando `IEnumerable<T>` le ottieni **tutte**:
 
-```cs
+```cs norun
 builder.Services.AddTransient<INotificaService, EmailService>();
 builder.Services.AddTransient<INotificaService, SmsService>();
 
@@ -328,7 +328,7 @@ public class NotificaBroadcaster(IEnumerable<INotificaService> canali)
 
 Da .NET 8 puoi anche distinguere le implementazioni con una **chiave**:
 
-```cs
+```cs norun
 builder.Services.AddKeyedScoped<IPagamentoService, CartaPagamentoService>("carta");
 builder.Services.AddKeyedScoped<IPagamentoService, PaypalPagamentoService>("paypal");
 
@@ -350,7 +350,7 @@ I keyed services sostituiscono bene `switch` su tipi concreti per scegliere una 
 
 La configurazione si integra con la DI tramite l'**Options Pattern**: una sezione di `appsettings.json` viene mappata su una classe e iniettata.
 
-```cs
+```cs norun
 public class MailOptions
 {
     public string Host { get; set; } = "";
@@ -382,7 +382,7 @@ public class MailService(IOptions<MailOptions> options)
 
 Il **Decorator** avvolge un servizio con un altro che implementa la stessa interfaccia, aggiungendo comportamento (logging, cache, retry) senza toccare l'originale.
 
-```cs
+```cs norun
 public class LoggingReportDecorator : IReportService
 {
     private readonly IReportService _inner;
@@ -402,7 +402,7 @@ public class LoggingReportDecorator : IReportService
 
 Il container built-in non ha un supporto diretto ai decorator: si usa la libreria **Scrutor**, che aggiunge anche l'**assembly scanning**:
 
-```cs
+```cs norun
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.Decorate<IReportService, LoggingReportDecorator>();
 
@@ -443,7 +443,7 @@ public class ServiceB { public ServiceB(ServiceC c) { } }
 
 Con la constructor injection, per testare una classe non serve nemmeno il container: basta passarle un fake.
 
-```cs
+```cs norun
 public class FakeNotificaService : INotificaService
 {
     public string? UltimoMessaggio { get; private set; }
@@ -464,7 +464,7 @@ public void ConfermaOrdine_InviaNotifica()
 
 Con un framework di mocking (es. Moq) passi direttamente `mock.Object`. Nei **test di integrazione**, invece, si costruisce il container quasi reale e si sostituiscono solo alcune dipendenze (database in-memory, servizi esterni finti, `TimeProvider` controllabile), verificando così anche il wiring.
 
-```cs
+```cs norun
 var services = new ServiceCollection();
 services.AddScoped<OrdineService>();
 services.AddSingleton<INotificaService, FakeNotificaService>();
@@ -479,7 +479,7 @@ Se per testare una classe devi configurare un container intero, è un indizio ch
 
 ## 8. Esempio completo
 
-```cs
+```cs norun
 public record User(int Id, string Nome);
 
 public interface IUserRepository { User? GetById(int id); }

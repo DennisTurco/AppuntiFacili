@@ -19,14 +19,14 @@ Esempi di query in SQL:
 
 - Selezionare tutti i record dalla tabella "clienti":
 
-```sql
+```sql norun
 SELECT *
 FROM clienti;
 ```
 
 - Selezionare i record dalla tabella "prodotti" dove il prezzo è inferiore a 10 euro:
 
-```sql
+```sql norun
 SELECT *
 FROM prodotti
 WHERE prezzo < 10;
@@ -34,7 +34,7 @@ WHERE prezzo < 10;
 
 - Aggiornare il prezzo del prodotto con id 1234:
 
-```sql
+```sql norun
 UPDATE prodotti
 SET prezzo = 10
 WHERE id = 1234;
@@ -42,7 +42,7 @@ WHERE id = 1234;
 
 - Eliminare i record dalla tabella "ordini" dove la data è precedente al 1 gennaio 2021:
 
-```sql
+```sql norun
 DELETE FROM ordini
 WHERE data < '2021-01-01';
 ```
@@ -60,7 +60,7 @@ La clausola FROM specifica:
 
 Esempio di utilizzo della clausola FROM con una sottoquery:
 
-```sql
+```sql norun
 SELECT cliente_id, nome
 FROM (
     SELECT cliente_id, nome, regione
@@ -82,7 +82,7 @@ Esistono diversi tipi di JOIN:
 
 Esempio di INNER JOIN:
 
-```sql
+```sql norun
 SELECT clienti.nome, ordini.data_ordine
 FROM clienti
 INNER JOIN ordini ON clienti.id = ordini.cliente_id;
@@ -94,7 +94,7 @@ Clausola che viene usata in un'espressione di query per specificare quali elemen
 
 Esempio di utilizzo della clausola WHERE:
 
-```sql
+```sql norun
 SELECT nome, cognome
 FROM clienti
 WHERE regione = 'Lazio';
@@ -106,7 +106,7 @@ Clausola che specifica i tipi di valori che verranno prodotti quando viene esegu
 
 Esempio di utilizzo della clausola SELECT:
 
-```sql
+```sql norun
 SELECT nome, cognome, CONCAT(nome, ' ', cognome) AS nome_completo
 FROM clienti;
 ```
@@ -117,7 +117,7 @@ Parola chiave che può essere usata per creare un identificatore temporaneo al f
 
 Esempio di utilizzo della parola chiave INTO:
 
-```sql
+```sql norun
 SELECT nome, cognome
 INTO clienti_temporanei
 FROM clienti
@@ -136,7 +136,7 @@ Le funzioni aggregate eseguono calcoli su un insieme di valori e restituiscono u
 
 Esempi di utilizzo delle funzioni aggregate:
 
-```sql
+```sql norun
 SELECT COUNT(*) AS numero_clienti
 FROM clienti;
 
@@ -153,7 +153,7 @@ La clausola `ORDER BY` viene utilizzata per ordinare i risultati di una query in
 
 Esempio di utilizzo della clausola ORDER BY:
 
-```sql
+```sql norun
 SELECT nome, cognome
 FROM clienti
 ORDER BY cognome ASC, nome DESC;
@@ -165,7 +165,7 @@ La clausola `GROUP BY` viene utilizzata per raggruppare i dati in base a una o p
 
 Esempio di utilizzo della clausola GROUP BY:
 
-```sql
+```sql norun
 SELECT regione, COUNT(*) AS numero_clienti
 FROM clienti
 GROUP BY regione;
@@ -177,7 +177,7 @@ La clausola `HAVING` viene utilizzata per filtrare i gruppi di risultati creati 
 
 Esempio di utilizzo della clausola HAVING:
 
-```sql
+```sql norun
 SELECT regione, COUNT(*) AS numero_clienti
 FROM clienti
 GROUP BY regione
@@ -207,7 +207,7 @@ La parola chiave `INSERT INTO` viene utilizzata per inserire nuovi dati in una t
 
 Esempio di inserimento di dati:
 
-```sql
+```sql norun
 INSERT INTO clienti (id, nome, cognome, regione)
 VALUES (1, 'Mario', 'Rossi', 'Lazio');
 ```
@@ -218,7 +218,7 @@ La parola chiave `UPDATE` viene utilizzata per aggiornare i dati esistenti in un
 
 Esempio di aggiornamento di dati:
 
-```sql
+```sql norun
 UPDATE clienti
 SET regione = 'Toscana'
 WHERE id = 1;
@@ -230,7 +230,7 @@ La parola chiave `DELETE FROM` viene utilizzata per eliminare i dati esistenti i
 
 Esempio di eliminazione di dati:
 
-```sql
+```sql norun
 DELETE FROM clienti
 WHERE id = 1;
 ```
@@ -241,7 +241,7 @@ La parola chiave `DROP TABLE` viene utilizzata per eliminare una tabella esisten
 
 Esempio di eliminazione di una tabella:
 
-```sql
+```sql norun
 DROP TABLE clienti;
 ```
 
@@ -323,7 +323,7 @@ La parola chiave `COMMIT` viene utilizzata per confermare una transazione, rende
 
 Esempio di conferma di una transazione:
 
-```sql
+```sql norun
 COMMIT;
 ```
 
@@ -333,7 +333,7 @@ La parola chiave `ROLLBACK` viene utilizzata per annullare una transazione, reve
 
 Esempio di annullamento di una transazione:
 
-```sql
+```sql norun
 ROLLBACK;
 ```
 
@@ -364,7 +364,7 @@ La parola chiave `CREATE INDEX` viene utilizzata per creare un nuovo indice su u
 
 Esempio di creazione di un indice:
 
-```sql
+```sql norun
 CREATE INDEX idx_nome_cliente
 ON clienti (nome);
 ```
@@ -375,6 +375,6 @@ La parola chiave `DROP INDEX` viene utilizzata per eliminare un indice esistente
 
 Esempio di eliminazione di un indice:
 
-```sql
+```sql norun
 DROP INDEX idx_nome_cliente;
 ```

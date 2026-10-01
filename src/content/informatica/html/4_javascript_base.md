@@ -37,7 +37,7 @@ In tutti i casi generalmente si inserisce in fondo al body del file HTML prima d
 
 - `alert()`: mostra un popup all'utente.
   
-  ```javascript
+  ```javascript norun
   alert("Hello World!!");
   ```
 
@@ -58,7 +58,7 @@ In tutti i casi generalmente si inserisce in fondo al body del file HTML prima d
 
 - `confirm()`: chiede conferma (Ok / Annulla), ritorna `true` o `false`
 
-  ```javascript
+  ```javascript norun
   if (confirm("Vuoi continuare?")) {
     console.log("Utente ha confermato");
   } else {
@@ -76,7 +76,7 @@ Esempio:
 <button id="bottone"> Cliccami </button>
 ```
 
-```javascript
+```javascript norun
 function saluta() {
   alert("Ciao!");
 }

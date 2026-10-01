@@ -25,7 +25,7 @@ public class RigaOrdine { public int Id { get; set; } public int Quantita { get;
 
 ## 1. Operazioni CRUD e query
 
-```cs
+```cs norun
 public class ProdottoService
 {
     private readonly AppDbContext _context;
@@ -64,7 +64,7 @@ public class ProdottoService
 
 Una query LINQ viene tradotta in SQL ed eseguita sul server solo quando la **materializzi** (`ToListAsync`, `FirstAsync`, `CountAsync`...). Non tutto è traducibile: se usi un tuo metodo C# dentro un `Where`, EF lancia un'eccezione.
 
-```cs
+```cs norun
 // Errore a runtime: EF non sa tradurre IsScontato in SQL
 var x = await _context.Prodotti.Where(p => IsScontato(p)).ToListAsync();
 
@@ -80,7 +80,7 @@ Finché non la materializzi, una query è solo un `IQueryable`: puoi comporla a 
 
 Se ti servono pochi campi, **proietta** con `Select`: meno dati trasferiti e niente tracking.
 
-```cs
+```cs norun
 var lista = await _context.Prodotti
     .Select(p => new { p.Id, p.Nome, Categoria = p.Categoria!.Nome })
     .ToListAsync();
@@ -89,7 +89,7 @@ var lista = await _context.Prodotti
 
 Su tabelle grandi non fare mai `ToListAsync()` senza limiti. La **offset pagination** è semplice ma rallenta con pagine lontane (il DB deve comunque scorrere le righe saltate); la **keyset pagination** riparte dall'ultimo valore visto:
 
-```cs
+```cs norun
 // Offset: pagina 3 da 20 elementi
 var pagina = await _context.Prodotti.AsNoTracking()
     .OrderBy(p => p.Id).Skip(2 * 20).Take(20).ToListAsync();
@@ -105,7 +105,7 @@ Usa sempre `OrderBy` su una colonna univoca insieme a `Skip`/`Take`: senza, l'or
 
 Quando LINQ non basta, puoi scrivere SQL. `FromSql` restituisce entity, `ExecuteSqlAsync` esegue comandi senza risultato. Entrambi convertono i valori interpolati in **parametri** SQL.
 
-```cs
+```cs norun
 decimal soglia = 1000;
 var costosi = await _context.Prodotti
     .FromSql($"SELECT * FROM Prodotti WHERE Prezzo > {soglia}")
@@ -118,7 +118,7 @@ int righe = await _context.Database.ExecuteSqlAsync(
 
 Per gli aggiornamenti massivi esistono anche `ExecuteUpdateAsync` ed `ExecuteDeleteAsync`, che restano in LINQ:
 
-```cs
+```cs norun
 await _context.Prodotti
     .Where(p => p.QuantitaInStock == 0)
     .ExecuteUpdateAsync(s => s.SetProperty(p => p.Prezzo, p => p.Prezzo * 0.9m));
@@ -134,7 +134,7 @@ Non concatenare mai input dell'utente in una stringa SQL e non passarla a `FromS
 
 **Many-to-Many**: da EF Core 5 basta una collezione su entrambi i lati e la tabella di join viene creata automaticamente.
 
-```cs
+```cs norun
 public class Studente
 {
     public int Id { get; set; }
@@ -169,7 +169,7 @@ public class Profilo { public int Id { get; set; } public int UtenteId { get; se
 
 Un **Global Query Filter** aggiunge automaticamente una condizione a ogni query di una entity. È lo strumento tipico per **soft delete** e **multi-tenancy**.
 
-```cs
+```cs norun
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
     modelBuilder.Entity<Prodotto>()
@@ -196,7 +196,7 @@ Il filtro è invisibile nel punto in cui scrivi la query: se una query restituis
 | **Explicit Loading** | `Entry(x).Reference(...).LoadAsync()` | Carichi la relazione in un secondo momento |
 | **Lazy Loading** | automatico all'accesso (pacchetto `Proxies` + proprietà `virtual`) | Comodo, ma pericoloso nei cicli |
 
-```cs
+```cs norun
 // Eager: categoria e relazioni annidate nella stessa query
 var prodotti = await _context.Prodotti
     .Include(p => p.Categoria)
@@ -212,7 +212,7 @@ Senza Include né lazy loading, le navigation property restano semplicemente `nu
 
 Il **problema N+1** nasce quando esegui 1 query per gli elementi principali e poi **N** query aggiuntive, una per elemento, per caricare una relazione. Con lazy loading attivo è facilissimo cascarci:
 
-```cs
+```cs norun
 var ordini = await _context.Ordini.ToListAsync();      // 1 query
 foreach (var o in ordini)
     Console.WriteLine(o.Cliente!.Nome);                // +1 query per ogni ordine!
@@ -221,7 +221,7 @@ foreach (var o in ordini)
 
 Le soluzioni sono `Include` oppure, meglio ancora per la sola lettura, una proiezione:
 
-```cs
+```cs norun
 var ordini = await _context.Ordini
     .Select(o => new
     {
@@ -234,7 +234,7 @@ var ordini = await _context.Ordini
 
 Per scoprire un N+1 attiva il logging del SQL: se vedi la stessa query ripetersi decine di volte con parametri diversi, è il segnale.
 
-```cs
+```cs norun
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString)
            .LogTo(Console.WriteLine, LogLevel.Information));
@@ -250,7 +250,7 @@ Più `Include` su collezioni (1:N) nella stessa query producono un join che **mo
 
 La **concorrenza ottimistica** assume che i conflitti siano rari: due utenti possono leggere la stessa riga, ma al salvataggio EF verifica che nessuno l'abbia modificata nel frattempo. Si ottiene con un **concurrency token**, ad esempio `[Timestamp]` (colonna `rowversion` in SQL Server) o `[ConcurrencyCheck]` su una proprietà.
 
-```cs
+```cs norun
 public class Prodotto
 {
     public int Id { get; set; }
@@ -264,7 +264,7 @@ public class Prodotto
 
 Se nessuna riga viene aggiornata (il token è cambiato), EF lancia `DbUpdateConcurrencyException`, proteggendoti dal **lost update**:
 
-```cs
+```cs norun
 try
 {
     await _context.SaveChangesAsync();
@@ -281,7 +281,7 @@ catch (DbUpdateConcurrencyException ex)
 
 Ogni `SaveChangesAsync()` è già atomico. Se però devi rendere atomiche **più** chiamate, apri una transazione esplicita:
 
-```cs
+```cs norun
 await using var transaction = await _context.Database.BeginTransactionAsync();
 try
 {

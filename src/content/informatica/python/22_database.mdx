@@ -68,7 +68,7 @@ print("Connessione avvenuta con successo!")
 
 ## 3.2 Chiudere la connessione
 
-```python
+```python norun
 conn.close()
 ```
 
@@ -127,7 +127,7 @@ conn.close()
 
 ### 6.1 Recuperare tutti gli utenti
 
-```python
+```python norun
 conn = sqlite3.connect("miodb.db")
 cursor = conn.cursor()
 
@@ -142,7 +142,7 @@ conn.close()
 
 ### 6.2 Recuperare un singolo utente
 
-```python
+```python norun
 cursor.execute("SELECT * FROM utenti WHERE email = ?", ("mario@example.com",))
 utente = cursor.fetchone()
 print(utente)
@@ -150,7 +150,7 @@ print(utente)
 
 ## 7. Aggiornare dati
 
-```python
+```python norun
 cursor.execute("""
 UPDATE utenti SET nome = ?
 WHERE email = ?
@@ -161,7 +161,7 @@ conn.commit()
 
 ## 8. Eliminare dati
 
-```python
+```python norun
 cursor.execute("DELETE FROM utenti WHERE email = ?", ("mario@example.com",))
 conn.commit()
 ```
@@ -268,7 +268,7 @@ class User:
 
 File: database/user_repository.py
 
-```python
+```python norun
 from models.user import User
 from database.connection import DatabaseConnection
 
@@ -325,7 +325,7 @@ class UserRepository:
 
 File: main.py
 
-```python
+```python norun
 from models.user import User
 from database.user_repository import UserRepository
 

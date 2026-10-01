@@ -27,7 +27,7 @@ Per aprire un file si utilizza la funzione integrata `open()`.
 
 Sintassi:
 
-```python
+```python norun
 file = open("percorso_file.txt", "modalità")
 ```
 
@@ -45,7 +45,7 @@ dove:
 
 ### 2.1 Esempio apertura file
 
-```python
+```python norun
 file = open("test.txt", "r")
 print(file)
 ```
@@ -61,7 +61,7 @@ Per chiudere un file in python si usa la funzione `file.close()`.
 
 Esempio:
 
-```python
+```python norun
 file = open("test.txt", "r")
 file.close()
 ```
@@ -72,7 +72,7 @@ Per leggere il contenuto di un file, si usa `file.read()`.
 
 Esempio:
 
-```python
+```python norun
 file = open("test.txt", "r")
 content = file.read()
 print(content)
@@ -86,7 +86,7 @@ file.close()
 
 Esempio:
 
-```python
+```python norun
 file = open("test.txt", "r")
 for riga in file.readlines():
     print(riga.strip())
@@ -125,7 +125,7 @@ file.close()
 Python mette a disposizione anche alcune funzioni che permettono di leggere alcune **proprietà** di un file dopo la
 sua apertura:
 
-```python
+```python norun
 file = open("test.txt", "r")
 print(f"NomeFile: {file.name}")
 print(f"Modalità: {file.mode}")
@@ -146,7 +146,7 @@ L'istruzione `with` permette di gestire automaticamente l'apertura e la chiusura
 
 Esempio:
 
-```python
+```python norun
 with open("test.txt", "r") as file:
     contenuto = file.read()
     print(contenuto)

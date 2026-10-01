@@ -104,7 +104,7 @@ Il parametro `format` permette di personalizzare il formato del messaggio.
 
 Esempio:
 
-```python
+```python norun
 logging.basicConfig(
     format="%(asctime)s - [%(levelname)s] (%(filename)s:%(lineno)d) - %(message)s",
     level=logging.DEBUG
@@ -164,7 +164,7 @@ Il problema è che **senza un servizio centralizzato**, ogni file rischia di cre
 
 Un **LogService** risolve tutto questo: una singola configurazione una sola volta, e poi in ogni modulo chiedi semplicemente:
 
-```python
+```python norun
 logger = LogService.get_logger(__name__)
 ```
 
@@ -177,7 +177,7 @@ Così hai:
 
 File: **LogService.py**:
 
-```python
+```python norun
 import logging
 from pathlib import Path
 from typing import Optional
@@ -224,7 +224,7 @@ class LogService:
 
 Esempio d'uso, file **mail.py**:
 
-```python
+```python norun
 from LogService import LogService
 
 class MailService:

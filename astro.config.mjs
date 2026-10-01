@@ -10,6 +10,7 @@ import remarkToc from 'remark-toc'; // https://github.com/remarkjs/remark-toc#op
 import react from '@astrojs/react';
 import partytown from '@astrojs/partytown'
 import { remarkMermaid } from './src/plugins/remark-mermaid.mjs';
+import { remarkRunnable } from './src/plugins/remark-runnable.mjs';
 
 export default defineConfig({
   site: "https://appuntifacili.it",
@@ -18,7 +19,7 @@ export default defineConfig({
     mdx({
       // extendMarkdownConfig is true by default, but we add remarkMermaid
       // explicitly here so it also runs for .mdx files.
-      remarkPlugins: [remarkMath, remarkMermaid],
+      remarkPlugins: [remarkMath, remarkMermaid, remarkRunnable],
       rehypePlugins: [rehypeKatex],
     }),
     sitemap({
@@ -39,6 +40,7 @@ export default defineConfig({
       remarkToc,
       [remarkCollapse, { test: "Table of contents" }],
       remarkMermaid,
+      remarkRunnable,
     ],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
@@ -48,5 +50,24 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [tailwindcss()],},
+    plugins: [tailwindcss()],
+    // Dipendenze dei blocchi eseguibili (caricate solo su richiesta): pre-ottimizzate
+    // così in dev Vite non ricarica la pagina la prima volta che servono
+    optimizeDeps: {
+      include: [
+        "sucrase",
+        "sql.js",
+        "codemirror",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@codemirror/commands",
+        "@codemirror/language",
+        "@codemirror/lang-python",
+        "@codemirror/lang-javascript",
+        "@codemirror/lang-sql",
+        "@codemirror/legacy-modes/mode/clike",
+        "@codemirror/theme-one-dark",
+      ],
+    },
+  },
 });

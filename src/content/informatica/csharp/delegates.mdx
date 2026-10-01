@@ -160,7 +160,7 @@ foreach (Action handler in azione.GetInvocationList())
 
 I delegati sono **immutabili**: `d += Metodo` crea un **nuovo** delegato con una nuova lista. Resta però un rischio classico:
 
-```cs
+```cs norun
 if (OnNotifica != null)
 {
     OnNotifica("messaggio"); // un altro thread potrebbe averlo appena reso null
@@ -169,7 +169,7 @@ if (OnNotifica != null)
 
 La forma corretta è leggere il delegato una sola volta:
 
-```cs
+```cs norun
 OnNotifica?.Invoke("messaggio");
 
 // equivalente esplicito: copia locale
@@ -193,7 +193,7 @@ Console.WriteLine(calc()); // 30
 
 Se ti servono tutti i risultati devi iterare la invocation list:
 
-```cs
+```cs norun
 List<int> risultati = new();
 
 foreach (Calcola singolo in calc.GetInvocationList())
@@ -253,7 +253,7 @@ public static T Misura<T>(Func<T> operazione)
 }
 
 EseguiConAudit(() => Console.WriteLine("Salvataggio..."));
-int totale = Misura(() => Enumerable.Range(1, 1_000_000).Sum());
+long totale = Misura(() => Enumerable.Range(1, 1_000_000).Sum(x => (long)x));
 ```
 
 `Predicate<T>` è usato dai metodi di `List<T>` come `Find`, `Exists`, `RemoveAll`:
@@ -278,7 +278,7 @@ Entrambi modellano comportamenti, ma con scopi diversi:
 - **delegato**: "passami **una funzione**". Ideale per una singola operazione, callback brevi, strategie semplici; si integra con lambda e LINQ;
 - **interfaccia**: "dammi **un collaboratore**". Meglio quando il contratto ha più metodi correlati, stato interno o dipendenze.
 
-```cs
+```cs norun
 // Delegato: basta una funzione
 public static void ElaboraOrdine(Ordine ordine, Action<Ordine> callback) => callback(ordine);
 
@@ -376,7 +376,7 @@ foreach (var azione in azioni) azione(); // 3 3 3
 
 Tutte le lambda catturano la **stessa variabile `i`**, che a fine ciclo vale 3. La correzione è una copia locale per ogni iterazione:
 
-```cs
+```cs norun
 for (int i = 0; i < 3; i++)
 {
     int copia = i;
@@ -490,7 +490,7 @@ gestisci(new Cane());           // Cane
 
 Lo stesso vale per i delegati generici, grazie ai modificatori `out` e `in` nelle loro dichiarazioni (`Func<out TResult>`, `Action<in T>`):
 
-```cs
+```cs norun
 Func<Cane> creaCane = () => new Cane();
 Func<Animale> creaAnimale = creaCane;     // OK: covarianza
 

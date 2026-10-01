@@ -49,7 +49,7 @@ The `!` after `this.items[index]` is the **non-null assertion operator**. It tel
 
 You specify the concrete type in angle brackets when you instantiate the class:
 
-```ts
+```ts norun
 const data1 = new DataStore<number>();
 data1.addItem(10);
 data1.addItem(23);
@@ -96,7 +96,7 @@ Here `K` is the type of the `key` parameter, and `V` is the type shared by `valu
 
 ### 3.1 Explicit type arguments
 
-```ts
+```ts norun
 const n1: number = 1;
 const n2: number = 2;
 getValue<string, number>("hello", n1, n2);
@@ -108,7 +108,7 @@ Here we explicitly told TypeScript `K = string` and `V = number`.
 
 In practice, you rarely need to write out `<string, number>` explicitly — TypeScript can usually **infer** the type parameters just by looking at the arguments you pass:
 
-```ts
+```ts norun
 getValue("hello", n1, n2); // TypeScript infers K = string, V = number automatically
 ```
 

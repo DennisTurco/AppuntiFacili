@@ -27,7 +27,7 @@ The compiler is right to complain: `arr.pop()` has type `{ name: string } | unde
 
 The **optional chaining** operator `?.` solves this cleanly: it accesses a property only if the value on its left is not `null`/`undefined`, and short-circuits to `undefined` otherwise.
 
-```ts
+```ts norun
 const el = arr.pop()?.name;
 console.log(el); // el has type: string | undefined
 ```
@@ -36,7 +36,7 @@ Read `?.` as "if the thing on the left exists, continue; otherwise stop here and
 
 `?.` also works for calling functions that might not exist, and for indexing into arrays/objects that might not exist:
 
-```ts
+```ts norun
 obj.method?.();       // calls method only if it exists, otherwise evaluates to undefined
 config?.settings?.theme; // safely drills into a possibly-missing nested structure
 list?.[0];             // indexes only if list is not null/undefined
@@ -73,7 +73,7 @@ As a general guideline, prefer `?.` — it's inherently safer, since it acknowle
 
 Optional chaining pairs naturally with the **nullish coalescing** operator `??`, which supplies a default value when the expression on its left is `null` or `undefined`.
 
-```ts
+```ts norun
 const el = arr.pop()?.name;
 const value = el ?? "default";
 console.log(value); // "default" if el was undefined, otherwise the name itself

@@ -3,6 +3,8 @@ import { getCollection } from "astro:content";
 import LessonLayout from "@/layouts/LessonLayout.astro";
 import Quiz from "@/components/Quiz.jsx";
 import Aside from "@/components/Aside.astro";
+import Playground from "@/components/Playground.astro";
+import CodeQuiz from "@/components/CodeQuiz.astro";
 
 export async function getStaticPaths() {
   const entries = await getCollection("informatica");
@@ -17,5 +19,5 @@ const { Content, headings } = await entry.render();
 ---
 
 <LessonLayout entry={entry} headings={headings} collection="informatica">
-  <Content components={{ Quiz, Aside }} />
+  <Content components={{ Quiz, Aside, Playground, CodeQuiz }} />
 </LessonLayout>

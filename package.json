@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:csharp": "node tools/build-csharp-runner.mjs",
+    "search:dev": "astro build && pagefind --site dist --output-path public/pagefind"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.0",
@@ -17,6 +19,15 @@
     "@astrojs/react": "^4.3.0",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/starlight": "^0.35.2",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/legacy-modes": "^6.5.4",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@codemirror/view": "^6.43.13",
     "@fontsource-variable/bricolage-grotesque": "^5.2.5",
     "@fontsource-variable/inter": "^5.2.5",
     "@iconify-json/bx": "^1.2.2",
@@ -35,6 +46,7 @@
     "astro-navbar": "^2.3.9",
     "astro-seo": "^0.8.4",
     "astro-sitemap": "^1.0.0",
+    "codemirror": "^6.0.2",
     "katex": "^0.16.22",
     "lucide-react": "^0.553.0",
     "mermaid": "^11.10.1",
@@ -49,10 +61,16 @@
     "remark-math": "^6.0.0",
     "remark-toc": "^9.0.0",
     "sharp": "^0.33.5",
+    "shiki": "3.15.0",
     "solid-js": "^1.9.9",
+    "sql.js": "^1.14.2",
+    "sucrase": "^3.35.1",
     "supabase": "^2.39.2",
     "tailwindcss": "^4.0.14",
     "unist-util-visit": "^5.1.0",
     "webcoreui": "^1.1.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
   }
 }

@@ -15,7 +15,7 @@ videoLesson: false
 
 Immagina questo codice:
 
-```cs
+```cs norun
 public void ProcessaOrdine(int ordineId, int clienteId, int prodottoId) { /* ... */ }
 
 // Il compilatore accetta la chiamata anche se semanticamente è sbagliata
@@ -51,7 +51,7 @@ Nel **Domain-Driven Design (DDD)** non tutti gli oggetti hanno lo stesso ruolo:
 - **Value Object**: definito dai suoi **valori**. Non ha identità propria, in genere è **immutabile**, ha **uguaglianza per valore** e incapsula le proprie regole di validazione. Esempi: `Email`, `Money`, `Address`, `DateRange` e gli stessi `OrdineId`, `ClienteId`.
 - **Aggregate Root**: l'entità principale di un gruppo di oggetti correlati, unico punto di ingresso per modificarli mantenendo le invarianti.
 
-```cs
+```cs norun
 // Entity: conta l'identità
 public sealed class Cliente
 {
@@ -97,7 +97,7 @@ In più, in .NET vale una regola fondamentale: se due oggetti sono uguali, devon
 
 Esempio con un `Email` che normalizza il valore: chiavi diverse nella forma, uguali nel dominio.
 
-```cs
+```cs norun
 var set = new HashSet<Email>
 {
     new Email("utente@example.com"),
@@ -148,7 +148,7 @@ public readonly struct OrdineId : IEquatable<OrdineId>, IComparable<OrdineId>
 
 Uso:
 
-```cs
+```cs norun
 var ids = new List<OrdineId> { new(30), new(10), new(20) };
 ids.Sort();                                         // usa CompareTo
 Console.WriteLine(string.Join(", ", ids));          // 10, 20, 30
@@ -229,7 +229,7 @@ public sealed class Result<T>
 }
 ```
 
-```cs
+```cs norun
 public readonly record struct Email
 {
     public string Value { get; }
@@ -256,7 +256,7 @@ public readonly record struct Email
 
 Uso:
 
-```cs
+```cs norun
 foreach (var input in new[] { "Utente@Example.com", "", "senza-chiocciola" })
 {
     var result = Email.Create(input);
@@ -273,7 +273,7 @@ Regola per le conversioni: `implicit` solo se la conversione non può mai fallir
 
 I Value Objects possono anche ospitare **invarianti di dominio**. Esempio con `Money`:
 
-```cs
+```cs norun
 public readonly record struct Money(decimal Amount, string Currency)
 {
     public static Result<Money> Create(decimal amount, string currency)
@@ -304,7 +304,7 @@ Prima o poi un Value Object deve passare da JSON, route, query string e database
 
 Senza configurazione, `OrdineId(42)` viene serializzato come `{ "Value": 42 }`. Di solito si vuole il solo valore `42`, e si ottiene con un converter:
 
-```cs
+```cs norun
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -328,7 +328,7 @@ In alternativa puoi decorare il tipo con `[JsonConverter(typeof(OrdineIdJsonConv
 
 Per parametri semplici basta un `TypeConverter`:
 
-```cs
+```cs norun
 using System.ComponentModel;
 using System.Globalization;
 
@@ -355,7 +355,7 @@ Da .NET 7 esiste anche `IParsable<T>`: se il tipo espone un metodo statico `TryP
 
 Quando serve controllo completo (errori dettagliati in `ModelState`, dipendenze dal DI, mapping da `Result<T>`) si usa un `IModelBinder`:
 
-```cs
+```cs norun
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 public sealed class EmailModelBinder : IModelBinder
@@ -382,7 +382,7 @@ public sealed class EmailModelBinder : IModelBinder
 
 Il database salva primitivi, quindi EF Core deve sapere come convertire avanti e indietro:
 
-```cs
+```cs norun
 public class Ordine
 {
     public OrdineId Id { get; set; }
@@ -415,7 +415,7 @@ Con molti ID tipizzati, invece di ripetere `HasConversion` per ogni proprietà, 
 
 Scrivere a mano wrapper, `Equals`, `GetHashCode`, converter JSON, `TypeConverter` ed EF Core per ogni ID diventa ripetitivo. La libreria **AndrewLock.StronglyTypedId** usa un **source generator** per produrre tutto questo codice:
 
-```cs
+```cs norun
 using StronglyTypedIds;
 
 [StronglyTypedId]                    // Guid di default

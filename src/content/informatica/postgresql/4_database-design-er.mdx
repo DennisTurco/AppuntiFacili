@@ -74,7 +74,7 @@ Other notations exist (Chen notation with diamonds, UML class diagrams with `1..
 
 Put the foreign key on the "many" side. `NOT NULL` means the relationship is mandatory.
 
-```sql
+```sql norun
 CREATE TABLE project (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     code        text NOT NULL UNIQUE,      -- e.g. 'PRJ-2026-014'
@@ -139,7 +139,7 @@ A junction table often grows its own attributes, for example `linked_at` or `lin
 
 Common best practice: use a **surrogate primary key** and protect the natural key with a **`UNIQUE` constraint**. You get stable foreign keys *and* no duplicates.
 
-```sql
+```sql norun
 CREATE TABLE tag (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     project_id  bigint NOT NULL REFERENCES project(id),
@@ -220,7 +220,7 @@ Typical cases:
 - **Reporting / read models**: a separate flattened table or **materialized view** for exports.
 - **Snapshots of history**: an issued revision must keep the title *as it was* at issue time, even if the document is renamed later. This is not really redundancy, it is a different fact.
 
-```sql
+```sql norun
 CREATE MATERIALIZED VIEW project_summary AS
 SELECT p.id, p.code, count(d.id) AS document_count
 FROM project p
@@ -268,7 +268,7 @@ erDiagram
 
 The revision table in PostgreSQL:
 
-```sql
+```sql norun
 CREATE TYPE revision_status AS ENUM ('draft', 'issued', 'superseded');
 
 CREATE TABLE revision (

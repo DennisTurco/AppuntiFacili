@@ -42,7 +42,7 @@ I trigger possono servire per diversi scopi:
 
 ## 4. Sintassi
 
-```sql
+```sql norun
 CREATE TRIGGER trigger_name
 ON { Table name or view name }
 [ WITH <Options> ]
@@ -78,7 +78,7 @@ ON { Table name or view name }
 
 per gli esempi sottostanti prendiamo in considerazione la seguente tabella:
 
-```sql
+```sql norun
 CREATE TABLE Student(
     studentID INT NOT NULL AUTO_INCREMENT,
     FName VARCHAR(20),
@@ -94,7 +94,7 @@ CREATE TABLE Student(
 
 Nel trigger sottostante, stiamo cercando di calcolare la percentuale dello studente non appena i suoi dettagli vengono aggiornati al database.
 
-```sql
+```sql norun
 CREATE TRIGGER sample_trigger
 before INSERT
 ON student
@@ -106,7 +106,7 @@ SET new.total = new.marks/6;
 
 Qui quando inseriamo i dati nella tabella studente automaticamente il trigger verrà invocato. Il trigger aggiungerà 100 alla colonna marks nella colonna student.
 
-```sql
+```sql norun
 CREATE TRIGGER calculate
 before INSERT
 ON student
@@ -125,7 +125,7 @@ per int );
 
 Quando inseriamo i dati nella tabella, il trigger total mark memorizza il risultato nella tabella Final_mark.
 
-```sql
+```sql norun
 CREATE TRIGGER total_mark
 AFTER INSERT
 ON student

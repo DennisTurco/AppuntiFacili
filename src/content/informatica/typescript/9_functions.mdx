@@ -54,7 +54,7 @@ Optional parameters must come after all required parameters. `function f(a?: str
 
 Since functions are first-class values in JavaScript (and therefore in TypeScript), a parameter can itself be typed as a function. The type describes the expected parameter list and return type of whatever function is passed in.
 
-```ts
+```ts norun
 function callFunc(
     func: (f: string, l: string, m?: string) => string,
     param1: string,

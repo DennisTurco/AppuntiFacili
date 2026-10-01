@@ -84,7 +84,7 @@ for a in animali:
 
 ### 4.1 Verifica di appartenenza `in`
 
-```python
+```python norun
 print("cane" in animali)    # True
 print("leone" in animali)   # False
 ```
@@ -97,20 +97,20 @@ Il controllo di appartenenza in un set è **molto più veloce** rispetto a liste
 
 ### 5.1 Metodo `add()`
 
-```python
+```python norun
 animali.add("scimmia")
 ```
 
 ### 5.2 Metodo `update()`
 
-```python
+```python norun
 animali_tropicali = {"tucano", "canguro"}
 animali.update(animali_tropicali)
 ```
 
 È possibile usare `update()` anche con liste o tuple:
 
-```python
+```python norun
 animali.update(["leone", "tigre"])
 ```
 
@@ -126,7 +126,7 @@ animali.update(["leone", "tigre"])
 
 Esempi
 
-```python
+```python norun
 animali.remove("cane")
 animali.discard("leone")
 elemento = animali.pop()
@@ -152,19 +152,19 @@ print(A | B)          # {1, 2, 3, 4, 5}
 
 ### 7.2 Intersezione (`&`)
 
-```python
+```python norun
 print(A & B)          # {3}
 ```
 
 ### 7.3 Differenza (`-`)
 
-```python
+```python norun
 print(A - B)          # {1, 2}
 ```
 
 ### 7.4 Differenza simmetrica (`^`)
 
-```python
+```python norun
 print(A ^ B)          # {1, 2, 4, 5}
 ```
 

@@ -61,7 +61,7 @@ Se la chiave non esiste, Python genera un errore (`KeyError`).
 
 Un'alternativa più sicura è usare il metodo `get()`:
 
-```python
+```python norun
 x = auto.get("modello")
 print(x) # Output: Panda
 ```
@@ -74,7 +74,7 @@ Se la chiave non esiste, `get()` restituisce `None` (o un valore di default se s
 
 ### 4.1 Tutte le chiavi
 
-```python
+```python norun
 chiavi = auto.keys()
 print(chiavi)
 ```
@@ -83,7 +83,7 @@ print(chiavi)
 
 Analogamente con i valori:
 
-```python
+```python norun
 valori = auto.values()
 print(valori)
 ```
@@ -96,14 +96,14 @@ Entrambi i metodi restituiscono delle **view**, utili per iterare sugli elementi
 
 Per modificare un valore è sufficiente assegnarne uno nuovo alla chiave:
 
-```python
+```python norun
 auto["anno"] = 2010
 print(auto)
 ```
 
 ### 5.2 Aggiunta di una nuova coppia chiave-valore
 
-```python
+```python norun
 auto["alimentazione"] = "benzina"
 print(auto)
 ```
@@ -112,13 +112,13 @@ print(auto)
 
 - Con `del`:
 
-    ```python
+    ```python norun
     del auto["anno"]
     ```
 
 - Con `pop()`:
 
-    ```python
+    ```python norun
     colore = auto.pop("colori")
     ```
 
@@ -128,21 +128,21 @@ print(auto)
 
 ### 6.1 Iterare sulle chiavi
 
-```python
+```python norun
 for chiave in auto:
 print(chiave)
 ```
 
 ### 6.2 Iterare sui valori
 
-```python
+```python norun
 for valore in auto.values():
     print(valore)
 ```
 
 ### 6.3 Iterare su chiavi e valori
 
-```python
+```python norun
 for chiave, valore in auto.items():
     print(chiave, valore)
 ```

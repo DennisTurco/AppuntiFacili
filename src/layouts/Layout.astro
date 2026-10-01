@@ -113,6 +113,8 @@ const metaDescription = description || DEFAULT_DESCRIPTION;
           if (!codeEl || !codeBlock.parentNode) continue;
           if (codeBlock.parentElement?.classList.contains('code-wrapper')) continue;
           if (codeEl.className.toLowerCase().includes('mermaid')) continue;
+          // Blocchi gestiti da componenti React (es. codice nei quiz): non vanno spostati
+          if (codeBlock.closest('[data-no-copy]')) continue;
 
           const wrapper = document.createElement('div');
           wrapper.className = 'code-wrapper';

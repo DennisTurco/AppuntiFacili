@@ -31,7 +31,7 @@ Le lambda sono arrivate con **C# 3.0** (2007), insieme a LINQ, extension methods
 
 La forma base è:
 
-```cs
+```cs norun
 (parametri) => espressione
 ```
 
@@ -155,7 +155,7 @@ Console.WriteLine(moltiplica(10)); // 30
 
 Viene catturata la **variabile**, non il suo valore al momento della creazione: se la variabile cambia, la lambda vede il nuovo valore.
 
-```cs
+```cs norun
 int contatore = 0;
 Action incrementa = () => contatore++;
 
@@ -191,7 +191,7 @@ foreach (var azione in azioni)
 Tutte le lambda catturano **la stessa** variabile `i`, che a fine ciclo vale `3`.
 La soluzione è una copia locale per ogni iterazione:
 
-```cs
+```cs norun
 for (int i = 0; i < 3; i++)
 {
     int copia = i;
@@ -209,7 +209,7 @@ Le closure sono utilissime, ma possono anche tenere in vita oggetti grandi più 
 
 La stessa lambda può diventare due cose molto diverse, a seconda del tipo di destinazione:
 
-```cs
+```cs norun
 Func<Prodotto, bool> filtroInMemoria = p => p.Prezzo > 100;
 Expression<Func<Prodotto, bool>> filtroTraducibile = p => p.Prezzo > 100;
 ```
@@ -233,7 +233,7 @@ Console.WriteLine(pari(4));       // True
 
 Con EF Core, se `db.Prodotti` è un `IQueryable<Prodotto>`, la lambda non viene eseguita su ogni record ma tradotta in SQL:
 
-```cs
+```cs norun
 var query = db.Prodotti.Where(p => p.Prezzo > 100);
 // SELECT * FROM Prodotti WHERE Prezzo > 100
 ```
@@ -268,7 +268,7 @@ var studenti = new List<Studente>
 
 Le lambda descrivono l'intera pipeline: filtro, proiezione, ordinamento.
 
-```cs
+```cs norun
 var risultati = studenti
     .Where(s => s.Corso == "Informatica")
     .Select(s => new { s.Nome, Media = s.Voti.Average() })
@@ -285,7 +285,7 @@ foreach (var r in risultati)
 
 La lambda di `GroupBy` sceglie la **chiave** di raggruppamento:
 
-```cs
+```cs norun
 var perCorso = studenti
     .GroupBy(s => s.Corso)
     .Select(g => new
@@ -304,7 +304,7 @@ foreach (var g in perCorso)
 
 `Aggregate` riceve l'**accumulatore** corrente e l'**elemento** corrente, e produce il nuovo accumulatore:
 
-```cs
+```cs norun
 int sommaVotiAnna = studenti
     .First(s => s.Nome == "Anna")
     .Voti
@@ -317,7 +317,7 @@ Console.WriteLine(sommaVotiAnna); // 85
 
 La query syntax viene tradotta dal compilatore in chiamate di metodo con lambda:
 
-```cs
+```cs norun
 var q1 =
     from s in studenti
     where s.Eta >= 21
@@ -580,6 +580,68 @@ d:"Che non restituisca mai null"
 },
 correctAnswer:"b"
 }
+]} />
+
+### Leggi il codice: cosa stampa? dov'è il bug?
+
+<CodeQuiz title="Leggi il codice" questions={[
+  {
+    type: "output",
+    question: "Cosa stampa questo codice?",
+    lang: "csharp",
+    code: `Func<int, int> doppio = x => x * 2;
+Func<int, int> piuUno = x => x + 1;
+
+Console.WriteLine(doppio(piuUno(3)));
+Console.WriteLine(piuUno(doppio(3)));`,
+    expected: "8\n7",
+    explanation: "Le funzioni si applicano dall'interno verso l'esterno: `doppio(piuUno(3))` = `doppio(4)` = 8, mentre `piuUno(doppio(3))` = `piuUno(6)` = 7."
+  },
+  {
+    type: "output",
+    question: "Closure in un ciclo `for`: cosa stampa?",
+    lang: "csharp",
+    code: `var azioni = new List<Action>();
+for (int i = 0; i < 3; i++)
+    azioni.Add(() => Console.Write(i + " "));
+
+foreach (var azione in azioni) azione();`,
+    expected: "3 3 3",
+    explanation: "Le lambda catturano la **variabile** `i`, non il suo valore: quando vengono eseguite il ciclo è finito e `i` vale 3. Per catturare il valore si copia in una variabile locale dentro il ciclo (`int copia = i;`)."
+  },
+  {
+    question: "LINQ e esecuzione differita: cosa stampa?",
+    lang: "csharp",
+    code: `var lista = new List<int> { 1, 2, 3 };
+var query = lista.Where(x => x > 1);
+lista.Add(4);
+
+Console.WriteLine(query.Count());`,
+    answers: { a: "2", b: "3", c: "4", d: "Errore: la lista è stata modificata" },
+    correctAnswer: "b",
+    explanation: "`Where` non esegue subito il filtro: la query viene valutata solo quando serve il risultato (`Count()`), e a quel punto la lista contiene anche il 4. Gli elementi maggiori di 1 sono 2, 3 e 4."
+  },
+  {
+    type: "bug",
+    question: "Vogliamo il quadrato dei numeri pari, ma il risultato è sbagliato. Clicca la riga con il bug.",
+    lang: "csharp",
+    code: `var numeri = new List<int> { 1, 2, 3, 4, 5, 6 };
+
+var quadratiPari = numeri
+    .Where(n => n % 2 == 1)
+    .Select(n => n * n);
+
+Console.WriteLine(string.Join(", ", quadratiPari)); // atteso: 4, 16, 36`,
+    bugLine: 4,
+    fix: `var numeri = new List<int> { 1, 2, 3, 4, 5, 6 };
+
+var quadratiPari = numeri
+    .Where(n => n % 2 == 0)
+    .Select(n => n * n);
+
+Console.WriteLine(string.Join(", ", quadratiPari)); // 4, 16, 36`,
+    explanation: "`n % 2 == 1` seleziona i numeri **dispari**: per i pari il resto della divisione per 2 deve essere 0."
+  }
 ]} />
 
 ## 12. Esercizi

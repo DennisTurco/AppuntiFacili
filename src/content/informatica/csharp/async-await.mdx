@@ -82,7 +82,7 @@ int r = await t;               // poi "Ripreso dopo 1 secondo"
 | Compressione, parsing pesante, hashing | valuta `Task.Run` |
 | Wrappare `Thread.Sleep`, `.Result`, API sincrone lente | spesso è un anti-pattern |
 
-```cs
+```cs norun
 // I/O-bound: l'API è già asincrona, Task.Run sarebbe inutile
 public async Task<string> ScaricaHtmlAsync(HttpClient http, string url)
     => await http.GetStringAsync(url);
@@ -165,7 +165,7 @@ Con $N$ richieste indipendenti di latenza $L_i$, il tempo passa da $\sum L_i$ a 
 | Composizione con `WhenAll` / `WhenAny` | No | Sì |
 | Uso corretto | event handler | quasi sempre |
 
-```cs
+```cs norun
 public async void MetodoSbagliato()
 {
     await Task.Delay(1000);
@@ -186,7 +186,7 @@ Un'eccezione non gestita in un metodo `async void` viene rilanciata sul contesto
 
 Un errore molto comune è dimenticare `await`: il task parte, ma nessuno ne controlla esito o errori.
 
-```cs
+```cs norun
 public void Metodo()
 {
     SalvaAsync();       // warning CS4014: errori persi
@@ -200,7 +200,7 @@ public async Task MetodoCorretto()
 
 Se invece vuoi davvero avviare un'operazione senza attenderla (**fire-and-forget**), rendilo esplicito con il discard `_ =` e registra gli errori:
 
-```cs
+```cs norun
 _ = EseguiConLogAsync(SalvaLogAsync(), logger);
 
 static async Task EseguiConLogAsync(Task task, ILogger logger)
@@ -263,7 +263,7 @@ catch (Exception ex)
 
 `Task.WhenAll` attende che **tutti** i task terminino e, per `Task<T>`, restituisce un array con i risultati nello stesso ordine dei task.
 
-```cs
+```cs norun
 Task<string> t1 = http.GetStringAsync("https://api1.example.com");
 Task<string> t2 = http.GetStringAsync("https://api2.example.com");
 Task<string> t3 = http.GetStringAsync("https://api3.example.com");
@@ -292,7 +292,7 @@ Console.WriteLine($"Primo completato: {await primo}"); // Veloce
 
 Esempio pratico: un timeout manuale con `WhenAny`.
 
-```cs
+```cs norun
 Task<string> richiesta = http.GetStringAsync(url);
 Task timeout = Task.Delay(TimeSpan.FromSeconds(2));
 
@@ -310,7 +310,7 @@ Prima di `await` si componevano i task con `ContinueWith`. Esiste ancora, ma ric
 
 Con molti elementi, avviare tutti i task insieme può saturare rete o server. Da .NET 6 `Parallel.ForEachAsync` limita quante iterazioni girano in contemporanea.
 
-```cs
+```cs norun
 var options = new ParallelOptions
 {
     MaxDegreeOfParallelism = 4,
@@ -381,7 +381,7 @@ await DownloadAsync(progress, CancellationToken.None);
 
 Quando i dati arrivano nel tempo (paging, eventi, lettura di file o rete) puoi produrli uno alla volta con `yield return` e consumarli con `await foreach`, senza materializzare l'intera collezione.
 
-```cs
+```cs norun
 public async IAsyncEnumerable<int> GeneraValoriAsync(
     [EnumeratorCancellation] CancellationToken ct = default)
 {
@@ -405,7 +405,7 @@ Il `SynchronizationContext` decide **dove** riprende un metodo dopo `await`. Per
 - **WPF / WinForms / MAUI**: il contesto è il thread UI, quindi dopo `await` puoi toccare i controlli;
 - **ASP.NET Core e console app**: non c'è un contesto speciale, la continuazione riprende su un thread qualsiasi del pool.
 
-```cs
+```cs norun
 private async void Carica_Click(object sender, RoutedEventArgs e)
 {
     string testo = await http.GetStringAsync("https://example.com");
@@ -415,7 +415,7 @@ private async void Carica_Click(object sender, RoutedEventArgs e)
 
 `ConfigureAwait(false)` dice di **non** tornare sul contesto originale. È utile nel codice di libreria, che non ha bisogno della UI e così evita un salto di thread.
 
-```cs
+```cs norun
 public async Task<string> MetodoDiLibreriaAsync()
 {
     var dati = await FetchAsync().ConfigureAwait(false);
@@ -433,7 +433,7 @@ Nel codice UI, invece, evitalo se dopo l'`await` accedi ai controlli: la continu
 
 Un deadlock async tipico nasce quando blocchi sincronicamente (con `.Result` o `.Wait()`) il thread che serve anche alla continuazione.
 
-```cs
+```cs norun
 // Event handler WPF
 private void Button_Click(object sender, RoutedEventArgs e)
 {
@@ -463,7 +463,7 @@ sequenceDiagram
 
 La soluzione è **async all the way**: rendere asincrona l'intera catena di chiamate.
 
-```cs
+```cs norun
 private async void Button_Click(object sender, RoutedEventArgs e)
 {
     var risultato = await MetodoAsincrono(); // nessun blocco
@@ -479,7 +479,7 @@ In ASP.NET Core questo deadlock specifico è raro (non c'è contesto UI), ma `.R
 
 `ValueTask<T>` è utile quando un metodo completa spesso **in modo sincrono**: evita di allocare un `Task<T>` a ogni chiamata.
 
-```cs
+```cs norun
 private readonly Dictionary<string, int> _cache = new();
 
 public async ValueTask<int> LeggiDaCacheAsync(string chiave)

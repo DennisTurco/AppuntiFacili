@@ -3,6 +3,7 @@ import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
 import UserMenu from "@/components/UserMenu.jsx";
 import DarkModeToggle from "@/components/DarkModeToggle.astro";
+import Search from "@/components/Search.astro";
 import logo from "@/assets/favicon.webp";
 
 const menuitems = [
@@ -49,6 +50,12 @@ const isActive = (path: string) => pathname === path || pathname.startsWith(path
     </ul>
 
     <div class="flex items-center gap-1">
+      <div class="mr-1 hidden xl:block">
+        <Search />
+      </div>
+      <div class="xl:hidden">
+        <Search compact />
+      </div>
       <div class="hidden lg:block">
         <UserMenu client:idle />
       </div>

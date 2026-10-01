@@ -1,0 +1,70 @@
+/* ---------- Codice nelle domande dei quiz (src/components/Quiz.jsx) ---------- */
+
+.quiz-code pre {
+  margin: 0;
+  padding: 0.75rem 0;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.6rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.dark .quiz-code pre {
+  border-color: var(--color-slate-800);
+}
+.quiz-plain-code {
+  background: var(--color-slate-50);
+  color: var(--color-slate-800);
+}
+.dark .quiz-plain-code {
+  background: var(--color-slate-950);
+  color: var(--color-slate-200);
+}
+
+/* Ogni riga occupa tutta la larghezza, con il numero di riga a sinistra */
+.quiz-code code {
+  display: block;
+  min-width: max-content;
+  counter-reset: quiz-line;
+}
+.quiz-code .line {
+  display: inline-block;
+  width: 100%;
+  padding: 0 1rem 0 0;
+  border-left: 3px solid transparent;
+}
+.quiz-code .line::before {
+  counter-increment: quiz-line;
+  content: counter(quiz-line);
+  display: inline-block;
+  width: 2.25rem;
+  padding-right: 0.75rem;
+  text-align: right;
+  color: var(--color-slate-400);
+  user-select: none;
+}
+
+/* "Trova il bug": righe cliccabili */
+.quiz-code.is-selectable:not(.is-checked) .line {
+  cursor: pointer;
+}
+.quiz-code.is-selectable:not(.is-checked) .line:hover {
+  background: rgb(59 130 246 / 0.08);
+}
+.quiz-code .line:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: -2px;
+}
+.quiz-code .line.is-selected {
+  border-left-color: var(--color-blue-500);
+  background: rgb(59 130 246 / 0.14) !important;
+}
+.quiz-code .line.is-correct {
+  border-left-color: var(--color-emerald-500);
+  background: rgb(16 185 129 / 0.16) !important;
+}
+.quiz-code .line.is-wrong {
+  border-left-color: var(--color-rose-500);
+  background: rgb(244 63 94 / 0.16) !important;
+}

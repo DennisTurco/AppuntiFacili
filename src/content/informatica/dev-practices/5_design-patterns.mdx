@@ -33,7 +33,7 @@ Patterns are tools, not goals. Use a pattern when you have the problem it solves
 
 The **Repository** pattern hides data access behind a collection-like interface. The domain asks for `Project` objects and does not know about SQL or EF Core.
 
-```cs
+```cs norun
 public interface IProjectRepository
 {
     Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default);
@@ -55,7 +55,7 @@ public class EfProjectRepository(AppDbContext db) : IProjectRepository
 
 The **Unit of Work** groups several changes into **one transaction**: either all of them are saved, or none.
 
-```cs
+```cs norun
 public interface IUnitOfWork
 {
     Task<int> SaveChangesAsync(CancellationToken ct = default);
@@ -85,7 +85,7 @@ Avoid a "generic repository" that returns `IQueryable<T>` from every method. It 
 
 A **Factory** centralizes the creation of objects, so the caller does not need to know which concrete class to instantiate.
 
-```cs
+```cs norun
 public interface IDocumentParser { ParsedDocument Parse(Stream file); }
 
 public class PdfParser : IDocumentParser { /* ... */ }
@@ -112,7 +112,7 @@ Use it when the concrete type depends on **runtime data** (file extension, user 
 
 **Strategy** defines a family of algorithms behind one interface and lets you choose one at runtime. It is the most direct way to apply the Open/Closed Principle.
 
-```cs
+```cs norun
 public interface IRevisionNumbering
 {
     string Next(string? current);
@@ -144,7 +144,7 @@ Each customer project can use a different numbering scheme without any `if` in `
 
 A **Decorator** wraps an object that implements an interface, and adds behavior **before or after** the call, without changing the original class. Typical uses: caching, logging, retry, metrics.
 
-```cs
+```cs norun
 public class CachedProjectRepository(
     IProjectRepository inner,
     IMemoryCache cache) : IProjectRepository
@@ -176,7 +176,7 @@ You already use decorators every day: ASP.NET Core **middleware** wraps the next
 
 **Observer** lets an object (the **subject**) notify many other objects (the **observers**) when something happens, without knowing who they are. In C# this pattern is built into the language with **events**.
 
-```cs
+```cs norun
 public class Document
 {
     public event EventHandler<RevisionAddedEventArgs>? RevisionAdded;
@@ -203,7 +203,7 @@ In larger applications the same idea appears as **domain events** (often with a 
 
 An **Adapter** converts the interface of an existing class into the interface your code expects. It is the key pattern for **integration between systems**: your domain talks to your own interface, and the adapter translates to the external API.
 
-```cs
+```cs norun
 // Our domain interface
 public interface IEquipmentCatalog
 {
@@ -247,7 +247,7 @@ public sealed class UnitConverter
 
 This is hard to test (global state, cannot be replaced by a fake). In modern .NET you let the container manage the lifetime instead:
 
-```cs
+```cs norun
 builder.Services.AddSingleton<IUnitConverter, UnitConverter>();
 ```
 

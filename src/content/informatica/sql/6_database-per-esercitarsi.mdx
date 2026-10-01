@@ -2,17 +2,99 @@
 title: "Database per esercitarsi"
 order: 6
 draft: false
-lastUpdateDate: "2025-09-14"
+lastUpdateDate: "2026-10-01"
 subject: "SQL"
 category: "Informatica"
-difficulty: ""
+difficulty: "facile"
 tags: ["sql", "programmazione", "base di dati", "database", "esercizi"]
 author: "Dennis Turco"
 videoLesson: false
 ---
 
-## Database per esercitarsi
+Qui puoi scrivere ed eseguire query SQL direttamente nel browser, senza installare niente.
+Ogni editor carica uno dei database di esempio: clicca il nome di una tabella per vederne il contenuto,
+scrivi la tua query e premi **Esegui** (oppure `Ctrl` + `Invio`).
 
-- <a href="/files/informatica/database_vaccari.sql" download>Database di Vaccari</a>
+<Aside variant="info" title="Come funziona">
+Le query vengono eseguite con **SQLite** dentro il browser. Ad ogni esecuzione il database riparte da zero,
+quindi puoi provare `INSERT`, `UPDATE` e `DELETE` senza paura di rovinare i dati.
+La sintassi è quasi identica a quella di MySQL; alcune funzioni hanno nomi diversi
+(ad esempio si usa `strftime('%Y', data)` al posto di `YEAR(data)`).
+</Aside>
+
+## Database "Scuola"
+
+Scuole, classi, studenti, insegnanti e lezioni (quale insegnante insegna in quale classe).
+
+<Playground
+  lang="sql"
+  db="scuola"
+  schema
+  code={`-- Studenti con la loro classe e la loro scuola
+SELECT s.nome, s.cognome, c.nome AS classe, sc.nome AS scuola
+FROM Studente s
+JOIN Classe c ON s.fk_classe = c.id_classe
+JOIN Scuola sc ON c.fk_scuola = sc.id_scuola
+ORDER BY sc.nome, c.nome;`}
+/>
+
+### Esercizi
+
+1. Elenca tutti gli studenti della classe con `id_classe = 3`.
+2. Conta quanti studenti ci sono in ogni classe (`GROUP BY`).
+3. Trova le scuole di tipo `'Liceo'` e le loro classi.
+4. Elenca gli insegnanti che insegnano in almeno due classi diverse (`HAVING`).
+
+## Database "Eventi" (Vaccari)
+
+Utenti che pubblicano eventi, con i commenti e i voti degli altri utenti.
+È un database piccolo: alcuni eventi non hanno ancora luogo e categoria (`NULL`).
+
+<Playground
+  lang="sql"
+  db="vaccari"
+  schema
+  code={`-- Eventi con chi li ha inseriti, numero di commenti e voto medio
+SELECT e.titoloevento, e.dataevento, e.artista,
+       u.nickname AS inserito_da,
+       COUNT(c.idcommento) AS commenti,
+       AVG(c.voto) AS voto_medio
+FROM eventi e
+JOIN utenti u ON e.inserito_da = u.Idutente
+LEFT JOIN commenti c ON c.idevento = e.ideventi
+GROUP BY e.ideventi
+ORDER BY e.dataevento;`}
+/>
+
+### Esercizi
+
+1. Elenca i commenti con il nickname dell'utente che li ha scritti.
+2. Trova gli eventi che non hanno nessun commento (`LEFT JOIN ... IS NULL`).
+3. Con un `UPDATE` assegna un luogo all'evento 3, poi mostra gli eventi con il nome del luogo e la città.
+   Perché con `JOIN` l'evento 2 sparisce e con `LEFT JOIN` no?
+
+## Database "Viaggi"
+
+Autisti, passeggeri, viaggi e giudizi reciproci. Questo database contiene **solo la struttura**:
+il primo esercizio è popolarlo con qualche `INSERT`.
+
+<Playground
+  lang="sql"
+  db="viaggi"
+  schema
+  code={`INSERT INTO Autista (id_autista, nome, cognome) VALUES (1, 'Luca', 'Rossi');
+INSERT INTO Viaggio (id_viaggio, partenza, arrivo, costo, fk_autista)
+VALUES (1, 'Parma', 'Bologna', 12.5, 1);
+
+SELECT v.partenza, v.arrivo, v.costo, a.nome || ' ' || a.cognome AS autista
+FROM Viaggio v
+JOIN Autista a ON v.fk_autista = a.id_autista;`}
+/>
+
+## Scarica i database
+
+Se vuoi usarli in MySQL o in un altro DBMS, puoi scaricare i file `.sql`:
+
 - <a href="/files/informatica/database_scuola.sql" download>Scuola</a>
+- <a href="/files/informatica/database_vaccari.sql" download>Database di Vaccari</a>
 - <a href="/files/informatica/database_viaggi.sql" download>Viaggi</a>

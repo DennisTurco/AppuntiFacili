@@ -29,6 +29,7 @@ const informaticaCollection = defineCollection({
     category: z.string(),
     difficulty: z.string(),
     videoLesson: z.boolean(),
+    runnable: z.boolean().optional(),
     tags: z.array(z.string()),
   }),
 });
@@ -44,6 +45,7 @@ const matematicaCollection = defineCollection({
     category: z.string(),
     difficulty: z.string(),
     videoLesson: z.boolean(),
+    runnable: z.boolean().optional(),
     tags: z.array(z.string()),
   }),
 });

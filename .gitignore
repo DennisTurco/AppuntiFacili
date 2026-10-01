@@ -21,3 +21,9 @@ pnpm-debug.log*
 .DS_Store
 
 .idea
+# runner C#: output di dotnet
+tools/csharp-runner/bin/
+tools/csharp-runner/obj/
+
+# indice di ricerca generato da pagefind in dev
+public/pagefind/

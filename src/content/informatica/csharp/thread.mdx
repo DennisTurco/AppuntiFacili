@@ -57,7 +57,7 @@ dove $P$ è la frazione parallelizzabile e $N$ il numero di core. Se $P = 0.7$, 
 
 ### 2.1 Creazione, `Start` e `Join`
 
-```cs
+```cs norun
 using System;
 using System.Threading;
 
@@ -87,7 +87,7 @@ Console.WriteLine($"Ancora vivo? {worker.IsAlive}");  // False
 
 Il costruttore accetta un `ThreadStart` (nessun parametro) o un `ParameterizedThreadStart` (un solo parametro `object?`, che richiede cast). In pratica è più comodo e type-safe **catturare i valori con una lambda**:
 
-```cs
+```cs norun
 void Processa(string file, int retry) =>
     Console.WriteLine($"Processo {file} con {retry} tentativi");
 
@@ -104,7 +104,7 @@ t2.Start();
 La variabile di un ciclo `for` è **unica** per tutto il ciclo: se la catturi in una lambda, i thread possono vedere il valore già incrementato. Copiala prima in una variabile locale.
 </Aside>
 
-```cs
+```cs norun
 for (int i = 0; i < 3; i++)
     new Thread(() => Console.Write(i)).Start();     // può stampare 3 3 3, 1 3 3...
 
@@ -120,7 +120,7 @@ for (int i = 0; i < 3; i++)
 - I thread **foreground** (default) tengono vivo il processo.
 - I thread **background** (`IsBackground = true`) vengono terminati quando finiscono tutti i foreground.
 
-```cs
+```cs norun
 Thread bg = new Thread(() =>
 {
     for (int i = 0; i < 10; i++)
@@ -140,7 +140,7 @@ Console.WriteLine("Main termina subito");
 
 `Thread.Abort()` interrompeva forzatamente un thread, ma è **deprecato** e non supportato nel .NET moderno. Il modo corretto è chiedere al thread di fermarsi e lasciare che sia lui a uscire in modo pulito:
 
-```cs
+```cs norun
 using CancellationTokenSource cts = new();
 
 Thread worker = new Thread(() =>
@@ -211,7 +211,7 @@ Far partire i thread è facile; il problema vero è **coordinarli** quando acced
 
 Si ha una **race condition** quando più thread accedono allo stesso stato condiviso, almeno uno scrive, e non c'è sincronizzazione: il risultato dipende dall'ordine di esecuzione.
 
-```cs
+```cs norun
 using System;
 using System.Threading;
 
@@ -237,7 +237,7 @@ Console.WriteLine(counter); // atteso 200000, spesso esce meno (es. 137512)
 
 `lock` protegge una **sezione critica**, eseguibile da un solo thread alla volta. È zucchero sintattico per `Monitor.Enter`/`Monitor.Exit` dentro un `try/finally`.
 
-```cs
+```cs norun
 private static readonly object _sync = new();
 private static int _counter = 0;
 
@@ -263,7 +263,7 @@ Tieni la sezione critica il più breve possibile: niente I/O, `Sleep` o chiamate
 
 Un **deadlock** si ha quando due o più thread restano bloccati per sempre, ognuno in attesa di una risorsa tenuta da un altro.
 
-```cs
+```cs norun
 object lockA = new(), lockB = new();
 
 Thread t1 = new Thread(() =>
@@ -282,7 +282,7 @@ t1.Join();  t2.Join();   // non termina mai: T1 aspetta B, T2 aspetta A
 
 Un deadlock richiede che coesistano le quattro **condizioni di Coffman**: mutua esclusione, hold and wait, no preemption, attesa circolare. Basta romperne una. La soluzione più pratica è eliminare l'attesa circolare imponendo un **ordine globale di acquisizione**:
 
-```cs
+```cs norun
 // Entrambi i thread prendono sempre prima A, poi B: nessun ciclo possibile
 Thread t1 = new Thread(() => { lock (lockA) lock (lockB) Console.WriteLine("T1 ok"); });
 Thread t2 = new Thread(() => { lock (lockA) lock (lockB) Console.WriteLine("T2 ok"); });

@@ -117,7 +117,7 @@ def controllo_integrita(file1, file2):
 
 Esempio d'uso:
 
-```python
+```python norun
 # Per testare la funzione controllo_integrita, prendere 1 file immagine, duplicarlo 2 volte (averne 3)
 # su uno dei 3 applicare una modifica, per esempio ruotare l'immagine
 print(controllo_integrita("immagine_nomrale1.svg", "immagine_nomrale2.svg"))
@@ -130,7 +130,7 @@ L'hashing semplice (es. SHA256) non basta per le password, perché è vulnerabil
 La soluzione è usare un **salt**, una stringa casuale univoca aggiunta alla password prima di eseguire l'hash.
 In Python possiamo usare `hashlib.pbkdf2_hmac` per derivare chiavi sicure.
 
-```python
+```python norun
 import hashlib, os
 
 password = b"mypass123"
@@ -147,7 +147,7 @@ Esempio pratico con `hashlib.pbkdf2_hmac`:
 
 (importante: evita valori troppo grandi se esegui su macchine poco performanti)
 
-```python
+```python norun
 import hashlib, os, time
 
 password = b"mypass123"
@@ -262,7 +262,7 @@ La **firma digitale** consente di garantire l'autenticità e l'integrità di un 
 - Il destinatario verifica la firma con la **chiave pubblica**.
 
 
-```python
+```python norun
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
@@ -300,7 +300,7 @@ Se la verifica fallisce, significa che il messaggio è stato modificato o che la
 
 La libreria `zxcvbn` consente di stimare la forza di una password.
 
-```python
+```python norun
 from zxcvbn import zxcvbn
 
 def controllo_password(password):

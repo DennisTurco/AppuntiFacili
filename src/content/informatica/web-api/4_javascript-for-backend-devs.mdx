@@ -85,7 +85,7 @@ function describe({ title, revision = "A" }) {
 
 The `...` operator **spreads** (copies) or **collects** (rest) values.
 
-```js
+```js norun
 const updated = { ...doc, revision: "C" };     // shallow copy + override
 const allTags = [...pumpTags, ...valveTags];   // merge arrays
 const logAll = (level, ...messages) => messages.forEach((m) => console.log(level, m)); // rest
@@ -93,7 +93,7 @@ const logAll = (level, ...messages) => messages.forEach((m) => console.log(level
 
 ### 4.3 Optional chaining and nullish coalescing
 
-```js
+```js norun
 const city = project.site?.address?.city;        // undefined instead of an error
 const pageSize = settings.pageSize ?? 20;        // default only for null/undefined
 ```
@@ -192,7 +192,7 @@ fetch("/api/projects")
 
 Running several Promises together:
 
-```js
+```js norun
 // Wait for all (like Task.WhenAll). Rejects if one fails.
 const [projects, users] = await Promise.all([getProjects(), getUsers()]);
 // Never rejects: you get a status for each one
@@ -205,7 +205,7 @@ const results = await Promise.allSettled([getProjects(), getUsers()]);
 
 `async`/`await` is syntax on top of Promises, just like in C#. An `async` function **always returns a Promise**. `await` pauses the function (not the thread) until the Promise settles.
 
-```js
+```js norun
 async function loadProject(id) {
   const response = await fetch(`/api/projects/${id}`);
   return await response.json();  // the caller receives a Promise
@@ -262,7 +262,7 @@ In a bigger project you would create an `ApiError` class that extends `Error`, l
 
 ### 10.2 Using the helper
 
-```js
+```js norun
 // GET with query string
 const params = new URLSearchParams({ status: "Approved", page: 1 });
 const docs = await apiRequest(`/projects/42/documents?${params}`);
@@ -291,7 +291,7 @@ If the page and the API have different origins (for example `localhost:5173` and
 
 The **DOM** (Document Object Model) is the tree of HTML elements that JavaScript can read and change. Frameworks like React or Angular do this for you, but the basics are simple. Assume the page has an input `#search`, a list `#equipment-list` and a hidden paragraph `#error`.
 
-```js
+```js norun
 const list = document.querySelector("#equipment-list");
 const errorBox = document.querySelector("#error");
 

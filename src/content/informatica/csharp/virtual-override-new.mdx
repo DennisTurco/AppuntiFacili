@@ -37,7 +37,7 @@ public class Lupo : Animale
 }
 ```
 
-```cs
+```cs norun
 Animale a1 = new Cane();
 Animale a2 = new Lupo();
 Lupo l = new Lupo();
@@ -77,7 +77,7 @@ public class Word : Documento
 }
 ```
 
-```cs
+```cs norun
 Documento[] documenti = { new Pdf(), new Word(), new Documento() };
 
 foreach (var doc in documenti)
@@ -239,7 +239,7 @@ d.Stampa(); // Derivata
 
 Il bug tipico emerge con le collezioni, dove gli elementi sono quasi sempre visti tramite il tipo base:
 
-```cs
+```cs norun
 var lista = new List<Base> { new Derivata(), new Derivata() };
 
 foreach (var item in lista)
@@ -267,7 +267,7 @@ public class JsonFormatter : BaseFormatter, IFormatter
 }
 ```
 
-```cs
+```cs norun
 JsonFormatter jf = new JsonFormatter();
 BaseFormatter bf = jf;
 IFormatter f = jf;
@@ -315,7 +315,7 @@ Console.WriteLine(r.Area());     // 12
 
 `sealed override` mantiene lo stesso slot ma impedisce ulteriori ridefinizioni nelle classi successive:
 
-```cs
+```cs norun
 public class Cane : Animale
 {
     public sealed override string FaiVerso() => "Bau!";

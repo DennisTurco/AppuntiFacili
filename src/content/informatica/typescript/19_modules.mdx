@@ -70,7 +70,7 @@ export default test;
 
 To import one or more named exports, use curly braces and match the exact exported name:
 
-```ts
+```ts norun
 // main.ts
 import { add, VALUE } from "./math-utils";
 
@@ -86,7 +86,7 @@ Named imports must match the exported name exactly (you can rename locally with 
 
 The default export can be imported under **any local name you choose** — that's the whole point of it being "default" rather than named:
 
-```ts
+```ts norun
 // main.ts (continued)
 import Something from "./math-utils";
 
@@ -105,7 +105,7 @@ import Something, { add, VALUE } from "./math-utils";
 
 Instead of listing individual named exports, you can import everything a module exports as a single namespace object:
 
-```ts
+```ts norun
 // main.ts
 import * as MathUtils from "./math-utils";
 
@@ -120,7 +120,7 @@ This style is handy when a module exports many related utilities and you want to
 
 A module can also forward another module's exports without importing them locally first — a **re-export**. This is common in "barrel" files that aggregate several modules into one entry point:
 
-```ts
+```ts norun
 // index.ts
 export * from "./math-utils";
 export * from "./string-utils";
@@ -128,7 +128,7 @@ export * from "./string-utils";
 
 Consumers can now do `import { add } from "./index";` without knowing that `add` actually lives in `math-utils.ts`. You can also re-export selectively:
 
-```ts
+```ts norun
 // index.ts
 export { add, VALUE } from "./math-utils";
 ```

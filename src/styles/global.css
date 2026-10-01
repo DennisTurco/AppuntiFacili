@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import "katex/dist/katex.min.css";
+@import "./playground.css";
+@import "./quiz.css";
 
 @plugin '@tailwindcss/typography';
 

@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+
+  <!--
+    Runner C# per i blocchi di codice eseguibili del sito.
+    Compila il codice dello studente con Roslyn ed esegue l'assembly risultante,
+    tutto dentro il browser (WebAssembly, in un Web Worker).
+
+    Build:  node tools/build-csharp-runner.mjs   (pubblica in public/runners/csharp)
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Messaggi di eccezione leggibili (non solo le chiavi delle risorse) -->
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
+    <NoWarn>$(NoWarn);CA1416;IL2026;IL2075;IL2104</NoWarn>
+
+    <!-- DLL "vere" (non webcil) così Roslyn può leggerle come MetadataReference -->
+    <WasmEnableWebcil>false</WasmEnableWebcil>
+    <!-- Niente fingerprint nei nomi: i file vengono serviti da /runners/csharp/_framework -->
+    <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <OverrideHtmlAssetPlaceholders>false</OverrideHtmlAssetPlaceholders>
+    <CompressionEnabled>false</CompressionEnabled>
+    <BlazorEnableCompression>false</BlazorEnableCompression>
+
+    <!--
+      Trimming: le assembly del framework che il codice dello studente può usare sono
+      "radicate" più sotto (non vengono ridotte), il resto viene eliminato se inutilizzato.
+    -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+
+  <!--
+    Roslyn: si usa la build netstandard2.0 e non quella net10.0, che chiama
+    Volatile.ReadBarrier (intrinsic non supportato dall'interprete Mono in WebAssembly:
+    finisce in StackOverflowException). Il linguaggio supportato è lo stesso.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" ExcludeAssets="compile;runtime" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.9.0" ExcludeAssets="compile;runtime" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.dll" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_CSharp)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Assembly del framework disponibili come riferimenti per il codice dello studente -->
+    <TrimmerRootAssembly Include="System.Private.CoreLib" />
+    <TrimmerRootAssembly Include="System.Runtime" />
+    <TrimmerRootAssembly Include="System.Console" />
+    <TrimmerRootAssembly Include="System.Collections" />
+    <TrimmerRootAssembly Include="System.Collections.Concurrent" />
+    <TrimmerRootAssembly Include="System.Collections.Immutable" />
+    <TrimmerRootAssembly Include="System.Linq" />
+    <TrimmerRootAssembly Include="System.Linq.Expressions" />
+    <TrimmerRootAssembly Include="System.Linq.Queryable" />
+    <TrimmerRootAssembly Include="System.Text.RegularExpressions" />
+    <TrimmerRootAssembly Include="System.Text.Json" />
+    <TrimmerRootAssembly Include="System.Memory" />
+    <TrimmerRootAssembly Include="System.Runtime.Numerics" />
+    <TrimmerRootAssembly Include="System.Threading" />
+    <TrimmerRootAssembly Include="System.Threading.Tasks" />
+    <TrimmerRootAssembly Include="System.ComponentModel.Primitives" />
+    <TrimmerRootAssembly Include="System.ObjectModel" />
+  </ItemGroup>
+
+</Project>

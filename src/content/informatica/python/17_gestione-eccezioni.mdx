@@ -38,7 +38,7 @@ Se durante l'esecuzione di quel codice si verifica un'eccezione non gestita, il 
 
 Esempio:
 
-```python
+```python norun
 try:
     x = int(input("Inserisci un numero: "))
     print("Hai inserito:", x)
@@ -134,7 +134,7 @@ Usare `else` migliora la leggibilità e chiarisce l'intento del programmatore: "
 
 Esempio
 
-```py
+```py norun
 try:
     file = open("dati.txt", "r")
     contenuto = file.read()
@@ -153,7 +153,7 @@ Anche se si verifica un'eccezione, il `finally` viene eseguito (a meno che il pr
 
 ## 6. Schema Generale
 
-```py
+```py norun
 try:
     # codice che potrebbe generare un errore
 except oErrore1:

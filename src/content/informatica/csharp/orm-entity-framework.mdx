@@ -83,7 +83,7 @@ EF Core applica molte **convenzioni**: `Id` o `NomeClasseId` diventa chiave prim
 
 Il `DbContext` è il **cuore di EF Core**: rappresenta la sessione con il database, espone i `DbSet<T>` (uno per tabella) e contiene il **Change Tracker**.
 
-```cs
+```cs norun
 public class AppDbContext : DbContext
 {
     public DbSet<Prodotto> Prodotti => Set<Prodotto>();
@@ -109,7 +109,7 @@ public class AppDbContext : DbContext
 
 Registrazione in `Program.cs`:
 
-```cs
+```cs norun
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db")); // o UseSqlServer(...)
 ```
@@ -124,7 +124,7 @@ Il `DbContext` **non è thread-safe** e accumula entità tracciate. `AddDbContex
 
 La stessa configurazione della sezione 3 si può scrivere con attributi direttamente sulla entity:
 
-```cs
+```cs norun
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -147,7 +147,7 @@ Le **Data Annotations** sono comode per vincoli semplici e leggibili accanto all
 
 Una **shadow property** esiste nel modello EF ma **non nella classe C#**: utile per dati infrastrutturali (`CreatedAt`, `IsDeleted`, `TenantId`) che non vuoi nel dominio.
 
-```cs
+```cs norun
 modelBuilder.Entity<Prodotto>().Property<DateTime>("CreatedAt");
 modelBuilder.Entity<Prodotto>().Property<bool>("IsDeleted").HasDefaultValue(false);
 
@@ -157,7 +157,7 @@ _context.Entry(prodotto).Property("CreatedAt").CurrentValue = DateTime.UtcNow;
 
 Le **owned entities** mappano un **Value Object** (un oggetto che ha senso solo dentro il proprietario) nella stessa tabella del proprietario:
 
-```cs
+```cs norun
 public class Ordine
 {
     public int Id { get; set; }
@@ -193,7 +193,7 @@ public class PagamentoBonifico : Pagamento { public string Iban { get; set; } = 
 | **TPT** (Table Per Type) | Una per il tipo base + una per derivato | Schema normalizzato | Join a ogni query |
 | **TPC** (Table Per Concrete type) | Una completa per ogni tipo concreto | Niente join base/derivato | Colonne duplicate |
 
-```cs
+```cs norun
 modelBuilder.Entity<Pagamento>().UseTptMappingStrategy(); // oppure UseTpcMappingStrategy()
 ```
 
@@ -219,7 +219,7 @@ graph LR
 
 Ogni migrazione contiene un metodo `Up()` (modifiche da applicare), un metodo `Down()` (rollback) e aggiorna lo **snapshot** del modello. Ad esempio, aggiungendo `public string? Descrizione { get; set; }` a `Prodotto` e lanciando `migrations add AggiuntaDescrizione`, si ottiene:
 
-```cs
+```cs norun
 protected override void Up(MigrationBuilder migrationBuilder)
 {
     migrationBuilder.AddColumn<string>(
@@ -250,7 +250,7 @@ Il **Change Tracker** memorizza lo stato delle entità note al contesto:
 
 Quando chiami `SaveChangesAsync()`, EF confronta i valori originali con quelli correnti, genera i comandi SQL, li esegue **in una transazione** e aggiorna gli stati.
 
-```cs
+```cs norun
 var p = await _context.Prodotti.FirstAsync(p => p.Id == 1);
 Console.WriteLine(_context.Entry(p).State); // Unchanged
 
@@ -264,7 +264,7 @@ Console.WriteLine(_context.Entry(p).State); // Unchanged
 
 Il contesto mantiene anche una **identity map**: per una certa chiave esiste una sola istanza tracciata, quindi due query sulla stessa riga restituiscono lo stesso oggetto.
 
-```cs
+```cs norun
 var p1 = await _context.Prodotti.FindAsync(1);
 var p2 = await _context.Prodotti.FirstAsync(p => p.Id == 1);
 Console.WriteLine(ReferenceEquals(p1, p2)); // True
@@ -274,7 +274,7 @@ Console.WriteLine(ReferenceEquals(p1, p2)); // True
 
 Per query di sola lettura (liste, dashboard, report, API read-only) il tracking è lavoro sprecato. `AsNoTracking()` evita di inserire le entità nel Change Tracker, riducendo memoria e CPU.
 
-```cs
+```cs norun
 var disponibili = await _context.Prodotti
     .AsNoTracking()
     .Where(p => p.QuantitaInStock > 0)
@@ -289,7 +289,7 @@ Le entità caricate con `AsNoTracking()` non vengono salvate: se modifichi una l
 
 In una API web l'oggetto arriva dal client già **Detached**. `Attach()` lo marca `Unchanged`, `Update()` marca **tutte** le proprietà come `Modified`, `Remove()` lo marca `Deleted`.
 
-```cs
+```cs norun
 // Aggressivo: UPDATE su tutte le colonne, anche quelle non inviate dal client
 _context.Prodotti.Update(prodottoDalClient);
 

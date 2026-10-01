@@ -34,7 +34,7 @@ public partial class Student
 }
 ```
 
-```cs
+```cs norun
 // File: Student.Validation.cs
 public partial class Student : IValidatable
 {
@@ -64,7 +64,7 @@ public partial class Student { }   // Tipo DIVERSO: il namespace cambia
 
 Il caso d'uso reale di `partial` è separare il codice **generato** da quello scritto a mano. Nei progetti WinForms trovi `MainForm.cs` e `MainForm.Designer.cs`:
 
-```cs
+```cs norun
 // File: MainForm.cs (scritto da te)
 public partial class MainForm : Form
 {
@@ -75,7 +75,7 @@ public partial class MainForm : Form
 }
 ```
 
-```cs
+```cs norun
 // File: MainForm.Designer.cs (generato dal designer)
 public partial class MainForm
 {
@@ -115,7 +115,7 @@ Non scrivere mai logica dentro i file generati (`*.Designer.cs`, entità di scaf
 
 Le partial method permettono a codice generato e manuale di agganciarsi tramite "hook". Nella **forma classica** (implicitamente `private`, ritorno `void`) l'implementazione è facoltativa:
 
-```cs
+```cs norun
 public partial class StudentImporter
 {
     partial void OnBeforeSave(Student student);   // dichiarazione (es. generata)
@@ -154,7 +154,7 @@ public partial class SearchValidator
 
 Un esempio reale è il generatore di regex di .NET 7+: tu scrivi solo la dichiarazione, il compilatore genera il corpo.
 
-```cs
+```cs norun
 public static partial class Validators
 {
     [GeneratedRegex(@"^\d{5}$")]

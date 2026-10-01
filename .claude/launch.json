@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "astro-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "pnpm@10.15.1",
+        "dev",
+        "--port",
+        "4340"
+      ],
+      "port": 4340
+    },
+    {
+      "name": "astro-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "pnpm@10.15.1",
+        "preview",
+        "--port",
+        "4330"
+      ],
+      "port": 4330
+    }
+  ]
+}

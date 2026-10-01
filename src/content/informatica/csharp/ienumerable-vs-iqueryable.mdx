@@ -42,7 +42,7 @@ public interface IEnumerable<out T>
 
 Un `foreach` viene trasformato dal compilatore in qualcosa di molto simile a:
 
-```cs
+```cs norun
 using IEnumerator<int> enumerator = collezione.GetEnumerator();
 
 while (enumerator.MoveNext())       // avanza, true se c'è un elemento
@@ -101,7 +101,7 @@ Console.WriteLine(string.Join(", ", query)); // 6, 7, 8, 9, 10
 
 `IQueryable<T>` estende `IEnumerable<T>` aggiungendo tre membri:
 
-```cs
+```cs norun
 public interface IQueryable<out T> : IEnumerable<T>
 {
     Expression Expression { get; }    // albero sintattico della query
@@ -123,7 +123,7 @@ flowchart LR
 
 Esempio con EF Core:
 
-```cs
+```cs norun
 IQueryable<Prodotto> query = _context.Prodotti
     .Where(p => p.Prezzo > 100)
     .OrderBy(p => p.Nome);
@@ -135,7 +135,7 @@ List<Prodotto> prodotti = await query.ToListAsync(); // ora parte la query
 
 SQL generato (semplificato):
 
-```sql
+```sql norun
 SELECT p.Id, p.Nome, p.Prezzo
 FROM Prodotti AS p
 WHERE p.Prezzo > 100
@@ -174,7 +174,7 @@ Console.WriteLine(string.Join(", ", grandi)); // 2, 3, 10
 Ogni enumerazione riesegue la query. Su un `IQueryable<T>` chiamare `Count()` e poi `foreach` significa **due round-trip** al database. Se ti servono i dati più volte, materializza una sola volta con `ToList()`.
 </Aside>
 
-```cs
+```cs norun
 IQueryable<Ordine> query = _context.Ordini.Where(o => o.Totale > 50);
 
 int quanti = query.Count();      // query SQL n. 1
@@ -188,7 +188,7 @@ int quantiInMemoria = lista.Count;
 
 Gli expression tree sono il cuore di `IQueryable<T>`. La stessa lambda può diventare due cose diverse a seconda del tipo di destinazione:
 
-```cs
+```cs norun
 Func<Prodotto, bool> filtroCompilato = p => p.Prezzo > 100;
 Expression<Func<Prodotto, bool>> filtroEspressione = p => p.Prezzo > 100;
 ```
@@ -198,7 +198,7 @@ Expression<Func<Prodotto, bool>> filtroEspressione = p => p.Prezzo > 100;
 
 Puoi esplorare l'albero direttamente:
 
-```cs
+```cs norun
 Expression<Func<Prodotto, bool>> expr = p => p.Prezzo > 100;
 
 var corpo = (BinaryExpression)expr.Body;
@@ -218,7 +218,7 @@ graph TD
 
 Gli alberi si possono anche costruire a runtime, utile per filtri dinamici e builder di ricerca:
 
-```cs
+```cs norun
 using System.Linq.Expressions;
 
 ParameterExpression p = Expression.Parameter(typeof(Prodotto), "p");
@@ -236,7 +236,7 @@ La differenza più importante è **dove** applichi filtro, proiezione e aggregaz
 
 ### 6.1 Filtro in memoria vs filtro sul database
 
-```cs
+```cs norun
 // Carica TUTTA la tabella, poi filtra in memoria
 IEnumerable<Prodotto> prodottiEnum = _context.Prodotti;
 var costosiMemoria = prodottiEnum.Where(p => p.Prezzo > 100).ToList();
@@ -267,7 +267,7 @@ sequenceDiagram
 Un metodo di repository che restituisce `IEnumerable<T>` invece di `IQueryable<T>` "spezza" la query: ogni `Where`, `Skip` o `Take` aggiunto dal chiamante viene eseguito in memoria dopo aver scaricato l'intera tabella. Con milioni di righe può saturare RAM e rete.
 </Aside>
 
-```cs
+```cs norun
 // Firma problematica
 public IEnumerable<Prodotto> GetAll() => _context.Prodotti;
 
@@ -279,7 +279,7 @@ var pagina = repo.GetAll().Skip(100).Take(20).ToList();
 
 Spesso l'ottimizzazione più efficace è **caricare meno colonne**: meno I/O, meno payload di rete, meno materializzazione e nessun change tracking inutile.
 
-```cs
+```cs norun
 var cards = await _context.Prodotti
     .Where(p => p.Prezzo > 100)
     .Select(p => new ProdottoCardDto
@@ -296,7 +296,7 @@ var cards = await _context.Prodotti
 
 Si verifica quando una query carica N entità e poi, per ciascuna, ne parte un'altra per i dati correlati (ad esempio con lazy loading):
 
-```cs
+```cs norun
 var ordini = await _context.Ordini.ToListAsync();   // 1 query
 
 foreach (var ordine in ordini)
@@ -305,7 +305,7 @@ foreach (var ordine in ordini)
 
 La soluzione è restare su `IQueryable<T>` e far caricare tutto in un'unica query, con `Include` oppure con una proiezione:
 
-```cs
+```cs norun
 var ordini = await _context.Ordini
     .Select(o => new
     {
@@ -320,7 +320,7 @@ var ordini = await _context.Ordini
 
 `ToListAsync()` bufferizza tutto ($O(n)$ in memoria). Per elaborare molte righe una alla volta usa lo streaming asincrono:
 
-```cs
+```cs norun
 await foreach (var prodotto in _context.Prodotti
     .Where(p => p.Prezzo > 100)
     .AsAsyncEnumerable())
@@ -333,7 +333,7 @@ await foreach (var prodotto in _context.Prodotti
 
 `IQueryable<T>` permette di comporre una query in più passi senza eseguire nulla nel frattempo:
 
-```cs
+```cs norun
 public async Task<List<Prodotto>> CercaAsync(
     string? nome, decimal? prezzoMin, decimal? prezzoMax)
 {
@@ -356,7 +356,7 @@ Il database riceve **una sola query** con tutti i filtri combinati in `AND`.
 
 Lo **Specification pattern** incapsula una regola di filtro in un oggetto riusabile e testabile, mantenendola in forma traducibile:
 
-```cs
+```cs norun
 public abstract class Specification<T>
 {
     public abstract Expression<Func<T, bool>> ToExpression();
@@ -389,7 +389,7 @@ Se la specification restituisse una `Func<T, bool>` invece di una `Expression<Fu
 - `Regex`, comparatori custom, `Aggregate` arbitrari;
 - accesso a servizi esterni o a stato dell'applicazione.
 
-```cs
+```cs norun
 // EF Core lancia InvalidOperationException: "could not be translated"
 var query = _context.Prodotti
     .Where(p => AlgoritmoComplesso(p))
@@ -402,7 +402,7 @@ Le vecchie versioni di EF spostavano in silenzio sul client le parti non traduci
 
 Quando ti serve logica solo C#, rendi esplicito il confine con `AsEnumerable()`. Non esegue nulla da solo: cambia il tipo statico, così gli operatori successivi diventano LINQ to Objects.
 
-```cs
+```cs norun
 var risultati = _context.Prodotti
     .Where(p => p.Prezzo > 10)        // SQL: WHERE Prezzo > 10
     .AsEnumerable()                   // da qui in poi: memoria

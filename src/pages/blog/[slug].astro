@@ -19,6 +19,8 @@ const { Content } = await entry.render();
 
 <Layout title={entry.data.title}>
   <Container>
+    <!-- Indicizzato dalla ricerca (Pagefind) -->
+    <div data-pagefind-body={entry.data.draft ? undefined : ""} data-pagefind-filter="sezione:Blog">
     <div class="mx-auto max-w-3xl mt-14">
       <span class="text-blue-400 uppercase tracking-wider text-sm font-medium">
         {entry.data.category}
@@ -50,6 +52,7 @@ const { Content } = await entry.render();
 
     <div class="mx-auto prose prose-lg mt-6 max-w-3xl">
       <Content />
+    </div>
     </div>
     <div class="text-center mt-8">
       <a

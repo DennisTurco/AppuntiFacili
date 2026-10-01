@@ -34,7 +34,7 @@ Il modulo `sqlite3` è già presente in tutte le installazioni moderne di Python
 
 Verificare:
 
-```python
+```python norun
 python -c "import sqlite3; print(sqlite3.sqlite_version)"
 ```
 
@@ -144,7 +144,7 @@ Grazie a `IF NOT EXISTS` può essere eseguito più volte senza danni.
 
 **database/setup.py**:
 
-```python
+```python norun
 import sqlite3
 from config.settings import DATABASE_PATH
 
@@ -168,7 +168,7 @@ La funzione `executescript()` permette di eseguire più comandi SQL in un colpo 
 
 **main.py**:
 
-```python
+```python norun
 from database.setup import run_migrations
 
 # Eseguo le migrazioni
@@ -208,7 +208,7 @@ Questa tabella registra quali script sono già stati applicati.
 
 ### 6.2 Loader delle migrazioni
 
-```python
+```python norun
 import os
 import sqlite3
 from config.settings import DATABASE_PATH
@@ -256,7 +256,7 @@ Questo simula un sistema di migrazioni simile a framework più avanzati (Django,
 
 Questo approccio permette di non ricreare file `.db` accidentalmente:
 
-```python
+```python norun
 import os
 from database.setup import run_migrations
 

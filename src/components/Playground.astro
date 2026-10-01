@@ -1,0 +1,44 @@
+---
+/**
+ * Editor di codice eseguibile da usare nelle lezioni MDX.
+ *
+ *   <Playground lang="python" code={`print("ciao")`} />
+ *   <Playground lang="sql" db="scuola" schema code="SELECT * FROM Studente;" />
+ *   <Playground lang="csharp" stdin={"Mario\n42"} code={`...`} />
+ *
+ * Per rendere eseguibile un normale blocco di codice basta invece scrivere
+ * ```python run   (vedi src/plugins/remark-runnable.mjs)
+ */
+import { Code } from "astro:components";
+
+interface Props {
+  lang: "python" | "javascript" | "typescript" | "csharp" | "sql";
+  code?: string;
+  /** Solo SQL: database di esempio da caricare (scuola, viaggi, vaccari) */
+  db?: string;
+  /** Solo SQL: mostra l'elenco delle tabelle e delle colonne */
+  schema?: boolean;
+  /** Input precompilato del programma */
+  stdin?: string;
+  /** Apre subito l'editor (default: true) */
+  editable?: boolean;
+}
+
+const { lang, code = "", db, schema = false, stdin, editable = true } = Astro.props;
+---
+
+<div
+  class="runnable-marker"
+  data-runnable={lang}
+  data-db={db}
+  data-stdin={stdin}
+  data-schema={schema ? "" : undefined}
+  data-editable={editable ? "" : undefined}
+  hidden
+>
+</div>
+<Code code={code.replace(/^\n/, "")} lang={lang} themes={{ light: "rose-pine-dawn", dark: "github-dark-dimmed" }} />
+
+<script>
+  import "@/scripts/playground";
+</script>

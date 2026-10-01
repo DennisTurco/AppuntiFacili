@@ -57,7 +57,7 @@ Assembly e namespace **non** sono la stessa cosa. Il namespace è un raggruppame
 
 Il pattern più comune: l'interfaccia è `public`, la classe concreta è `internal`.
 
-```cs
+```cs norun
 // Assembly: School.Infrastructure
 public interface IStudentRepository
 {
@@ -82,7 +82,7 @@ public static class InfrastructureModule
 
 Dall'assembly `School.Web`:
 
-```cs
+```cs norun
 builder.Services.AddInfrastructure();           // OK: metodo pubblico
 
 // var repo = new SqlStudentRepository();       // Errore: tipo internal
@@ -111,7 +111,7 @@ internal class DiscountCalculator
 
 Nel progetto `School.Tests`:
 
-```cs
+```cs norun
 public class DiscountCalculatorTests
 {
     [Fact]
@@ -164,7 +164,7 @@ public class Helper
 
 Assembly `School.Plugins`:
 
-```cs
+```cs norun
 public class DocumentoPlugin : DocumentoBase
 {
     public void Test()

@@ -1,0 +1,388 @@
+/* ---------- Blocchi di codice eseguibili (src/scripts/playground.ts) ---------- */
+
+.runnable {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #fff;
+  font-size: 0.875rem;
+}
+.dark .runnable {
+  border-color: var(--color-slate-800);
+  background: var(--color-slate-900);
+}
+
+.runnable-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+  border-bottom: 1px solid var(--color-slate-200);
+  background: var(--color-slate-50);
+}
+.dark .runnable-toolbar {
+  border-color: var(--color-slate-800);
+  background: var(--color-slate-950);
+}
+
+.runnable-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-slate-500);
+}
+.runnable-db {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-slate-400);
+}
+
+.runnable-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.runnable-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-slate-300);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--color-slate-700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.runnable-btn:hover {
+  background: var(--color-slate-100);
+  color: var(--color-slate-900);
+}
+.runnable-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.runnable-btn svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.runnable-btn.is-primary {
+  border-color: var(--color-blue-600);
+  background: var(--color-blue-600);
+  color: #fff;
+}
+.runnable-btn.is-primary:hover {
+  background: var(--color-blue-700);
+}
+.runnable-btn.is-danger {
+  border-color: var(--color-rose-600);
+  background: var(--color-rose-600);
+  color: #fff;
+}
+.runnable-btn.is-small {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+}
+.runnable-btn.is-table {
+  font-family: var(--font-mono);
+}
+.dark .runnable-btn {
+  border-color: var(--color-slate-700);
+  background: var(--color-slate-900);
+  color: var(--color-slate-200);
+}
+.dark .runnable-btn:hover {
+  background: var(--color-slate-800);
+  color: #fff;
+}
+.dark .runnable-btn.is-primary {
+  border-color: var(--color-blue-500);
+  background: var(--color-blue-600);
+  color: #fff;
+}
+.dark .runnable-btn.is-primary:hover {
+  background: var(--color-blue-500);
+}
+.dark .runnable-btn.is-danger {
+  border-color: var(--color-rose-500);
+  background: var(--color-rose-600);
+  color: #fff;
+}
+
+/* Codice: il blocco Shiki perde i bordi propri, li dà il contenitore */
+.runnable-code pre,
+.runnable-code .code-wrapper {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.runnable-code pre {
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.runnable-editor .cm-editor {
+  max-height: 32rem;
+}
+.runnable-editor .cm-gutters {
+  border-right: 0;
+}
+
+.runnable-stdin {
+  padding: 0.6rem 0.85rem;
+  border-top: 1px solid var(--color-slate-200);
+}
+.dark .runnable-stdin {
+  border-color: var(--color-slate-800);
+}
+.runnable-stdin label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-slate-500);
+}
+.runnable-stdin textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-slate-300);
+  border-radius: 0.5rem;
+  background: var(--color-slate-50);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: inherit;
+  resize: vertical;
+}
+.dark .runnable-stdin textarea {
+  border-color: var(--color-slate-700);
+  background: var(--color-slate-950);
+}
+
+.runnable-output {
+  border-top: 1px solid var(--color-slate-200);
+  background: var(--color-slate-50);
+}
+.dark .runnable-output {
+  border-color: var(--color-slate-800);
+  background: var(--color-slate-950);
+}
+.runnable-output-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem 0 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slate-400);
+}
+.runnable-output-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 28rem;
+  overflow: auto;
+  padding: 0.4rem 0.85rem 0.75rem;
+}
+
+.runnable-stream {
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  overflow: visible;
+  background: none !important;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-slate-800);
+}
+.dark .runnable-stream {
+  color: var(--color-slate-200);
+}
+.runnable-stream.is-stderr {
+  color: var(--color-rose-700);
+}
+.dark .runnable-stream.is-stderr {
+  color: var(--color-rose-300);
+}
+
+.runnable-status,
+.runnable-muted {
+  margin: 0;
+  color: var(--color-slate-500);
+  font-size: 0.8125rem;
+}
+.runnable-status::before {
+  content: "";
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.45rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  vertical-align: -0.1rem;
+  animation: runnable-spin 0.8s linear infinite;
+}
+@keyframes runnable-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.runnable-result {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.runnable-result.is-ok {
+  color: var(--color-emerald-700);
+}
+.runnable-result.is-error {
+  color: var(--color-rose-700);
+}
+.dark .runnable-result.is-ok {
+  color: var(--color-emerald-400);
+}
+.dark .runnable-result.is-error {
+  color: var(--color-rose-400);
+}
+
+.runnable-info {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-blue-700);
+}
+.dark .runnable-info {
+  color: var(--color-blue-300);
+}
+
+.runnable-image {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.runnable-errors {
+  border-left: 3px solid var(--color-rose-500);
+  padding-left: 0.75rem;
+  color: var(--color-rose-800);
+}
+.dark .runnable-errors {
+  color: var(--color-rose-200);
+}
+.runnable-errors-title {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+}
+.runnable-errors ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+.runnable-errors li + li {
+  margin-top: 0.25rem;
+}
+.runnable-errors-pos {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.runnable-errors code {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Risultati SQL */
+.runnable-table-wrap {
+  overflow-x: auto;
+}
+.runnable-table {
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  min-width: 12rem;
+}
+.runnable-table th,
+.runnable-table td {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--color-slate-200);
+  text-align: left;
+  white-space: nowrap;
+}
+.runnable-table th {
+  background: #fff;
+  font-weight: 600;
+}
+.dark .runnable-table th,
+.dark .runnable-table td {
+  border-color: var(--color-slate-800);
+}
+.dark .runnable-table th {
+  background: var(--color-slate-900);
+}
+.runnable-table td.is-null {
+  color: var(--color-slate-400);
+  font-style: italic;
+}
+.runnable-table-caption {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-slate-500);
+}
+
+/* Schema del database */
+.runnable-schema {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--color-slate-200);
+}
+.dark .runnable-schema {
+  border-color: var(--color-slate-800);
+}
+.runnable-schema-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-slate-500);
+}
+.runnable-schema-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.4rem 1rem;
+}
+.runnable-schema-table summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+.runnable-schema-table ul {
+  margin: 0.25rem 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.runnable-pk {
+  color: var(--color-amber-600);
+  font-weight: 700;
+}
