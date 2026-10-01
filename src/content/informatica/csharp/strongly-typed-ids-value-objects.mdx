@@ -1,8 +1,8 @@
 ---
 title: "Strongly Typed IDs e Value Objects (DDD Light)"
-order: 6
+order: 7
 draft: false
-lastUpdateDate: "2026-06-09"
+lastUpdateDate: "2026-10-01"
 subject: "C#"
 category: "Informatica"
 difficulty: "complesso"
@@ -16,80 +16,58 @@ videoLesson: false
 Immagina questo codice:
 
 ```cs
-public void ProcessaOrdine(int ordineId, int clienteId, int prodottoId)
-{
-    // Il compilatore accetta la chiamata anche se semanticamente è sbagliata
-    ProcessaOrdine(prodottoId, ordineId, clienteId);
-}
+public void ProcessaOrdine(int ordineId, int clienteId, int prodottoId) { /* ... */ }
+
+// Il compilatore accetta la chiamata anche se semanticamente è sbagliata
+ProcessaOrdine(prodottoId, ordineId, clienteId);
 ```
 
-Dal punto di vista del compilatore, tre `int` sono semplicemente tre `int`. Dal punto di vista del dominio, invece, `OrdineId`, `ClienteId` e `ProdottoId` rappresentano concetti diversi.
+Per il compilatore tre `int` sono solo tre `int`. Per il dominio, invece, `OrdineId`, `ClienteId` e `ProdottoId` sono concetti diversi.
 
-Questo è un caso classico di **Primitive Obsession**: si usano tipi primitivi per rappresentare concetti di dominio più ricchi di quanto il tipo riesca a esprimere.
+Questo è un caso classico di **Primitive Obsession**: usare tipi primitivi per concetti di dominio più ricchi. Le conseguenze tipiche sono parametri invertiti senza errori, validazioni duplicate in più punti e API meno leggibili (`string email` dice meno di `Email email`).
 
-Le conseguenze pratiche sono:
-
-- **Parametri invertiti** senza errori di compilazione.
-- **Mescolanza di identità diverse**: un ID ordine può finire in un campo cliente.
-- **Validazioni duplicate** in controller, service, repository e metodi helper.
-- **Regole di dominio disperse** invece di essere centralizzate dentro il tipo giusto.
-- **API meno leggibili**: `string email` dice meno di `Email email`.
-
-```mermaid
-graph LR
-    A[Primitivo: string email] --> B[Qualsiasi stringa]
-    C[Value Object: Email] --> D[Solo valori validi]
-    B --> E[Errori a runtime]
-    D --> F[Maggiore sicurezza a compile time e runtime]
-```
-
-Il punto chiave è questo: un tipo non dovrebbe contenere solo dati, ma anche **significato semantico**.
-
-## 2. DDD in profondità: Entity, Value Object, Aggregate Root
-
-Nel **Domain-Driven Design (DDD)**, non tutti gli oggetti del dominio hanno lo stesso ruolo.
-
-### Entity
-
-Una **Entity** è un oggetto definito dalla sua **identità**, non solo dai suoi dati.
-
-Esempio: un `Ordine` può cambiare stato, totale, righe, indirizzo di spedizione, ma rimane sempre lo stesso ordine se il suo `OrdineId` è lo stesso.
+Con uno **strongly typed ID** l'errore emerge a compile time:
 
 ```cs
-public class Ordine
-{
-    public OrdineId Id { get; private set; }
-    public Email EmailCliente { get; private set; }
-    public decimal Totale { get; private set; }
-}
+public readonly record struct OrdineId(int Value);
+public readonly record struct ClienteId(int Value);
+
+public void ProcessaOrdine(OrdineId ordineId, ClienteId clienteId) { /* ... */ }
+
+var ordine = new OrdineId(42);
+var cliente = new ClienteId(7);
+
+ProcessaOrdine(ordine, cliente);   // OK
+ProcessaOrdine(cliente, ordine);   // errore CS1503: impossibile convertire da 'ClienteId' a 'OrdineId'
 ```
 
-Due `Ordine` con lo stesso ID rappresentano concettualmente la stessa entità, anche se alcuni campi cambiano nel tempo.
+Il punto chiave: un tipo non dovrebbe contenere solo dati, ma anche **significato semantico**.
 
-### Value Object
+## 2. Entity, Value Object e Aggregate Root
 
-Un **Value Object** è definito dai suoi **valori interni**:
+Nel **Domain-Driven Design (DDD)** non tutti gli oggetti hanno lo stesso ruolo:
 
-- non ha identità autonoma;
-- in genere è **immutabile**;
-- possiede **uguaglianza per valore**;
-- incapsula regole di validazione e comportamento locale.
+- **Entity**: definita dalla sua **identità**. Un `Ordine` può cambiare stato e totale, ma resta lo stesso ordine finché ha lo stesso `OrdineId`.
+- **Value Object**: definito dai suoi **valori**. Non ha identità propria, in genere è **immutabile**, ha **uguaglianza per valore** e incapsula le proprie regole di validazione. Esempi: `Email`, `Money`, `Address`, `DateRange` e gli stessi `OrdineId`, `ClienteId`.
+- **Aggregate Root**: l'entità principale di un gruppo di oggetti correlati, unico punto di ingresso per modificarli mantenendo le invarianti.
 
-Esempi tipici:
+```cs
+// Entity: conta l'identità
+public sealed class Cliente
+{
+    public ClienteId Id { get; init; }
+    public string Nome { get; set; } = "";
+}
 
-- `Email`
-- `Money`
-- `Address`
-- `DateRange`
-- `OrdineId`, `ClienteId`, `ProdottoId`
+// Value Object: conta il valore
+public readonly record struct Money(decimal Amount, string Currency);
 
-Se due `Email` contengono lo stesso valore normalizzato, sono uguali. Non interessa "quale istanza" siano, ma "quale valore" rappresentino.
+var c1 = new Cliente { Id = new ClienteId(1), Nome = "Mario" };
+var c2 = new Cliente { Id = new ClienteId(1), Nome = "Mario Rossi" };
+Console.WriteLine(c1.Id == c2.Id);                                   // True: stesso cliente
 
-### Aggregate Root
-
-Un **Aggregate Root** è, in breve, l'entità principale di un aggregato: il punto di ingresso attraverso cui il resto del sistema modifica in modo consistente un gruppo di oggetti correlati.
-
-Per esempio:
+Console.WriteLine(new Money(10m, "EUR") == new Money(10m, "EUR"));   // True: stesso valore
+```
 
 ```mermaid
 graph TD
@@ -103,134 +81,42 @@ graph TD
     A --> D
 ```
 
-L'idea è che le invarianti dell'aggregato vengano protette passando dal root (`Ordine`), non modificando direttamente ogni oggetto interno in modo arbitrario.
+<Aside variant="tip">
+Una domanda rapida per distinguere i due casi: per una Entity chiediti "è la stessa cosa nel tempo?", per un Value Object "contiene gli stessi valori?".
+</Aside>
 
-### Identità vs valore
+## 3. Il contratto dell'uguaglianza
 
-La distinzione più importante è:
+L'uguaglianza di un Value Object deve essere una **relazione di equivalenza**:
 
-- **Equality basata su identità**: tipica delle Entity.
-- **Equality basata sul valore**: tipica dei Value Objects.
+- **riflessiva**: `x.Equals(x)` è sempre vero;
+- **simmetrica**: se `x.Equals(y)` allora `y.Equals(x)`;
+- **transitiva**: se `x.Equals(y)` e `y.Equals(z)` allora `x.Equals(z)`.
 
-In forma intuitiva:
+In più, in .NET vale una regola fondamentale: se due oggetti sono uguali, devono avere lo **stesso `GetHashCode()`**. Se il contratto si rompe, `HashSet<T>`, `Dictionary<TKey, TValue>`, `Distinct()` e gli ordinamenti iniziano a comportarsi in modo imprevedibile.
 
-- Entity: "sono la stessa cosa nel tempo?"
-- Value Object: "contengo gli stessi valori?"
-
-## 3. Uguaglianza strutturale e proprietà matematiche
-
-Quando diciamo che un Value Object usa **uguaglianza strutturale**, intendiamo che due istanze sono uguali se tutti i loro componenti significativi sono uguali.
-
-Per esempio:
+Esempio con un `Email` che normalizza il valore: chiavi diverse nella forma, uguali nel dominio.
 
 ```cs
-var a = new Email("utente@example.com");
-var b = new Email("UTENTE@example.com");
-```
-
-Se il tipo normalizza il valore in lowercase, `a` e `b` possono risultare uguali perché rappresentano lo stesso valore di dominio.
-
-### Equality basata su identità vs equality basata su valore
-
-Per le Entity:
-
-```cs
-public sealed class Cliente
+var set = new HashSet<Email>
 {
-    public ClienteId Id { get; init; }
-    public string Nome { get; init; } = "";
-}
+    new Email("utente@example.com"),
+    new Email("UTENTE@Example.com"),   // normalizzata in lowercase: duplicato
+};
+
+Console.WriteLine(set.Count); // 1
 ```
 
-di solito interessa:
+<Aside variant="danger">
+Se ridefinisci `Equals` ma non `GetHashCode` (o li calcoli su campi diversi), un oggetto inserito in un `Dictionary` può diventare "irrintracciabile": `ContainsKey` restituisce `false` anche per una chiave uguale.
+</Aside>
 
-```cs
-cliente1.Id == cliente2.Id
-```
+## 4. Implementazione manuale: `IEquatable<T>` e `IComparable<T>`
 
-Per un Value Object:
+Scrivendo un Value Object a mano, i due contratti principali sono:
 
-```cs
-public readonly record struct Money(decimal Amount, string Currency);
-```
-
-interessa invece:
-
-```cs
-new Money(10m, "EUR") == new Money(10m, "EUR")
-```
-
-### Definizione matematica: relazione di equivalenza
-
-L'uguaglianza corretta di un Value Object dovrebbe comportarsi come una **relazione di equivalenza**.
-
-Una relazione `~` su un insieme `S` è una relazione di equivalenza se vale:
-
-$$
-\forall x \in S,\ x \sim x
-$$
-
-Questa proprietà si chiama **riflessività**: ogni valore deve essere uguale a sé stesso.
-
-$$
-\forall x, y \in S,\ x \sim y \Rightarrow y \sim x
-$$
-
-Questa proprietà si chiama **simmetria**: se `x` è uguale a `y`, allora `y` è uguale a `x`.
-
-$$
-\forall x, y, z \in S,\ (x \sim y \land y \sim z) \Rightarrow x \sim z
-$$
-
-Questa proprietà si chiama **transitività**: se `x` è uguale a `y` e `y` è uguale a `z`, allora `x` deve essere uguale a `z`.
-
-Inoltre, in .NET vale una regola pratica fondamentale:
-
-$$
-x = y \Rightarrow hash(x) = hash(y)
-$$
-
-cioè se due oggetti sono uguali, devono produrre lo stesso `GetHashCode()`.
-
-### Perché è importante
-
-Se queste proprietà non valgono, si rompono collezioni e algoritmi:
-
-- `HashSet<T>`
-- `Dictionary<TKey, TValue>`
-- ordinamenti
-- comparazioni
-- eliminazione duplicati
-
-Per questo un buon Value Object non deve solo "sembrare" corretto: deve rispettare formalmente il contratto dell'uguaglianza.
-
-## 4. Implementazione manuale: `struct`, `IEquatable<T>` e `IComparable<T>`
-
-Se implementi un Value Object manualmente, i due contratti più importanti sono spesso:
-
-- `IEquatable<T>` per l'uguaglianza tipizzata efficiente;
-- `IComparable<T>` per l'ordinamento naturale.
-
-### Perché `IEquatable<T>` è utile
-
-`Equals(object?)` accetta un `object`, quindi può introdurre:
-
-- boxing nel caso dei value type;
-- controlli di tipo a runtime;
-- meno efficienza nelle collezioni generiche.
-
-`IEquatable<T>` permette invece una comparazione fortemente tipizzata.
-
-### Perché `IComparable<T>` è utile
-
-Serve quando vuoi:
-
-- ordinare liste di Value Objects;
-- usare `Sort()`;
-- definire un ordine coerente;
-- supportare operatori come `<`, `>`, `<=`, `>=`.
-
-### Esempio completo
+- `IEquatable<T>`: uguaglianza tipizzata, senza boxing né cast a runtime (a differenza di `Equals(object?)`);
+- `IComparable<T>`: ordinamento naturale, per `Sort()`, `OrderBy` e gli operatori `<`, `>`.
 
 ```cs
 public readonly struct OrdineId : IEquatable<OrdineId>, IComparable<OrdineId>
@@ -241,120 +127,62 @@ public readonly struct OrdineId : IEquatable<OrdineId>, IComparable<OrdineId>
     {
         if (value <= 0)
             throw new ArgumentOutOfRangeException(nameof(value), "OrdineId deve essere positivo");
-
         Value = value;
     }
 
     public bool Equals(OrdineId other) => Value == other.Value;
-
-    public override bool Equals(object? obj) =>
-        obj is OrdineId other && Equals(other);
-
+    public override bool Equals(object? obj) => obj is OrdineId other && Equals(other);
     public override int GetHashCode() => Value.GetHashCode();
-
     public int CompareTo(OrdineId other) => Value.CompareTo(other.Value);
-
     public override string ToString() => Value.ToString();
 
-    public static bool operator ==(OrdineId left, OrdineId right) => left.Equals(right);
-    public static bool operator !=(OrdineId left, OrdineId right) => !left.Equals(right);
-    public static bool operator <(OrdineId left, OrdineId right) => left.CompareTo(right) < 0;
-    public static bool operator >(OrdineId left, OrdineId right) => left.CompareTo(right) > 0;
-    public static bool operator <=(OrdineId left, OrdineId right) => left.CompareTo(right) <= 0;
-    public static bool operator >=(OrdineId left, OrdineId right) => left.CompareTo(right) >= 0;
+    public static bool operator ==(OrdineId l, OrdineId r) => l.Equals(r);
+    public static bool operator !=(OrdineId l, OrdineId r) => !l.Equals(r);
+    public static bool operator <(OrdineId l, OrdineId r) => l.CompareTo(r) < 0;
+    public static bool operator >(OrdineId l, OrdineId r) => l.CompareTo(r) > 0;
 
     public static explicit operator int(OrdineId id) => id.Value;
     public static explicit operator OrdineId(int value) => new(value);
 }
 ```
 
-### Note importanti
-
-- `readonly struct` evita mutazioni indesiderate.
-- Se ridefinisci `Equals`, devi ridefinire anche `GetHashCode`.
-- `CompareTo` dovrebbe essere coerente con l'uguaglianza: se `x.Equals(y)` allora `x.CompareTo(y) == 0`.
-- Gli operatori di confronto sono opzionali, ma rendono il tipo più naturale da usare.
-
-## 5. `record` e `record struct`: come funziona davvero l'uguaglianza
-
-I `record` sono stati introdotti per semplificare i modelli basati su dati. In DDD light sono spesso perfetti per i Value Objects.
-
-### `record class` e `record struct`
-
-- `record class`: reference type, allocazione su heap, value equality sintetizzata.
-- `record struct`: value type, di norma nessuna allocazione heap se non viene boxato, value equality sintetizzata.
-
-### Cosa genera automaticamente il compilatore
-
-Per un record, il compilatore genera tipicamente:
-
-- `Equals`
-- `GetHashCode`
-- operatori `==` e `!=`
-- `Deconstruct(...)`
-- `ToString()`
-- supporto al `with`
-
-Esempio:
+Uso:
 
 ```cs
-public readonly record struct ClienteId(Guid Value);
-
-var id1 = new ClienteId(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
-var id2 = new ClienteId(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
-
-Console.WriteLine(id1 == id2); // true
-
-var (rawGuid) = id1; // Deconstruct automatico
-Console.WriteLine(rawGuid);
+var ids = new List<OrdineId> { new(30), new(10), new(20) };
+ids.Sort();                                         // usa CompareTo
+Console.WriteLine(string.Join(", ", ids));          // 10, 20, 30
+Console.WriteLine(new OrdineId(10) < new OrdineId(20)); // True
 ```
 
-### `EqualityContract`
+<Aside variant="warning">
+`CompareTo` deve essere coerente con `Equals`: se `x.Equals(y)` allora `x.CompareTo(y) == 0`. Altrimenti un `SortedSet<T>` e un `HashSet<T>` possono dare risultati diversi sugli stessi dati.
+</Aside>
 
-Nei **record class** esiste anche il concetto di `EqualityContract`, usato per far sì che l'uguaglianza tenga conto del tipo runtime corretto nelle gerarchie di ereditarietà.
+## 5. `record` e `record struct`
 
-```cs
-public record Documento(string Numero);
-public record Fattura(string Numero) : Documento(Numero);
-```
+I `record` eliminano quasi tutto il boilerplate visto sopra. Esistono in due forme:
 
-Qui il compilatore usa internamente `EqualityContract` per evitare che record di tipi diversi risultino uguali solo perché hanno gli stessi valori.
+- `record class` (o solo `record`): reference type, allocato su heap, uguaglianza per valore;
+- `record struct`: value type, di norma nessuna allocazione heap (salvo boxing), uguaglianza per valore.
 
-In pratica:
-
-- `record class` con ereditarietà: il tipo concreto conta;
-- `record struct`: niente ereditarietà, quindi niente problema di `EqualityContract` nello stesso senso.
-
-### `Deconstruct`
-
-Il metodo `Deconstruct` consente di spacchettare il record:
+Il compilatore genera automaticamente `Equals`, `GetHashCode`, `==` / `!=`, `ToString()`, `Deconstruct(...)` (per i parametri posizionali) e il supporto a `with`.
 
 ```cs
 public readonly record struct Money(decimal Amount, string Currency);
 
-var money = new Money(10m, "EUR");
-var (amount, currency) = money;
+var a = new Money(10m, "EUR");
+var b = new Money(10m, "EUR");
+
+Console.WriteLine(a == b);          // True
+Console.WriteLine(a);               // Money { Amount = 10, Currency = EUR }
+
+var (amount, currency) = a;         // Deconstruct
+var c = a with { Amount = 15m };    // nuova istanza, a resta invariato
+Console.WriteLine(c.Amount);        // 15
 ```
 
-È utile per pattern matching, test, assegnazioni multiple e codice molto leggibile.
-
-### `with` expression
-
-Il `with` crea una nuova istanza copiando quella esistente e cambiando solo alcuni membri.
-
-```cs
-public record Money(decimal Amount, string Currency);
-
-var originale = new Money(10m, "EUR");
-var aggiornato = originale with { Amount = 15m };
-```
-
-Per i Value Objects questo ha senso solo se il tipo rimane valido dopo la copia. Per questo spesso:
-
-- si usano proprietà init-only;
-- oppure si espongono metodi di dominio invece di affidarsi troppo al `with`.
-
-### Esempio di `record struct` con validazione
+Se serve validazione, si rinuncia alla sintassi posizionale e si scrive il costruttore:
 
 ```cs
 public readonly record struct ProdottoId
@@ -365,75 +193,29 @@ public readonly record struct ProdottoId
     {
         if (value <= 0)
             throw new ArgumentOutOfRangeException(nameof(value), "ProdottoId deve essere positivo");
-
         Value = value;
     }
-
-    public static explicit operator int(ProdottoId id) => id.Value;
-    public static explicit operator ProdottoId(int value) => new(value);
 
     public override string ToString() => $"ProdottoId({Value})";
 }
 ```
 
-## 6. Validazione robusta: factory, conversioni e pattern `Result<T>` / `Either`
+<Aside variant="warning">
+Una `struct` ha sempre un valore di default: `default(ProdottoId)` o `new ProdottoId()` producono `Value = 0` **senza passare dalla validazione**. Lo stesso vale per `with`, che copia i campi senza richiamare il costruttore. Se l'invariante è critica, valuta un `record class` o controlla il valore anche nei metodi di dominio.
+</Aside>
 
-Lanciare eccezioni va bene quando hai davvero una situazione eccezionale. Ma per input utente o dati esterni spesso è meglio rappresentare il fallimento come un valore esplicito.
+<Aside variant="info">
+Nei `record class` con ereditarietà il compilatore usa una proprietà nascosta `EqualityContract`: così un `Fattura("1")` non risulta mai uguale a un `Documento("1")`, anche con gli stessi valori. I `record struct` non hanno ereditarietà, quindi il problema non si pone.
+</Aside>
 
-### Conversioni implicite ed esplicite
+## 6. Validazione con factory e `Result<T>`
 
-Gli operatori di conversione permettono a un Value Object di convivere con tipi primitivi senza perdere ergonomia.
-
-- `implicit`: conversione automatica, da usare con cautela.
-- `explicit`: richiede cast esplicito, più sicura quando c'è rischio di ambiguità o validazione.
-
-```cs
-public readonly record struct Email
-{
-    public string Value { get; }
-
-    private Email(string value) => Value = value;
-
-    public static Result<Email> Create(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            return Result<Email>.Failure("L'email non può essere vuota");
-
-        var normalized = input.Trim().ToLowerInvariant();
-
-        if (!normalized.Contains('@'))
-            return Result<Email>.Failure("Formato email non valido");
-
-        return Result<Email>.Success(new Email(normalized));
-    }
-
-    public static implicit operator string(Email email) => email.Value;
-
-    public static explicit operator Email(string value) =>
-        Create(value).ValueOrThrow();
-
-    public override string ToString() => Value;
-}
-```
-
-Qui:
-
-- `Email -> string` può essere implicita perché non fallisce;
-- `string -> Email` è meglio esplicita perché può fallire.
-
-### Pattern `Result<T>`
-
-Un `Result<T>` modella il fatto che un'operazione può riuscire o fallire.
+Per input utente o dati esterni, un valore non valido non è davvero "eccezionale": meglio rappresentare il fallimento come un valore esplicito. Lo schema tipico è **costruttore privato + factory method** che restituisce un `Result<T>`.
 
 ```cs
 public sealed class Result<T>
 {
-    private Result(bool isSuccess, T? value, string? error)
-    {
-        IsSuccess = isSuccess;
-        Value = value;
-        Error = error;
-    }
+    private Result(bool ok, T? value, string? error) => (IsSuccess, Value, Error) = (ok, value, error);
 
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
@@ -443,101 +225,84 @@ public sealed class Result<T>
     public static Result<T> Success(T value) => new(true, value, null);
     public static Result<T> Failure(string error) => new(false, default, error);
 
-    public T ValueOrThrow() =>
-        IsSuccess ? Value! : throw new InvalidOperationException(Error);
+    public T ValueOrThrow() => IsSuccess ? Value! : throw new InvalidOperationException(Error);
+}
+```
+
+```cs
+public readonly record struct Email
+{
+    public string Value { get; }
+    private Email(string value) => Value = value;
+
+    public static Result<Email> Create(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return Result<Email>.Failure("L'email non può essere vuota");
+
+        var normalized = input.Trim().ToLowerInvariant();
+        if (!normalized.Contains('@'))
+            return Result<Email>.Failure("Formato email non valido");
+
+        return Result<Email>.Success(new Email(normalized));
+    }
+
+    public static implicit operator string(Email email) => email.Value;        // non può fallire
+    public static explicit operator Email(string value) => Create(value).ValueOrThrow(); // può fallire
+
+    public override string ToString() => Value;
 }
 ```
 
 Uso:
 
 ```cs
-var result = Email.Create("utente@example.com");
-
-if (result.IsFailure)
+foreach (var input in new[] { "Utente@Example.com", "", "senza-chiocciola" })
 {
-    Console.WriteLine(result.Error);
+    var result = Email.Create(input);
+    Console.WriteLine(result.IsSuccess ? $"OK: {result.Value}" : $"Errore: {result.Error}");
 }
-else
-{
-    Email email = result.Value!;
-    Console.WriteLine(email);
-}
+// OK: utente@example.com
+// Errore: L'email non può essere vuota
+// Errore: Formato email non valido
 ```
 
-### Variante `Either`
+<Aside variant="tip">
+Regola per le conversioni: `implicit` solo se la conversione non può mai fallire (`Email` verso `string`), `explicit` quando può fallire o perdere informazione (`string` verso `Email`). Lo stesso concetto di `Result<T>` nei linguaggi funzionali si chiama `Either<Errore, Valore>`.
+</Aside>
 
-Lo stesso concetto può essere espresso come `Either<Errore, Valore>`:
-
-- lato sinistro: errore;
-- lato destro: successo.
-
-È molto usato in stili più funzionali, ma il concetto è lo stesso: il fallimento è un dato, non un'eccezione.
-
-### Esempio: `Money`
+I Value Objects possono anche ospitare **invarianti di dominio**. Esempio con `Money`:
 
 ```cs
 public readonly record struct Money(decimal Amount, string Currency)
 {
     public static Result<Money> Create(decimal amount, string currency)
     {
-        if (amount < 0)
-            return Result<Money>.Failure("L'importo non può essere negativo");
-
-        if (string.IsNullOrWhiteSpace(currency))
-            return Result<Money>.Failure("La valuta è obbligatoria");
-
+        if (amount < 0) return Result<Money>.Failure("L'importo non può essere negativo");
+        if (string.IsNullOrWhiteSpace(currency)) return Result<Money>.Failure("La valuta è obbligatoria");
         return Result<Money>.Success(new Money(amount, currency.ToUpperInvariant()));
     }
 
-    public Result<Money> Add(Money other)
-    {
-        if (Currency != other.Currency)
-            return Result<Money>.Failure("Non si possono sommare valute diverse");
-
-        return Result<Money>.Success(this with { Amount = Amount + other.Amount });
-    }
+    public Result<Money> Add(Money other) =>
+        Currency != other.Currency
+            ? Result<Money>.Failure("Non si possono sommare valute diverse")
+            : Result<Money>.Success(this with { Amount = Amount + other.Amount });
 }
+
+var eur = Money.Create(10m, "eur").ValueOrThrow();
+var usd = Money.Create(5m, "USD").ValueOrThrow();
+
+Console.WriteLine(eur.Add(eur).Value);  // Money { Amount = 20, Currency = EUR }
+Console.WriteLine(eur.Add(usd).Error);  // Non si possono sommare valute diverse
 ```
 
-## 7. Attraversare i confini applicativi: JSON e ASP.NET Core model binding
+## 7. Attraversare i confini: JSON e model binding
 
-Un Value Object non vive solo nel dominio. Prima o poi deve passare da:
+Prima o poi un Value Object deve passare da JSON, route, query string e database.
 
-- JSON
-- HTTP route/query string
-- model binding di ASP.NET Core
-- database
+### 7.1 `System.Text.Json`
 
-```mermaid
-flowchart LR
-    A[HTTP Request] --> B[Model Binding]
-    B --> C[Controller]
-    C --> D[Application Service]
-    D --> E[Domain]
-    E --> F[JSON Response]
-```
-
-### `System.Text.Json` e custom converter
-
-Se hai un Value Object come:
-
-```cs
-public readonly record struct OrdineId(int Value);
-```
-
-potresti voler serializzare solo il valore interno:
-
-```json
-42
-```
-
-invece di:
-
-```json
-{ "value": 42 }
-```
-
-Puoi farlo con un converter personalizzato:
+Senza configurazione, `OrdineId(42)` viene serializzato come `{ "Value": 42 }`. Di solito si vuole il solo valore `42`, e si ottiene con un converter:
 
 ```cs
 using System.Text.Json;
@@ -546,32 +311,22 @@ using System.Text.Json.Serialization;
 public sealed class OrdineIdJsonConverter : JsonConverter<OrdineId>
 {
     public override OrdineId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        var value = reader.GetInt32();
-        return new OrdineId(value);
-    }
+        => new(reader.GetInt32());
 
     public override void Write(Utf8JsonWriter writer, OrdineId value, JsonSerializerOptions options)
-    {
-        writer.WriteNumberValue(value.Value);
-    }
+        => writer.WriteNumberValue(value.Value);
 }
+
+// Registrazione (Minimal API)
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new OrdineIdJsonConverter()));
 ```
 
-Registrazione:
+In alternativa puoi decorare il tipo con `[JsonConverter(typeof(OrdineIdJsonConverter))]`, così il converter vale ovunque, anche fuori da ASP.NET Core. Per ID basati su `Guid` o `string` usa `GetGuid` / `GetString` e `WriteStringValue`.
 
-```cs
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.Converters.Add(new OrdineIdJsonConverter());
-});
-```
+### 7.2 Route e query string
 
-Per Value Objects basati su stringa, il converter legge e scrive stringhe; per `Guid`, usa `WriteStringValue` o parsing dedicato.
-
-### ASP.NET Core model binding con `TypeConverter`
-
-Per route e query param semplici, un `TypeConverter` è spesso la soluzione più leggera:
+Per parametri semplici basta un `TypeConverter`:
 
 ```cs
 using System.ComponentModel;
@@ -585,96 +340,49 @@ public sealed class OrdineIdTypeConverter : TypeConverter
     public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
         sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
-    {
-        if (value is string s && int.TryParse(s, out var parsed))
-            return new OrdineId(parsed);
-
-        throw new FormatException("OrdineId non valido");
-    }
+    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) =>
+        value is string s && int.TryParse(s, out var n) ? new OrdineId(n) : throw new FormatException("OrdineId non valido");
 }
-```
 
-A quel punto puoi scrivere:
-
-```cs
+// Ora il binding funziona direttamente
 [HttpGet("{id}")]
-public IActionResult GetById(OrdineId id)
-{
-    return Ok(id.Value);
-}
+public IActionResult GetById(OrdineId id) => Ok(id.Value);
 ```
 
-### Quando usare `IModelBinder`
+<Aside variant="info">
+Da .NET 7 esiste anche `IParsable<T>`: se il tipo espone un metodo statico `TryParse(string, IFormatProvider?, out T)`, Minimal API e controller MVC lo usano per il binding senza bisogno di `TypeConverter`.
+</Aside>
 
-Se la logica di binding è più complessa, puoi creare un binder personalizzato:
-
-- gestione errori dettagliata;
-- dipendenze dal container DI;
-- parsing complesso;
-- mapping verso `Result<T>`.
+Quando serve controllo completo (errori dettagliati in `ModelState`, dipendenze dal DI, mapping da `Result<T>`) si usa un `IModelBinder`:
 
 ```cs
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 public sealed class EmailModelBinder : IModelBinder
 {
-    public Task BindModelAsync(ModelBindingContext bindingContext)
+    public Task BindModelAsync(ModelBindingContext ctx)
     {
-        var raw = bindingContext.ValueProvider.GetValue(bindingContext.ModelName).FirstValue;
-
-        if (raw is null)
-            return Task.CompletedTask;
+        var raw = ctx.ValueProvider.GetValue(ctx.ModelName).FirstValue;
+        if (raw is null) return Task.CompletedTask;
 
         var result = Email.Create(raw);
-
         if (result.IsSuccess)
-        {
-            bindingContext.Result = ModelBindingResult.Success(result.Value);
-        }
+            ctx.Result = ModelBindingResult.Success(result.Value);
         else
-        {
-            bindingContext.ModelState.AddModelError(bindingContext.ModelName, result.Error!);
-        }
+            ctx.ModelState.AddModelError(ctx.ModelName, result.Error!);
 
         return Task.CompletedTask;
     }
 }
 ```
 
-Idea pratica:
+## 8. Persistenza e automazione
 
-- `TypeConverter` per tipi semplici;
-- `IModelBinder` quando serve controllo completo.
+### 8.1 EF Core e Value Converter
 
-## 8. Persistenza e automazione: EF Core e source generator `AndrewLock.StronglyTypedId`
-
-### EF Core
-
-EF Core deve sapere come mappare un Value Object sul tipo persistito.
+Il database salva primitivi, quindi EF Core deve sapere come convertire avanti e indietro:
 
 ```cs
-public class AppDbContext : DbContext
-{
-    public DbSet<Ordine> Ordini => Set<Ordine>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Ordine>(entity =>
-        {
-            entity.Property(o => o.Id)
-                  .HasConversion(
-                      id => id.Value,
-                      value => new OrdineId(value));
-
-            entity.Property(o => o.ClienteId)
-                  .HasConversion(
-                      id => id.Value,
-                      value => new ClienteId(value));
-        });
-    }
-}
-
 public class Ordine
 {
     public OrdineId Id { get; set; }
@@ -683,134 +391,60 @@ public class Ordine
 }
 
 public readonly record struct ClienteId(Guid Value);
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Ordine> Ordini => Set<Ordine>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Ordine>(e =>
+        {
+            e.Property(o => o.Id).HasConversion(id => id.Value, v => new OrdineId(v));
+            e.Property(o => o.ClienteId).HasConversion(id => id.Value, v => new ClienteId(v));
+        });
+    }
+}
 ```
 
-Questo evita di perdere i vantaggi dei tipi forti solo perché il database salva primitivi.
+Le query restano tipizzate: `db.Ordini.Where(o => o.ClienteId == clienteId)` viene tradotta in SQL sul `Guid` sottostante.
 
-### `AndrewLock.StronglyTypedId`
+Con molti ID tipizzati, invece di ripetere `HasConversion` per ogni proprietà, puoi registrare un `ValueConverter` una sola volta in `ConfigureConventions` con `Properties<OrdineId>().HaveConversion<OrdineIdConverter>()`.
 
-Se devi creare molti strongly typed IDs, scrivere a mano sempre:
+### 8.2 Source generator: `AndrewLock.StronglyTypedId`
 
-- wrapper;
-- `Equals`;
-- `GetHashCode`;
-- `ToString`;
-- converter JSON;
-- supporto EF Core;
-- parsers
-
-diventa ripetitivo.
-
-La libreria **AndrewLock.StronglyTypedId** usa un **source generator** per generare automaticamente il codice boilerplate.
-
-Esempio concettuale:
+Scrivere a mano wrapper, `Equals`, `GetHashCode`, converter JSON, `TypeConverter` ed EF Core per ogni ID diventa ripetitivo. La libreria **AndrewLock.StronglyTypedId** usa un **source generator** per produrre tutto questo codice:
 
 ```cs
 using StronglyTypedIds;
 
-[StronglyTypedId]
+[StronglyTypedId]                    // Guid di default
 public partial struct OrdineId;
+
+[StronglyTypedId(Template.Int)]      // anche Long, String, ...
+public partial struct ProdottoId;
 ```
 
-Oppure con tipo sottostante specifico:
+Conviene quando hai molti ID e vuoi convenzioni uniformi senza errori di copia-incolla. Con 1 o 2 tipi, l'implementazione manuale con `readonly record struct` resta più semplice da leggere.
 
-```cs
-using StronglyTypedIds;
+## 9. Quale tipo scegliere e quando non usarli
 
-[StronglyTypedId(Template.Guid)]
-public partial struct ClienteId;
-```
+| Approccio | Categoria | Uguaglianza di default | Allocazione | Note |
+|---|---|---|---|---|
+| `struct` | Value type | Manuale (o `ValueType.Equals`, lento) | In genere nessuna su heap | Massimo controllo, molto verboso |
+| `record struct` | Value type | Automatica per valore | In genere nessuna su heap | Ottimo per VO piccoli e ID |
+| `class` | Reference type | Per riferimento, salvo override | Heap | Flessibile, richiede disciplina |
+| `record class` | Reference type | Automatica per valore | Heap | VO grandi o con gerarchie |
 
-In base al template scelto, il generatore può produrre codice per:
+Regola pratica: ID e VO piccoli come `readonly record struct`; VO con molti campi, ereditarietà o invarianti che non devono essere aggirabili con `default` come `record class`.
 
-- `int`
-- `long`
-- `Guid`
-- `string`
+<Aside variant="warning">
+I value type vengono **boxati** quando passano per `object` o per un'interfaccia non generica, e un value type grande è costoso da copiare a ogni passaggio. Sopra i 16-24 byte circa conviene valutare un `record class`.
+</Aside>
 
-e spesso integrare:
+Non ogni `string` merita un tipo dedicato. Segnali di over-engineering: il tipo non incapsula nessuna regola, non migliora la leggibilità, è usato una sola volta, oppure il dominio è un CRUD banale dove converter e binder costano più del beneficio.
 
-- `System.Text.Json`
-- `TypeConverter`
-- `Newtonsoft.Json`
-- EF Core converters
-
-Il vantaggio principale è ridurre il codice ripetitivo mantenendo un modello coerente in tutta la soluzione.
-
-### Quando usare generatori
-
-Un source generator ha senso quando:
-
-- hai molti ID tipizzati;
-- vuoi convenzioni uniformi;
-- vuoi evitare errori di copia-incolla;
-- vuoi centralizzare il comportamento.
-
-Se invece hai solo 1 o 2 tipi, una implementazione manuale può essere più semplice e leggibile.
-
-## 9. Confronto tra approcci e quando non usare Value Objects
-
-### Confronto tecnico
-
-| Approccio | Categoria | Uguaglianza di default | Allocazione | Boxing | Note |
-|---|---|---|---|---|---|
-| `struct` | Value type | Manuale o `ValueType.Equals` | In genere stack/inlined | Possibile | Molto efficiente, ma più verboso |
-| `record struct` | Value type | Automatica per valore | In genere stack/inlined | Possibile | Ottimo compromesso per VO piccoli |
-| `class` | Reference type | Per riferimento, salvo override | Heap | No per il tipo stesso | Flessibile, ma richiede più disciplina |
-| `record class` | Reference type | Automatica per valore | Heap | No per il tipo stesso | Ottimo per VO grandi o gerarchie dati |
-
-### Memoria, allocazioni e copying
-
-Osservazioni pratiche:
-
-- `struct` e `record struct` evitano allocazioni heap nella maggior parte dei casi.
-- Se un value type viene trattato come `object` o interfaccia non generica, può avvenire **boxing**.
-- Un value type molto grande può essere costoso da copiare.
-- `record class` e `class` allocano su heap, ma evitano copie implicite dell'intera struttura.
-
-Regola pratica:
-
-- VO piccoli e semplici: spesso `readonly record struct`.
-- VO con più campi o semantica più ricca: valuta `record class`.
-- Gerarchie o ereditarietà: `record class`.
-- Massimo controllo low-level: `readonly struct`.
-
-### Quando NON usare Value Objects
-
-Non ogni `string` merita un tipo dedicato. Alcuni segnali di over-engineering:
-
-- il tipo non incapsula nessuna regola;
-- non aumenta davvero la leggibilità;
-- viene usato una sola volta e non rappresenta un concetto di dominio stabile;
-- aggiunge conversioni, binder e converter senza un beneficio reale;
-- rallenta il team perché il dominio è banale.
-
-Esempi in cui potresti evitare un Value Object:
-
-- script molto piccoli;
-- prototipi veloci;
-- campi tecnici senza semantica di dominio;
-- applicazioni CRUD semplicissime dove il costo architetturale supera il beneficio.
-
-Il criterio corretto non è "usare sempre Value Objects", ma:
-
-> usare un Value Object quando aggiunge significato, sicurezza e coesione delle regole.
-
-### Sintesi finale
-
-Gli Strongly Typed IDs sono un caso particolare di Value Object. Servono a spostare errori:
-
-- da runtime a compile time;
-- da logica dispersa a tipi espliciti;
-- da convenzioni informali a modelli verificabili.
-
-Se implementati bene, combinano:
-
-- teoria DDD;
-- uguaglianza formale corretta;
-- integrazione con .NET moderno;
-- miglior leggibilità delle API;
-- riduzione degli errori semantici.
+> Usa un Value Object quando aggiunge significato, sicurezza e coesione delle regole.
 
 ## 10. Quiz
 
@@ -838,27 +472,27 @@ d:"Il nome della classe"
 correctAnswer:"c"
 },
 {
-question:"Quale caratteristica fondamentale ha un Value Object?",
+question:"Se due oggetti sono uguali secondo Equals(), cosa deve valere per GetHashCode()?",
 answers:{
-a:"È mutabile nel tempo",
-b:"È immutabile",
-c:"Ha sempre un ID intero",
-d:"Deve ereditare da Entity"
+a:"Deve restituire valori diversi",
+b:"Deve restituire lo stesso valore",
+c:"Non ha alcun vincolo",
+d:"Deve restituire sempre 0"
 },
 correctAnswer:"b"
 },
 {
-question:"I `record struct` in C# 9+ hanno l'uguaglianza:",
+question:"I `record struct` in C# hanno l'uguaglianza:",
 answers:{
 a:"Per riferimento (reference equality)",
 b:"Non supportata",
-c:"Per valore (value equality), built-in",
+c:"Per valore (value equality), generata dal compilatore",
 d:"Solo con Equals() manuale"
 },
 correctAnswer:"c"
 },
 {
-question:"Cosa vantaggio principale offrono gli Strongly Typed IDs?",
+question:"Quale vantaggio principale offrono gli Strongly Typed IDs?",
 answers:{
 a:"Riducono la memoria usata",
 b:"Il compilatore impedisce la confusione tra ID di tipi diversi",
@@ -878,44 +512,44 @@ d:"Creare una tabella separata"
 correctAnswer:"c"
 },
 {
-question:"Il Value Object Money con metodo Aggiungi() che lancia eccezione se le valute sono diverse è un esempio di:",
+question:"Il metodo Money.Add() che rifiuta la somma di valute diverse è un esempio di:",
 answers:{
 a:"Lazy loading",
 b:"Invariante di dominio (business rule)",
 c:"Dependency Injection",
-d:"Factory pattern"
+d:"Model binding"
 },
 correctAnswer:"b"
 },
 {
-question:"Quale tipo ha zero allocazioni heap in C#?",
-answers:{
-a:"record class",
-b:"class",
-c:"record struct",
-d:"interface"
-},
-correctAnswer:"c"
-},
-{
-question:"Il factory method pattern nei Value Objects serve per:",
+question:"Il factory method con costruttore privato nei Value Objects serve per:",
 answers:{
 a:"Creare il DbContext",
-b:"Nascondere il costruttore e restituire errori senza eccezioni",
+b:"Controllare la creazione e restituire errori senza eccezioni",
 c:"Registrare i servizi nel container DI",
 d:"Convertire i tipi nel database"
 },
 correctAnswer:"b"
 },
 {
-question:"Due oggetti Email con lo stesso valore sono uguali in un record struct?",
+question:"Cosa produce `default(ProdottoId)` se ProdottoId è un readonly record struct con validazione nel costruttore?",
 answers:{
-a:"No, mai",
-b:"Solo con ReferenceEquals",
-c:"Sì, per via dell'uguaglianza strutturale automatica",
-d:"Solo se implementano IEquatable"
+a:"Un'eccezione ArgumentOutOfRangeException",
+b:"Un errore di compilazione",
+c:"Un'istanza con Value = 0, senza passare dalla validazione",
+d:"null"
 },
 correctAnswer:"c"
+},
+{
+question:"Quale conversione è corretto rendere implicit per il Value Object Email?",
+answers:{
+a:"Da Email a string, perché non può fallire",
+b:"Da string a Email, perché è la più usata",
+c:"Entrambe",
+d:"Nessuna, le conversioni implicit non sono ammesse sui record"
+},
+correctAnswer:"a"
 }
 ]} />
 
@@ -938,9 +572,9 @@ correctAnswer:"c"
 **Scenario**: Vuoi un tipo `Email` che garantisce sempre un valore valido.
 
 **Consegna**:
-1. Crea `Email` come `readonly record struct` con validazione nel costruttore (non vuota, contiene @, dominio valido).
-2. Implementa il factory method `Crea(string input)` che restituisce `(Email?, string?)`.
-3. Scrivi test per: email valida, email senza @, email vuota.
+1. Crea `Email` come `readonly record struct` con costruttore privato.
+2. Implementa il factory method `Create(string input)` che restituisce `Result<Email>` (non vuota, contiene @, dominio con almeno un punto).
+3. Verifica con un `HashSet<Email>` che `"A@B.it"` e `"a@b.it"` siano considerate uguali.
 4. Usa `Email` come proprietà di una classe `Utente`.
 
 *Obiettivo: costruire un Value Object con business rules e gestione errori senza eccezioni.*
@@ -951,8 +585,20 @@ correctAnswer:"c"
 
 **Consegna**:
 1. Crea `Money` con `Amount (decimal)` e `Currency (string)`.
-2. Implementa `Aggiungi(Money altro)` e `Sottrai(Money altro)` con controllo valuta.
+2. Implementa `Add(Money altro)` e `Subtract(Money altro)` con controllo valuta, restituendo `Result<Money>`.
 3. Aggiungi factory method `Euro(decimal)` e `Dollaro(decimal)`.
 4. Dimostra che due `Money(10, "EUR")` sono uguali.
 
 *Obiettivo: implementare un Value Object multi-proprietà con operazioni di dominio.*
+
+### 11.4 ID tipizzato end-to-end
+
+**Scenario**: Vuoi usare `OrdineId` in tutta l'applicazione, dalla route HTTP al database.
+
+**Consegna**:
+1. Crea un `JsonConverter<OrdineId>` che serializzi l'ID come numero semplice.
+2. Aggiungi un `TypeConverter` (o implementa `IParsable<OrdineId>`) per usarlo come parametro di route.
+3. Configura il Value Converter in EF Core.
+4. Esponi un endpoint `GET /ordini/{id}` che restituisce l'ordine in JSON con `"id": 42` e non `"id": { "Value": 42 }`.
+
+*Obiettivo: far attraversare a un Value Object tutti i confini applicativi senza perdere la tipizzazione.*

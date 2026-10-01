@@ -12,24 +12,15 @@ const categoriesOrder = [
   "altro",
 ];
 
-const icons = {
-  numeri: "fa6-solid:hashtag",
-  polinomi: "fa6-solid:superscript",
-  equazioni: "fa6-solid:equals",
-  logaritmi: "fa6-solid:subscript",
-  limiti: "fa6-solid:infinity",
-  derivate: "fa6-solid:chart-line",
-  altro: "fa6-solid:bookmark",
-};
+const description =
+  "Teoria, esempi svolti ed esercizi di matematica: dai numeri e polinomi fino a limiti e derivate.";
 ---
 
-<Layout title="Appunti di Matematica">
+<Layout title="Appunti di Matematica" description={description}>
   <LessonsSection
     collection="matematica"
     title="Matematica"
+    description={description}
     categoriesOrder={categoriesOrder}
-    icons={icons}
-    basePath="/matematica"
-    githubbutton={true}
   />
 </Layout>

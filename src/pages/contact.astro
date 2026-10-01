@@ -1,41 +1,51 @@
 ---
 import Contactform from "@/components/contactform.astro";
 import Container from "@/components/container.astro";
-import Sectionhead from "@/components/sectionhead.astro";
 import Layout from "@/layouts/Layout.astro";
 import { Icon } from "astro-icon/components";
+
+const contacts = [
+  { icon: "fa6-solid:envelope", label: "dennisturco@gmail.com", href: "mailto:dennisturco@gmail.com" },
+  { icon: "fa6-solid:phone", label: "+39 342 166 6192", href: "tel:+393421666192" },
+  { icon: "fa6-brands:discord", label: "Server Discord", href: "https://discord.com/invite/9Jb4Gt3HhB" },
+  { icon: "fa6-solid:location-dot", label: "Fidenza (PR)" },
+];
 ---
 
-<Layout title="Contact">
+<Layout title="Contatti" description="Contattami per richiedere una video lezione, l'aggiunta di appunti o per qualsiasi altra domanda.">
   <Container>
-    <Sectionhead>
-      <Fragment slot="title">Contattami</Fragment>
-      <Fragment slot="desc">Per una richiesta di Video Lezione, per l'aggiunta di appunti o per qualsiasi altra cosa.</Fragment>
-    </Sectionhead>
-
-    <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
+    <div class="mx-auto grid max-w-5xl gap-12 py-12 md:grid-cols-[1fr_1.3fr] md:py-16">
       <div>
-        <h2 class="font-medium text-2xl text-gray-800">Contattami</h2>
-        <p class="text-lg leading-relaxed text-slate-500 mt-3">
-          Hai bisogno di qualcosa?. Completa il seguente form con la richiesta.
+        <p class="eyebrow">Contatti</p>
+        <h1 class="page-title mt-2">Scrivimi</h1>
+        <p class="page-subtitle">
+          Per richiedere una video lezione, l'aggiunta di nuovi appunti, segnalare un errore o per qualsiasi altra cosa.
+          Di solito rispondo entro un paio di giorni.
         </p>
-        <div class="mt-5">
-          <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:map-marker" />
-            <span>Fidenza (PR)</span>
-          </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:envelope" /><a
-              href="mailto:dennisturco@gmail.com"
-              >dennisturco@gmail.com</a
-            >
-          </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:phone" /><a
-              href="tel:+39 3421666192">+39 3421666192</a
-            >
-          </div>
-        </div>
+
+        <ul class="mt-8 space-y-3">
+          {contacts.map((c) => (
+            <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+              <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <Icon name={c.icon} class="h-4 w-4" />
+              </span>
+              {c.href ? (
+                <a
+                  href={c.href}
+                  class="hover:text-blue-600 dark:hover:text-blue-400"
+                  {...(c.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {c.label}
+                </a>
+              ) : (
+                <span>{c.label}</span>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
-      <div>
+
+      <div class="card p-6 sm:p-8">
         <Contactform />
       </div>
     </div>

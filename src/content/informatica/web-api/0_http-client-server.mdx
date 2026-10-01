@@ -1,0 +1,420 @@
+---
+title: "HTTP and Client-Server Architecture"
+order: 0
+draft: false
+lastUpdateDate: "2026-10-01"
+subject: "Web & REST APIs"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["http", "client-server", "web", "status-codes", "cors", "https"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+Almost every modern business application is a **client-server** system. A **client** (a browser, a desktop app, another service) sends a **request**. A **server** processes it and sends back a **response**. The language they speak on the web is **HTTP** (HyperText Transfer Protocol).
+
+If you build REST APIs with ASP.NET Core, you work with HTTP every day. Interviewers know this, so they often start with basic questions: "What happens when you type a URL in the browser?" or "What is the difference between 401 and 403?". This lesson gives you clear answers.
+
+```mermaid
+sequenceDiagram
+    participant C as Client (Browser / App)
+    participant S as Server (ASP.NET Core API)
+    participant DB as Database (PostgreSQL)
+    C->>S: GET /api/projects/42
+    S->>DB: SELECT ... WHERE id = 42
+    DB-->>S: row
+    S-->>C: 200 OK + JSON body
+```
+
+## 2. Client-server architecture
+
+In a client-server architecture, responsibilities are split:
+
+- The **client** handles the user interface and user interaction.
+- The **server** owns the business logic, the data and the security rules.
+- They communicate over the network with a well-defined **contract** (for example, a REST API).
+
+A typical web application has three **tiers**: the front end (browser, JavaScript), the back end (Web API in .NET) and the database. This is called a **three-tier architecture**.
+
+Benefits:
+
+- **Separation of concerns**: you can change the UI without touching the database.
+- **Scalability**: you can add more server instances behind a **load balancer**.
+- **Integration**: many different clients (web, mobile, other services) can use the same API.
+
+<Aside variant="info">
+A server can also be a client. When your Projects API calls another team's Document service over HTTP, your API is the client in that conversation. This is very common in integration work.
+</Aside>
+
+## 3. Anatomy of an HTTP request and response
+
+HTTP is a **text-based** protocol (HTTP/1.1) built on top of TCP. A message has three parts: a start line, **headers**, and an optional **body**.
+
+### 3.1 Request
+
+```http
+POST /api/projects/42/documents HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+{
+  "title": "P&ID Area 100",
+  "revision": "A"
+}
+```
+
+- **Method**: `POST` (what you want to do).
+- **Path**: `/api/projects/42/documents` (which resource).
+- **Headers**: metadata, like the format of the body or the credentials.
+- **Body**: the data you send, usually JSON.
+
+### 3.2 Response
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /api/projects/42/documents/1001
+
+{
+  "id": 1001,
+  "title": "P&ID Area 100",
+  "revision": "A"
+}
+```
+
+- **Status line**: the protocol version, the **status code** (`201`) and a reason phrase.
+- **Headers**: here `Location` tells the client where the new resource lives.
+- **Body**: the created document.
+
+<Aside variant="tip">
+In interviews, describe a request with these four words: **method, URL, headers, body**. For a response: **status code, headers, body**. It's a simple structure that shows you understand the protocol.
+</Aside>
+
+## 4. HTTP methods
+
+The **method** (also called **verb**) tells the server what action the client wants.
+
+| Method | Typical use | Has body? | Safe | Idempotent |
+|---|---|---|---|---|
+| `GET` | Read a resource | No | Yes | Yes |
+| `POST` | Create a resource / run an action | Yes | No | No |
+| `PUT` | Replace a resource completely | Yes | No | Yes |
+| `PATCH` | Update part of a resource | Yes | No | No (usually) |
+| `DELETE` | Delete a resource | Usually no | No | Yes |
+| `HEAD` | Like GET, but only headers | No | Yes | Yes |
+| `OPTIONS` | Ask which methods are allowed (used by CORS) | No | Yes | Yes |
+
+- **Safe**: the method does not change data on the server.
+- **Idempotent**: calling it once or ten times leaves the server in the same state.
+
+We will go deeper into safety and idempotency in the next lesson, [REST API Design](/informatica/web-api/1_rest-api-design).
+
+## 5. Status codes
+
+The **status code** is a three-digit number. The first digit tells you the category.
+
+| Range | Meaning | Common codes |
+|---|---|---|
+| 1xx | Informational | 101 Switching Protocols |
+| 2xx | Success | 200 OK, 201 Created, 204 No Content |
+| 3xx | Redirection | 301 Moved Permanently, 304 Not Modified |
+| 4xx | Client error | 400, 401, 403, 404, 409, 422, 429 |
+| 5xx | Server error | 500, 502, 503, 504 |
+
+The codes you must know by heart:
+
+- **400 Bad Request**: the request is malformed or fails validation.
+- **401 Unauthorized**: the client is **not authenticated** (no token, or invalid token).
+- **403 Forbidden**: the client is authenticated but **not allowed** to do this.
+- **404 Not Found**: the resource does not exist.
+- **409 Conflict**: the request conflicts with the current state (e.g. a duplicate tag number, or a concurrency conflict).
+- **500 Internal Server Error**: an unexpected error on the server.
+
+<Aside variant="warning">
+The name "401 Unauthorized" is misleading. It really means "unauthenticated": the server doesn't know who you are. Use **403** when the server knows who you are, but you lack the permission.
+</Aside>
+
+<Aside variant="danger">
+Never return `200 OK` with an error message in the body, like `{ "success": false }`. Clients, proxies, logs and monitoring tools rely on the status code. A wrong status code hides real problems.
+</Aside>
+
+## 6. Headers
+
+**Headers** are key-value pairs with metadata about the message. The most common ones:
+
+| Header | Direction | Purpose |
+|---|---|---|
+| `Content-Type` | Both | Format of the body (`application/json`) |
+| `Accept` | Request | Formats the client can read |
+| `Authorization` | Request | Credentials, e.g. `Bearer token` |
+| `Location` | Response | URL of a newly created resource |
+| `Cache-Control` | Response | How long the response can be cached |
+| `ETag` | Response | Version of the resource, for caching and concurrency |
+| `Set-Cookie` / `Cookie` | Response / Request | Store and send cookies |
+
+## 7. Statelessness
+
+HTTP is **stateless**: each request is independent. The server does not remember the previous request. Every request must carry all the information needed to process it (for example, the auth token).
+
+Why it matters:
+
+- Any server instance can handle any request, so you can **scale horizontally**.
+- If an instance crashes, no session is lost.
+
+State still exists, of course. But it lives in the **database**, in a distributed cache (like Redis), or on the client (cookie, token), not in the memory of one web server.
+
+## 8. Cookies vs tokens
+
+Since HTTP is stateless, the client must prove its identity on every request. There are two common approaches.
+
+**Cookie-based sessions**: after login, the server creates a session and sends a session id in a cookie. The browser sends the cookie automatically with every request.
+
+```http
+HTTP/1.1 200 OK
+Set-Cookie: session_id=abc123; HttpOnly; Secure; SameSite=Strict
+```
+
+**Token-based authentication**: after login, the server returns a signed token, usually a **JWT** (JSON Web Token). The client stores it and sends it in the `Authorization` header.
+
+```http
+GET /api/equipment HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+| | Cookies (session) | Tokens (JWT) |
+|---|---|---|
+| Sent by | Browser, automatically | Client code, explicitly |
+| Server state | Session stored on server | Usually none (self-contained) |
+| Best for | Classic web apps, same domain | SPAs, mobile apps, service-to-service |
+| Main risk | CSRF | Token theft (XSS), hard to revoke |
+
+<Aside variant="tip">
+Interview tip: don't say one is "better". Say: "Cookies are great for server-rendered web apps on one domain, because the browser handles them and `HttpOnly` protects them from JavaScript. Tokens fit APIs used by many clients, like SPAs, mobile apps or other services."
+</Aside>
+
+## 9. HTTPS
+
+**HTTPS** is HTTP over **TLS** (Transport Layer Security). TLS gives you three things:
+
+1. **Encryption**: nobody in the middle can read the data.
+2. **Integrity**: nobody can change the data in transit.
+3. **Authentication**: the **certificate** proves the server is really `api.example.com`.
+
+During the **TLS handshake**, the client and server agree on keys using asymmetric cryptography. Then they use faster symmetric encryption for the data. Always use HTTPS in production, especially when you send tokens or passwords. In ASP.NET Core, `app.UseHttpsRedirection()` redirects HTTP to HTTPS.
+
+## 10. CORS
+
+Browsers apply the **Same-Origin Policy**: JavaScript loaded from one **origin** (scheme + host + port) cannot freely read responses from another origin. For example, a front end on `https://app.example.com` calling `https://api.example.com` is a **cross-origin** request.
+
+**CORS** (Cross-Origin Resource Sharing) is how the server tells the browser: "this other origin is allowed". For "non-simple" requests (e.g. with `Authorization` or JSON body), the browser first sends a **preflight** request with `OPTIONS`.
+
+```http
+OPTIONS /api/projects HTTP/1.1
+Origin: https://app.example.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: authorization, content-type
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: authorization, content-type
+```
+
+<Aside variant="info">
+CORS is enforced **by the browser only**. Postman, curl or another backend service ignore it. So CORS is not a security layer for your API: you still need authentication and authorization on the server.
+</Aside>
+
+## 11. Tools: browser devtools and curl
+
+**Browser devtools** (F12 → Network tab) show every request: method, URL, status, headers, body and timing. This is the first place to look when the front end "doesn't work".
+
+**curl** is a command-line HTTP client. It is perfect to test an API quickly.
+
+```bash
+# GET with headers shown (-i)
+curl -i https://localhost:5001/api/projects/42
+
+# POST with a JSON body and a token
+curl -X POST https://localhost:5001/api/projects/42/documents \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"title":"P&ID Area 100","revision":"A"}'
+
+# Verbose: see the TLS handshake and all headers
+curl -v https://localhost:5001/api/projects
+```
+
+In .NET, you can also call an API from code with `HttpClient`:
+
+```cs
+using System.Net;
+using System.Net.Http.Json;
+
+using var client = new HttpClient { BaseAddress = new Uri("https://localhost:5001") };
+
+var response = await client.GetAsync("/api/projects/42");
+if (response.StatusCode == HttpStatusCode.NotFound)
+{
+    Console.WriteLine("Project not found");
+    return;
+}
+response.EnsureSuccessStatusCode(); // throws for other 4xx/5xx
+
+var project = await response.Content.ReadFromJsonAsync<ProjectDto>();
+Console.WriteLine(project?.Name);
+
+public record ProjectDto(int Id, string Name);
+```
+
+In a real ASP.NET Core application you should get `HttpClient` from `IHttpClientFactory` instead of creating it with `new`. See [Middleware, Error Handling and Security](/informatica/web-api/3_aspnet-core-middleware-security) and [async/await](/informatica/csharp/async-await).
+
+## 12. Interview questions
+
+**Q: What happens when you type a URL in the browser and press Enter?**
+The browser resolves the domain name to an IP address with DNS. Then it opens a TCP connection and, for HTTPS, does a TLS handshake. It sends an HTTP GET request, the server returns a response with a status code, headers and HTML, and the browser renders the page and requests the other resources like CSS, JavaScript and images.
+
+**Q: What is the difference between 401 and 403?**
+401 means the server doesn't know who you are: the token is missing, expired or invalid. 403 means the server knows who you are, but you don't have permission for that resource. So 401 is about authentication and 403 is about authorization.
+
+**Q: What does "HTTP is stateless" mean?**
+It means each request is independent and the server doesn't keep memory of previous requests. Every request must carry everything needed, like the auth token. This makes it easy to scale horizontally, because any instance can handle any request.
+
+**Q: What is the difference between PUT and PATCH?**
+PUT replaces the whole resource with the representation in the body, and it is idempotent. PATCH applies a partial update, for example only changing the status of a document. In practice, I use PUT when the client sends the full object and PATCH for small changes.
+
+**Q: What is CORS and why do we need it?**
+CORS is a mechanism that lets a server tell the browser which other origins can call it. Browsers block cross-origin reads by default because of the Same-Origin Policy. It's important to remember that CORS only protects browsers, so it doesn't replace authentication.
+
+**Q: Cookies or JWT tokens: which would you choose?**
+It depends on the client. For a classic web app on the same domain, cookies with `HttpOnly` and `Secure` are simple and safe. For an API used by an SPA, mobile apps or other services, I would use JWT bearer tokens, because they are easy to send in a header and the server can validate them without session storage.
+
+**Q: Why should we always use HTTPS?**
+HTTPS encrypts the traffic, protects it from changes and proves the server's identity with a certificate. Without it, tokens and passwords travel in plain text and anyone on the network could steal them.
+
+## 13. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Which parts make up an HTTP request?",
+answers:{
+a:"Status code, headers, body",
+b:"Method, URL, headers, optional body",
+c:"Only URL and body",
+d:"Method, status code, cookie"
+},
+correctAnswer:"b"
+},
+{
+question:"A user with a valid token tries to delete a project, but only admins can do it. Which status code should the API return?",
+answers:{
+a:"401 Unauthorized",
+b:"404 Not Found",
+c:"403 Forbidden",
+d:"500 Internal Server Error"
+},
+correctAnswer:"c"
+},
+{
+question:"Which HTTP method is NOT idempotent?",
+answers:{
+a:"POST",
+b:"GET",
+c:"PUT",
+d:"DELETE"
+},
+correctAnswer:"a"
+},
+{
+question:"What does the `Location` header in a `201 Created` response contain?",
+answers:{
+a:"The geographical location of the server",
+b:"The URL of the client",
+c:"The URL of the login page",
+d:"The URL of the newly created resource"
+},
+correctAnswer:"d"
+},
+{
+question:"What does 'stateless' mean for HTTP?",
+answers:{
+a:"The server cannot use a database",
+b:"Each request is independent and carries all the information needed",
+c:"Responses can never be cached",
+d:"Cookies are not allowed"
+},
+correctAnswer:"b"
+},
+{
+question:"Who enforces CORS?",
+answers:{
+a:"The browser",
+b:"The database",
+c:"curl and Postman",
+d:"The DNS server"
+},
+correctAnswer:"a"
+},
+{
+question:"What is the purpose of a preflight request?",
+answers:{
+a:"To warm up the server cache",
+b:"To renew an expired token",
+c:"To ask the server, with OPTIONS, if a cross-origin request is allowed",
+d:"To check the TLS certificate"
+},
+correctAnswer:"c"
+},
+{
+question:"Which of these is NOT a guarantee provided by TLS?",
+answers:{
+a:"Encryption of the data",
+b:"Integrity of the data",
+c:"Authentication of the server",
+d:"Faster responses than plain HTTP"
+},
+correctAnswer:"d"
+}
+]} />
+
+## 14. Exercises
+
+### 14.1 Inspect real traffic with devtools
+
+**Goal**: get comfortable reading requests and responses.
+
+1. Open any website you use often and press F12, then go to the **Network** tab.
+2. Reload the page and pick one request to an API (filter by **Fetch/XHR**).
+3. Write down the method, the URL, the status code, three request headers and three response headers.
+4. Find one request that returns a 3xx or 4xx code and explain why.
+
+*Hint: the "Headers" sub-tab shows both sides; "Preview" shows the parsed JSON body.*
+
+### 14.2 Talk to a public API with curl
+
+**Goal**: send different methods and read the status codes.
+
+1. Use a free test API such as `https://jsonplaceholder.typicode.com`.
+2. Send `GET /posts/1` with `curl -i` and look at the headers.
+3. Send a `POST /posts` with a JSON body and check that you get `201`.
+4. Send `GET /posts/99999` and check the status code.
+5. Repeat one request with `-v` and find the TLS handshake lines.
+
+*Hint: on Windows PowerShell, use `curl.exe` to avoid the built-in alias, and escape the quotes in the JSON body.*
+
+### 14.3 Write a small HttpClient console app
+
+**Goal**: call an API from C# and handle status codes correctly.
+
+1. Create a console app with `dotnet new console` (.NET 8).
+2. Define a record `PostDto(int Id, string Title)`.
+3. Call `GET /posts/1` and print the title using `ReadFromJsonAsync`.
+4. Call a URL that returns 404 and print a friendly message instead of throwing.
+5. Add a timeout of 5 seconds with `HttpClient.Timeout` and catch `TaskCanceledException`.
+
+*Hint: check `response.IsSuccessStatusCode` or `response.StatusCode` before reading the body.*

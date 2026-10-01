@@ -1,0 +1,420 @@
+---
+title: "Middleware, Error Handling and Security"
+order: 3
+draft: false
+lastUpdateDate: "2026-10-01"
+subject: "Web & REST APIs"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["aspnet-core", "middleware", "security", "jwt", "cors", "httpclient", "problem-details"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+In the [previous lesson](/informatica/web-api/2_aspnet-core-web-api) we built endpoints. But every request passes through many steps **before** and **after** your endpoint: error handling, HTTPS redirection, CORS, authentication, logging. These steps are called **middleware**.
+
+We cover the pipeline and its order, custom middleware, global error handling, logging, CORS, authentication and authorization with JWT, and calling other services with `IHttpClientFactory`.
+
+## 2. The request pipeline
+
+A **middleware** is a component that receives the `HttpContext`, can do some work, and then either calls the **next** middleware or **short-circuits** the pipeline (returns a response immediately).
+
+```mermaid
+graph LR
+    R[Request] --> A[Exception handler]
+    A --> B[HTTPS redirection]
+    B --> C[CORS]
+    C --> D[Authentication]
+    D --> E[Authorization]
+    E --> F[Endpoint]
+    F -.response.-> E -.-> D -.-> C -.-> B -.-> A -.-> Z[Response]
+```
+
+The request goes **in** through the middleware in order, and the response comes **out** in reverse order. This is why it is often described as an onion.
+
+```cs
+var app = builder.Build();
+app.UseExceptionHandler();      // 1. catches errors from everything below
+app.UseHttpsRedirection();      // 2. HTTP → HTTPS
+app.UseCors("Frontend");        // 3. CORS headers
+app.UseAuthentication();        // 4. who are you?
+app.UseAuthorization();         // 5. are you allowed?
+app.MapControllers();           // 6. endpoints
+app.Run();
+```
+
+<Aside variant="warning">
+Order matters. `UseAuthentication` must come **before** `UseAuthorization`, otherwise the user is always anonymous and every protected endpoint returns 401. The exception handler must be **first**, so it can catch errors thrown by all the following middleware.
+</Aside>
+
+### 2.1 Use, Run and Map
+
+`app.Use` adds a middleware that can call `next`; `app.Run` adds a **terminal** middleware (it never calls `next`); `app.Map` branches the pipeline for a path.
+
+```cs
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"→ {context.Request.Method} {context.Request.Path}");
+    await next(context);
+    Console.WriteLine($"← {context.Response.StatusCode}");
+});
+```
+
+## 3. Custom middleware
+
+For reusable logic, write a middleware class. Example: a **correlation ID** that follows a request across services, very useful when systems are integrated.
+
+```cs
+public class CorrelationIdMiddleware(RequestDelegate next)
+{
+    private const string Header = "X-Correlation-Id";
+    public async Task InvokeAsync(HttpContext context, ILogger<CorrelationIdMiddleware> logger)
+    {
+        var id = context.Request.Headers[Header].FirstOrDefault() ?? Guid.NewGuid().ToString();
+        context.Response.Headers[Header] = id;
+
+        using var _ = logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = id });
+        await next(context);
+    }
+}
+
+// Program.cs
+app.UseMiddleware<CorrelationIdMiddleware>();
+```
+
+Rules for a convention-based middleware:
+
+- the constructor receives `RequestDelegate next`;
+- it has a public `InvokeAsync(HttpContext context, ...)` method;
+- the middleware itself is created **once** (singleton-like), so **scoped** services (like a `DbContext`) must be injected as parameters of `InvokeAsync`, not in the constructor.
+
+<Aside variant="info">
+Middleware vs filters: middleware runs for **every** request and knows nothing about controllers. **Action filters** run only inside MVC, around a specific action, and can access model binding results. Use middleware for cross-cutting HTTP concerns, filters for controller-specific logic.
+</Aside>
+
+## 4. Global exception handling
+
+You don't want `try/catch` in every action. You also never want to send a stack trace to the client. The solution is one **global exception handler** that returns a standard **ProblemDetails** (RFC 7807 / RFC 9457) response, as seen in [REST API Design](/informatica/web-api/1_rest-api-design).
+
+In .NET 8 you implement `IExceptionHandler`:
+
+```cs
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext context, Exception exception, CancellationToken ct)
+    {
+        var (status, title) = exception switch
+        {
+            NotFoundException   => (StatusCodes.Status404NotFound, "Resource not found"),
+            ValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
+            _                   => (StatusCodes.Status500InternalServerError, "Unexpected error")
+        };
+        if (status == 500)
+            logger.LogError(exception, "Unhandled exception");
+
+        context.Response.StatusCode = status;
+        await context.Response.WriteAsJsonAsync(
+            new ProblemDetails { Status = status, Title = title, Instance = context.Request.Path }, ct);
+        return true; // handled
+    }
+}
+```
+
+```cs
+// Program.cs
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+// ...
+app.UseExceptionHandler();
+```
+
+Now a service can simply `throw new NotFoundException($"Document {id} not found")`, and the client receives a clean JSON error:
+
+```json
+{ "title": "Resource not found", "status": 404, "instance": "/api/documents/42" }
+```
+
+<Aside variant="danger">
+Never return `exception.Message` or the stack trace for 500 errors in production. They can leak table names, file paths or connection details. Log the full exception on the server and return a generic message (optionally with a trace ID) to the client.
+</Aside>
+
+<Aside variant="tip">
+Interview tip: if asked "how do you handle errors in your API?", answer in three parts: a global exception handler (no try/catch everywhere), a consistent ProblemDetails format for clients, and logging with a correlation ID so you can find the error in the logs.
+</Aside>
+
+## 5. Logging
+
+ASP.NET Core has built-in logging through `ILogger<T>`, injected by DI.
+
+```cs
+public class DocumentService(AppDbContext db, ILogger<DocumentService> logger)
+{
+    public async Task ApproveAsync(int documentId, string revision)
+    {
+        logger.LogInformation("Approving document {DocumentId} revision {Revision}",
+            documentId, revision);
+        // ...
+    }
+}
+```
+
+Important points:
+
+- Use **message templates** with placeholders (`{DocumentId}`), not string interpolation. This is **structured logging**: tools like Seq, Elastic or Application Insights can filter by `DocumentId`.
+- Choose the right **log level**: `Trace`, `Debug`, `Information`, `Warning`, `Error`, `Critical`.
+- Configure minimum levels per category in `appsettings.json`, under `Logging:LogLevel` (e.g. `Default` = Information, `Microsoft.AspNetCore` = Warning).
+
+Many teams add **Serilog** to write logs to files, Seq or other sinks. The `ILogger` interface stays the same.
+
+## 6. CORS configuration
+
+Browsers block JavaScript calls to a different **origin** (scheme + host + port) unless the server allows it with **CORS** headers. If your frontend runs on `http://localhost:5173` and the API on `https://localhost:7001`, you need CORS.
+
+```cs
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy => policy
+        .WithOrigins("http://localhost:5173", "https://projects.example.com")
+        .WithMethods("GET", "POST", "PUT", "DELETE")
+        .WithHeaders("Content-Type", "Authorization"));
+});
+
+// pipeline: after UseRouting (if present), before UseAuthorization
+app.UseCors("Frontend");
+```
+
+<Aside variant="warning">
+`AllowAnyOrigin()` together with credentials (cookies) is not allowed and is a security risk. CORS protects **browsers** only: Postman, curl or another server ignore it. CORS is not authentication.
+</Aside>
+
+## 7. Authentication vs authorization
+
+| | Authentication (AuthN) | Authorization (AuthZ) |
+|---|---|---|
+| Question | **Who are you?** | **What can you do?** |
+| Result | An identity (`ClaimsPrincipal`) | Allow or deny |
+| Failure | 401 Unauthorized | 403 Forbidden |
+| Middleware | `UseAuthentication` | `UseAuthorization` |
+
+After authentication, the user is available as `HttpContext.User`, a `ClaimsPrincipal` with a list of **claims** (key-value facts: user id, email, roles).
+
+## 8. JWT bearer authentication
+
+A **JWT** (JSON Web Token) is a signed token with three parts separated by dots: `header.payload.signature`. The payload contains claims. The client sends it in every request:
+
+```http
+GET /api/projects HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+The API does not store sessions: it **validates the signature** and the claims (issuer, audience, expiration). This fits the **stateless** nature of REST.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant I as Identity Provider
+    participant A as Projects API
+    C->>I: Login (username, password)
+    I-->>C: JWT access token
+    C->>A: GET /api/projects + Bearer token
+    A->>A: Validate signature, issuer, audience, expiry
+    A-->>C: 200 OK (or 401)
+```
+
+```cs
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://login.example.com"; // identity provider
+        options.Audience = "projects-api";
+    });
+builder.Services.AddAuthorization();
+```
+
+With `Authority`, the API downloads the provider's public keys automatically (Entra ID, Keycloak, Auth0...). Package: `Microsoft.AspNetCore.Authentication.JwtBearer`.
+
+<Aside variant="info">
+A JWT is **signed, not encrypted**: anyone can decode the payload (try jwt.io). Never put secrets in it. Keep access tokens short-lived (minutes) and use refresh tokens to get new ones.
+</Aside>
+
+## 9. The Authorize attribute and policies
+
+```cs
+[ApiController]
+[Route("api/projects")]
+[Authorize]                                   // every action requires a valid user
+public class ProjectsController : ControllerBase
+{
+    [HttpGet]
+    [AllowAnonymous]                          // except this one
+    public IActionResult GetPublic() => Ok();
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]              // role-based
+    public IActionResult Delete(int id) => NoContent();
+
+    [HttpPost("{id:int}/documents/{docId:int}/approve")]
+    [Authorize(Policy = "CanApproveDocuments")] // policy-based
+    public IActionResult Approve(int id, int docId) => NoContent();
+}
+```
+
+Policies are defined in `Program.cs`:
+
+```cs
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("CanApproveDocuments", p => p.RequireClaim("permission", "documents:approve"));
+```
+
+Minimal APIs use the same concepts: `.RequireAuthorization("CanApproveDocuments")` and `.AllowAnonymous()`.
+
+Read the current user inside an action with `User.FindFirstValue(ClaimTypes.NameIdentifier)`.
+
+**Policy-based** authorization is more flexible than roles: you can combine claims, or write custom requirements (for example "the user is a member of this project").
+
+## 10. Calling other services: IHttpClientFactory
+
+Integration between systems often means your API calls **another** REST API: for example, the Projects API reads equipment data from an external Equipment Catalog service.
+
+<Aside variant="danger">
+Don't create `new HttpClient()` for every request and dispose it. Each instance opens new sockets, and under load you get **socket exhaustion**. A single static `HttpClient` instead does not see DNS changes. `IHttpClientFactory` solves both problems by pooling and recycling handlers.
+</Aside>
+
+The cleanest way is a **typed client**:
+
+```cs
+public record EquipmentInfo(string Tag, string Description, string Manufacturer);
+public class EquipmentCatalogClient(HttpClient http)
+{
+    public async Task<EquipmentInfo?> GetByTagAsync(string tag, CancellationToken ct)
+    {
+        var response = await http.GetAsync($"api/equipment/{Uri.EscapeDataString(tag)}", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return null;
+        response.EnsureSuccessStatusCode(); // throws on other 4xx/5xx
+        return await response.Content.ReadFromJsonAsync<EquipmentInfo>(ct);
+    }
+}
+```
+
+```cs
+// Program.cs
+builder.Services.AddHttpClient<EquipmentCatalogClient>(client =>
+    client.BaseAddress = new Uri(builder.Configuration["Services:EquipmentCatalog"]!))
+    .AddStandardResilienceHandler(); // retries, timeouts, circuit breaker
+```
+
+Now inject `EquipmentCatalogClient` in any service or endpoint. Key points for integration:
+
+- Read the base URL from **configuration**, never hard-code it.
+- Always pass the `CancellationToken` and use a **timeout** (the standard resilience handler adds one per attempt and in total).
+- Use **resilience** (package `Microsoft.Extensions.Http.Resilience`, based on Polly): retry with backoff for temporary errors, and a **circuit breaker** to stop calling a service that is down.
+- Forward the correlation ID header so you can trace a request across services.
+
+## 11. Interview questions
+
+**Q: What is middleware in ASP.NET Core?**
+Middleware is a component in the request pipeline. Each one receives the `HttpContext`, can do work before and after calling the next component, or can short-circuit and return a response. Examples are exception handling, HTTPS redirection, CORS, authentication and authorization. The order of registration in `Program.cs` defines the order of execution.
+
+**Q: How do you implement global error handling?**
+In .NET 8 I implement `IExceptionHandler`, register it with `AddExceptionHandler`, and add `UseExceptionHandler` at the start of the pipeline. The handler maps exception types to status codes, logs unexpected errors, and returns a ProblemDetails JSON. This way controllers stay clean and clients always get the same error format.
+
+**Q: What is the difference between authentication and authorization?**
+Authentication answers "who are you?" and produces an identity with claims, for example by validating a JWT. Authorization answers "what are you allowed to do?" using roles, claims or policies. If authentication fails you return 401, if the user is known but not allowed you return 403.
+
+**Q: How does JWT authentication work?**
+The client logs in at an identity provider and receives a signed token containing claims. It sends the token in the `Authorization: Bearer` header on every request. The API validates the signature, issuer, audience and expiration without storing any session, so it stays stateless and scales easily.
+
+**Q: What is CORS and when do you need it?**
+CORS is a browser mechanism that blocks JavaScript requests to a different origin unless the server allows them with specific headers. I need it when the frontend is served from a different domain or port than the API. I configure a named policy with explicit origins, methods and headers, and I avoid allowing any origin in production.
+
+**Q: Why should you use IHttpClientFactory instead of new HttpClient()?**
+Creating and disposing many `HttpClient` instances can cause socket exhaustion, while one static instance ignores DNS changes. The factory pools and recycles the underlying handlers, centralizes configuration like base address and timeout, and lets me add resilience policies such as retries and circuit breakers.
+
+**Q: How would you make a call to an external service more reliable?**
+I use a typed client with a timeout and a cancellation token, and add a resilience handler with retries using exponential backoff and a circuit breaker. I handle expected responses like 404 explicitly, log failures with a correlation ID, and if possible make the operation idempotent so retries are safe.
+
+## 12. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"In which order should these middleware be registered?",
+answers:{ a:"UseAuthorization, UseAuthentication, UseExceptionHandler", b:"UseExceptionHandler, UseAuthentication, UseAuthorization", c:"UseAuthentication, UseExceptionHandler, UseAuthorization", d:"The order does not matter" },
+correctAnswer:"b"
+},
+{
+question:"What does it mean when a middleware short-circuits the pipeline?",
+answers:{ a:"It returns a response without calling the next middleware", b:"It restarts the pipeline from the beginning", c:"It skips only the authorization middleware", d:"It runs the endpoint twice" },
+correctAnswer:"a"
+},
+{
+question:"Where should you inject a scoped service (like a DbContext) in a convention-based middleware?",
+answers:{ a:"In the constructor", b:"In a static field", c:"As a parameter of InvokeAsync", d:"Scoped services cannot be used in middleware" },
+correctAnswer:"c"
+},
+{
+question:"Which status code means the user is authenticated but not allowed to access the resource?",
+answers:{ a:"400 Bad Request", b:"401 Unauthorized", c:"404 Not Found", d:"403 Forbidden" },
+correctAnswer:"d"
+},
+{
+question:"Which statement about JWT is correct?",
+answers:{ a:"The payload is encrypted, so it can contain passwords", b:"The payload is signed but readable by anyone", c:"The server must store every token in a session table", d:"A JWT never expires" },
+correctAnswer:"b"
+},
+{
+question:"Who enforces CORS rules?",
+answers:{ a:"The browser", b:"The database", c:"The JWT middleware", d:"Every HTTP client, including curl" },
+correctAnswer:"a"
+},
+{
+question:"Why is structured logging with `{DocumentId}` placeholders better than string interpolation?",
+answers:{ a:"It makes the application compile faster", b:"It encrypts the log messages", c:"Log tools can store and filter by the named property", d:"It removes the need for log levels" },
+correctAnswer:"c"
+},
+{
+question:"What problem can `new HttpClient()` per request cause under load?",
+answers:{ a:"SQL injection", b:"Memory leaks in the DbContext", c:"CORS errors", d:"Socket exhaustion" },
+correctAnswer:"d"
+}
+]} />
+
+## 13. Exercises
+
+### 13.1 Request timing middleware
+
+**Goal**: log how long each request takes.
+
+1. Create a `RequestTimingMiddleware` class with `RequestDelegate next` and `InvokeAsync`.
+2. Start a `Stopwatch` before calling `next`, stop it after, and log method, path, status code and elapsed ms with a message template.
+3. Log a `Warning` instead if the request takes more than 500 ms.
+4. Register it and check the order: should it be before or after the exception handler?
+
+*Hint*: put it right after `UseExceptionHandler` so it measures almost the whole pipeline but errors are still converted to ProblemDetails.
+
+### 13.2 Global error handling for documents
+
+**Goal**: return consistent errors from the Documents API.
+
+1. Create `NotFoundException` and `ConflictException` classes.
+2. Throw `NotFoundException` when a document does not exist, and `ConflictException` when a revision already exists.
+3. Implement `IExceptionHandler` that maps them to 404 and 409, everything else to 500.
+4. Check with Swagger or curl that no stack trace is returned for a 500 error.
+
+*Hint*: add `traceId` from `context.TraceIdentifier` to `ProblemDetails.Extensions` so users can report it.
+
+### 13.3 Secure the API and call an external service
+
+**Goal**: combine JWT authorization and an integration call.
+
+1. Add JWT bearer authentication (you can use `dotnet user-jwts create` for local tokens).
+2. Protect `ProjectsController` with `[Authorize]` and create a policy `CanApproveDocuments` based on a claim.
+3. Create a typed client `EquipmentCatalogClient` with `AddHttpClient` and a base URL from `appsettings.json`.
+4. Add an endpoint `GET /api/projects/{id}/equipment/{tag}/details` that calls the external service (404 if the tag is unknown); stop the external service and see how the resilience handler behaves.
+
+*Hint*: `dotnet user-jwts create --claim permission=documents:approve` creates a token with the claim you need.

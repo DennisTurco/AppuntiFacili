@@ -1,30 +1,18 @@
 ---
-import { supabase } from "@/lib/supabaseClient";
-import { onMount } from "solid-js";
+import { Icon } from "astro-icon/components";
 import Layout from "@/layouts/Layout.astro";
 import Container from "@/components/container.astro";
-
-onMount(async () => {
-  // Questo sincronizza la sessione lato client
-  const { data: { session }, error } = await supabase.auth.getSession();
-  console.log("Sessione attiva:", session);
-});
 ---
 
-<Layout title="Conferma">
+<Layout title="Email confermata">
   <Container>
-<div class="container mx-auto px-6 py-12">
-  <h1 class="text-2xl font-bold text-center">Benvenuto!</h1>
-  <p class="text-center mt-4">La tua email è stata confermata. Ora puoi accedere.</p>
-</div>
-
-<div class="text-center mt-6">
-  <a
-    href="/login"
-    class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
-  >
-    Vai al Login
-  </a>
-</div>
-</Container>
+    <div class="mx-auto max-w-md py-20 text-center">
+      <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+        <Icon name="fa6-solid:check" class="h-6 w-6" />
+      </span>
+      <h1 class="mt-6 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Benvenuto!</h1>
+      <p class="mt-3 text-slate-600 dark:text-slate-400">La tua email è stata confermata. Ora puoi accedere.</p>
+      <a href="/login" class="btn btn-lg btn-primary mt-8">Vai al login</a>
+    </div>
+  </Container>
 </Layout>

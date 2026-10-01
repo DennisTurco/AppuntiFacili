@@ -1,0 +1,418 @@
+---
+title: "REST API Design"
+order: 1
+draft: false
+lastUpdateDate: "2026-10-01"
+subject: "Web & REST APIs"
+category: "Informatica"
+difficulty: "intermediate"
+tags: ["rest", "api-design", "http", "openapi", "problem-details", "pagination"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduction
+
+**REST** (REpresentational State Transfer) is an **architectural style** for building APIs over HTTP. It was described by Roy Fielding in 2000. REST is not a protocol or a library: it's a set of **constraints** and conventions.
+
+A well-designed REST API is **predictable**. If a developer knows how to read projects, they can guess how to read documents or equipment. This is very important for **integration**: other teams and other products will consume your API, often without talking to you first.
+
+The main REST constraints:
+
+- **Client-server**: UI and data are separated.
+- **Stateless**: each request carries all the information needed (see [HTTP and Client-Server Architecture](/informatica/web-api/0_http-client-server)).
+- **Cacheable**: responses say if they can be cached.
+- **Uniform interface**: resources are identified by URIs and handled with standard HTTP methods.
+- **Layered system**: the client doesn't know if there is a proxy, a gateway or a load balancer in the middle.
+
+<Aside variant="info">
+Many APIs called "REST" are really "HTTP + JSON" APIs. That's fine in practice. In an interview, show that you know the constraints, but focus on pragmatic, consistent design.
+</Aside>
+
+## 2. Resources and URIs
+
+A **resource** is any "thing" your API exposes: a project, a document, a piece of equipment. Each resource has a **URI** (Uniform Resource Identifier).
+
+Rules of thumb:
+
+1. Use **nouns**, not verbs: `/projects`, not `/getProjects`.
+2. Use **plural** names for collections: `/projects`, `/documents`.
+3. Use the **id** to identify one item: `/projects/42`.
+4. Use **nesting** for strong parent-child relationships, but max 2 levels.
+5. Use **lowercase** and **kebab-case**: `/piping-lines`, not `/PipingLines`.
+
+```text
+GET    /api/projects                         # list of projects
+GET    /api/projects/42                      # one project
+GET    /api/projects/42/documents            # documents of project 42
+GET    /api/projects/42/documents/1001       # one document
+GET    /api/documents/1001/revisions         # revisions of a document
+GET    /api/equipment?projectId=42&type=pump # filter instead of deep nesting
+```
+
+<Aside variant="warning">
+Avoid very deep URIs like `/projects/42/areas/3/equipment/7/tags/9`. They are hard to use and they break when the hierarchy changes. If a resource has its own unique id, expose it at the top level, e.g. `/tags/9`.
+</Aside>
+
+### 2.1 Actions that are not CRUD
+
+Sometimes an operation is not a simple create/read/update/delete. For example, "release a document revision". Two common options:
+
+```text
+# Option A: model the action as a sub-resource (a new thing is created)
+POST /api/documents/1001/revisions          # creates revision B
+
+# Option B: a controller-style action (pragmatic)
+POST /api/documents/1001/release
+```
+
+Prefer option A when you can. Use option B for real commands, and keep the name a clear verb.
+
+## 3. Mapping HTTP verbs to operations
+
+| Operation | Method + URI | Success code | Body in response |
+|---|---|---|---|
+| List | `GET /projects` | 200 OK | Array (paginated) |
+| Read one | `GET /projects/42` | 200 OK | The project |
+| Create | `POST /projects` | 201 Created | New project + `Location` header |
+| Replace | `PUT /projects/42` | 200 OK or 204 No Content | Updated project or nothing |
+| Partial update | `PATCH /projects/42` | 200 OK or 204 No Content | Updated project or nothing |
+| Delete | `DELETE /projects/42` | 204 No Content | Nothing |
+
+And the most common error codes per operation:
+
+| Situation | Code |
+|---|---|
+| Resource id doesn't exist | 404 Not Found |
+| Validation fails (missing title, wrong format) | 400 Bad Request (or 422) |
+| Duplicate (tag number already used in this project) | 409 Conflict |
+| Someone else changed the resource first | 409 Conflict or 412 Precondition Failed |
+| Not logged in / no permission | 401 / 403 |
+
+<Aside variant="tip">
+Interview tip: when you are asked to "design an API" on a whiteboard, go step by step. First list the resources (nouns), then the URIs, then the methods and status codes, and finally the request and response bodies. Say your choices out loud.
+</Aside>
+
+## 4. Safety and idempotency
+
+- A method is **safe** if it doesn't change server state: `GET`, `HEAD`, `OPTIONS`.
+- A method is **idempotent** if repeating the same request gives the same server state: `GET`, `PUT`, `DELETE` (and the safe ones).
+- `POST` is neither safe nor idempotent. Calling it twice creates two documents.
+
+Why it matters: networks fail. If a client sends a request and gets a timeout, it doesn't know if the server processed it. An idempotent request can be **retried** safely.
+
+```text
+PUT /api/equipment/7  { "tag": "P-101", "status": "Installed" }
+PUT /api/equipment/7  { "tag": "P-101", "status": "Installed" }   # same result
+
+DELETE /api/documents/1001   # 204 - deleted
+DELETE /api/documents/1001   # 404 - but the server state is the same
+```
+
+To make `POST` safe to retry, many APIs accept an **idempotency key**: the client sends a unique id in a header, and the server ignores duplicates with the same key.
+
+```http
+POST /api/projects/42/documents
+Idempotency-Key: 8f14e45f-ea2c-4a7b-9b1d-1c2e3f4a5b6c
+```
+
+## 5. Pagination, filtering and sorting
+
+Never return an unbounded list. A project can have 100,000 tags. Use **query parameters**:
+
+```text
+GET /api/projects/42/tags?page=2&pageSize=50
+GET /api/projects/42/tags?type=instrument&status=active
+GET /api/projects/42/tags?sort=-createdAt,name
+GET /api/projects/42/tags?search=FT-1
+```
+
+Here `-createdAt` means descending. Return the items together with paging metadata:
+
+```json
+{
+  "items": [ { "id": 501, "number": "FT-101" }, { "id": 502, "number": "FT-102" } ],
+  "page": 2,
+  "pageSize": 50,
+  "totalCount": 1234
+}
+```
+
+A simple implementation with EF Core (see [ORM and Entity Framework](/informatica/csharp/orm-entity-framework)):
+
+```cs
+public async Task<PagedResult<TagDto>> GetTagsAsync(int projectId, int page, int pageSize)
+{
+    pageSize = Math.Clamp(pageSize, 1, 100); // protect the server
+
+    var query = _db.Tags.Where(t => t.ProjectId == projectId);
+    var total = await query.CountAsync();
+
+    var items = await query
+        .OrderBy(t => t.Number)                // always order before Skip/Take
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(t => new TagDto(t.Id, t.Number))
+        .ToListAsync();
+
+    return new PagedResult<TagDto>(items, page, pageSize, total);
+}
+
+public record TagDto(int Id, string Number);
+public record PagedResult<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount);
+```
+
+<Aside variant="info">
+**Offset pagination** (`page` + `pageSize`) is simple but slow on very large tables, and items can shift between pages. **Cursor (keyset) pagination** uses the last seen key, e.g. `?after=502&limit=50`, which translates to `WHERE id > 502` and is fast with an index.
+</Aside>
+
+## 6. Versioning
+
+Your API is a **contract**. Once other systems use it, you cannot break it. A **breaking change** is, for example: removing a field, renaming a field, changing a type, or making an optional field required.
+
+Adding a new optional field is usually **not** breaking. When you must break the contract, release a new **version**.
+
+| Strategy | Example | Notes |
+|---|---|---|
+| URI path | `/api/v1/projects` | Most common, very visible, easy to route |
+| Query string | `/api/projects?api-version=1.0` | Default in Azure APIs |
+| Header | `Api-Version: 1.0` | Clean URIs, less visible |
+| Media type | `Accept: application/vnd.company.v1+json` | Most "pure", more complex |
+
+In ASP.NET Core, the `Asp.Versioning.Http` package supports all of them. Keep old versions running for a while and communicate a **deprecation** date to consumers.
+
+## 7. Error format: Problem Details (RFC 9457 / RFC 7807)
+
+Every error should have the **same shape**, so clients can handle errors in one place. The standard is **Problem Details**, defined in RFC 7807 (now updated by RFC 9457). The content type is `application/problem+json`.
+
+```json
+{
+  "type": "https://example.com/problems/validation-error",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "detail": "The document could not be created.",
+  "instance": "/api/projects/42/documents",
+  "errors": {
+    "title": [ "The Title field is required." ],
+    "revision": [ "Revision must be a single letter." ]
+  },
+  "traceId": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+}
+```
+
+- `type`, `title`, `status`, `detail`, `instance` are the standard fields.
+- You can add **extensions**, like `errors` for validation or `traceId` for logs.
+
+ASP.NET Core supports this out of the box:
+
+```cs
+builder.Services.AddProblemDetails();
+
+app.MapGet("/api/documents/{id:int}", async (int id, AppDbContext db) =>
+    await db.Documents.FindAsync(id) is { } doc
+        ? Results.Ok(doc)
+        : Results.Problem(
+            statusCode: StatusCodes.Status404NotFound,
+            title: "Document not found",
+            detail: $"Document {id} does not exist."));
+```
+
+<Aside variant="danger">
+Never send stack traces, SQL queries or connection strings in error responses in production. They help attackers. Log the details on the server and return only a `traceId` to the client.
+</Aside>
+
+## 8. HATEOAS (briefly)
+
+**HATEOAS** (Hypermedia As The Engine Of Application State) means the response includes **links** to related resources and possible next actions. The client discovers what it can do from the response.
+
+```json
+{
+  "id": 1001,
+  "title": "P&ID Area 100",
+  "status": "Draft",
+  "links": [
+    { "rel": "self", "href": "/api/documents/1001", "method": "GET" },
+    { "rel": "revisions", "href": "/api/documents/1001/revisions", "method": "GET" },
+    { "rel": "release", "href": "/api/documents/1001/release", "method": "POST" }
+  ]
+}
+```
+
+It is the highest level of the **Richardson Maturity Model** (level 3). In real projects it's rare, because most clients are written against documentation. Knowing the name and the idea is usually enough for an interview.
+
+## 9. Documentation with OpenAPI and Swagger
+
+**OpenAPI** is a standard format (JSON or YAML) to describe a REST API: endpoints, parameters, request and response schemas, status codes and security. **Swagger UI** is a web page that reads the OpenAPI document and lets you try the endpoints from the browser.
+
+```yaml
+openapi: 3.0.1
+paths:
+  /api/projects/{projectId}/documents:
+    post:
+      summary: Create a document in a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "201": { description: Created }
+        "400": { description: Validation error }
+        "404": { description: Project not found }
+```
+
+Benefits:
+
+- Always up-to-date documentation, generated from code.
+- Client SDKs can be **generated** automatically (e.g. with NSwag or Kiota) for C#, TypeScript and more.
+- It's the shared **contract** between teams, very useful for integration.
+
+In .NET 8 the Web API template includes Swashbuckle (`AddSwaggerGen`, `UseSwagger`). From .NET 9, `Microsoft.AspNetCore.OpenApi` with `AddOpenApi()` generates the document natively. You will see this in practice in [Building a Web API with ASP.NET Core](/informatica/web-api/2_aspnet-core-web-api).
+
+## 10. Interview questions
+
+**Q: What makes an API RESTful?**
+A RESTful API exposes resources identified by URIs and uses standard HTTP methods and status codes to work with them. It is stateless, so every request carries its own authentication and context, and responses can be cached. In practice I focus on consistent nouns in the URIs, correct verbs and meaningful status codes.
+
+**Q: What is idempotency and why is it important?**
+An operation is idempotent if calling it many times has the same effect as calling it once. GET, PUT and DELETE are idempotent, POST is not. It's important because of network failures: an idempotent request can be retried safely, and for POST we can add an idempotency key to avoid duplicates.
+
+**Q: Which status code do you return when you create a resource?**
+I return 201 Created, with a `Location` header pointing to the new resource, and usually the created object in the body. For a delete I return 204 No Content, and for a failed validation 400 with a Problem Details body.
+
+**Q: How would you design pagination for a large collection?**
+I would never return the whole collection. For most cases I'd use `page` and `pageSize` query parameters with a maximum page size, and return the total count with the items. For very large or fast-changing tables, I'd use cursor-based pagination, because it's faster and stable.
+
+**Q: How do you version an API, and what is a breaking change?**
+A breaking change is anything that can break existing clients, like removing or renaming a field or changing its type. Adding optional fields is fine. When I need a breaking change, I release a new version, usually in the URI like `/api/v2`, and keep the old version for a deprecation period.
+
+**Q: How should a REST API return errors?**
+With the correct status code and a consistent body. I like the Problem Details standard, RFC 7807, because ASP.NET Core supports it natively and clients can parse every error the same way. I never expose stack traces; I return a trace id and log the details on the server.
+
+**Q: What is OpenAPI used for?**
+OpenAPI is a machine-readable description of the API. We use it to generate documentation with Swagger UI, to test endpoints, and to generate client code for other teams. It works as the contract between the API and its consumers.
+
+## 11. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Which URI follows REST conventions best?",
+answers:{
+a:"GET /api/getAllDocuments",
+b:"POST /api/documents/delete/1001",
+c:"GET /api/projects/42/documents",
+d:"GET /api/Project_Documents?action=list"
+},
+correctAnswer:"c"
+},
+{
+question:"Which status code is the best response to a successful DELETE with no body?",
+answers:{
+a:"204 No Content",
+b:"200 OK with an empty JSON object",
+c:"201 Created",
+d:"410 Gone"
+},
+correctAnswer:"a"
+},
+{
+question:"Which of these methods is idempotent but NOT safe?",
+answers:{
+a:"GET",
+b:"POST",
+c:"HEAD",
+d:"PUT"
+},
+correctAnswer:"d"
+},
+{
+question:"A client tries to create a tag with a number that already exists in the project. What is the most appropriate status code?",
+answers:{
+a:"404 Not Found",
+b:"409 Conflict",
+c:"500 Internal Server Error",
+d:"200 OK"
+},
+correctAnswer:"b"
+},
+{
+question:"Which change is usually NOT a breaking change?",
+answers:{
+a:"Renaming a field",
+b:"Removing an endpoint",
+c:"Adding a new optional field to the response",
+d:"Changing a field from number to string"
+},
+correctAnswer:"c"
+},
+{
+question:"What is the content type of a Problem Details response?",
+answers:{
+a:"application/problem+json",
+b:"application/error+json",
+c:"text/plain",
+d:"application/xml"
+},
+correctAnswer:"a"
+},
+{
+question:"Why should you call OrderBy before Skip and Take when paginating with EF Core?",
+answers:{
+a:"Because Skip does not compile without it",
+b:"To make the query run on the client",
+c:"To avoid loading navigation properties",
+d:"Because without a stable order, items can appear on more than one page or be skipped"
+},
+correctAnswer:"d"
+},
+{
+question:"What does HATEOAS add to a response?",
+answers:{
+a:"A digital signature",
+b:"Links to related resources and possible next actions",
+c:"The API version number",
+d:"A cache expiration date"
+},
+correctAnswer:"b"
+}
+]} />
+
+## 12. Exercises
+
+### 12.1 Design the Equipment API on paper
+
+**Goal**: practice the whiteboard design process.
+
+1. Resources: `Project`, `Equipment`, `Tag`. An equipment belongs to a project and has many tags.
+2. Write the URIs for list, read, create, update and delete of equipment.
+3. Choose the method and success status code for each one.
+4. Add filtering by `type` and `status`, sorting by `name`, and pagination.
+5. List the possible error codes for "create equipment".
+
+*Hint: follow the order resources → URIs → methods → status codes → bodies, like in section 3.*
+
+### 12.2 Define your error contract
+
+**Goal**: write consistent Problem Details responses.
+
+1. Write the JSON body for: a validation error on a new document (missing `title`), a 404 for a missing project, and a 409 for a duplicate tag.
+2. Use the standard fields and add a `traceId` extension.
+3. In a .NET 8 minimal API, call `AddProblemDetails()` and return one of them with `Results.Problem`.
+4. Check the response with curl: status code and `Content-Type`.
+
+*Hint: for validation errors, `Results.ValidationProblem` builds the `errors` dictionary for you.*
+
+### 12.3 Review a bad API
+
+**Goal**: spot design problems, as in a code review.
+
+Look at these endpoints and rewrite each one following REST conventions:
+
+1. `GET /api/getDocumentById?id=1001`
+2. `POST /api/documents/1001/updateTitle`
+3. `GET /api/deleteProject/42`
+4. `POST /api/tags/search` returning all tags, always with `200 OK`, even on errors.
+
+*Hint: think about nouns vs verbs, safe methods, pagination and status codes. Explain why `GET` must never delete data.*

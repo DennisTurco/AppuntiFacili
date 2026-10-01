@@ -1,197 +1,504 @@
 ---
+import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import Layout from "./Layout.astro";
 import { getFormattedDate } from "@/utils/all";
-import LessonSearch from "../components/LessonSearch";
-import ScrollOnTop from "../components/ScrollOnTop";
-import BackButton from "../components/BackButton.astro";
-import BookLessonButton from "../components/BookLessonButton.astro";
-import GoToTopButton from "../components/GoToTopButton.astro";
-import ActionButtons from "../components/ActionButtons.astro";
-import TableOfContents from "../components/TableOfContents.astro";
+import {
+  categoryMeta,
+  categoryOf,
+  difficultyInfo,
+  getPublishedLessons,
+  readingTime,
+  type LessonCollection,
+  type LessonEntry,
+} from "@/utils/lessons";
 
-type LessonItem = {
-  title: string;
-  url: string;
-  order?: number;
-  subject?: string;
-  draft: boolean;
-};
-
-type LessonSubject = {
-  subject: string;
-  lessons: LessonItem[];
-};
-
-interface LessonLayoutProps {
-  frontmatter: any;
-  lessons: Record<string, LessonItem[]>;
-  backHref?: string;
-  sectionName?: string;
+interface Props {
+  entry: LessonEntry;
+  headings: MarkdownHeading[];
+  collection: LessonCollection;
 }
 
-// **Tipizza Astro.props**
-const { frontmatter, lessons, backHref = "/", sectionName = "Sezione" } =
-  Astro.props as LessonLayoutProps;
+const { entry, headings, collection } = Astro.props;
+const { data } = entry;
 
-// Filtra le lezioni non pubblicate (draft === true)
-const filteredLessonsArray: LessonSubject[] = Object.entries(lessons)
-  .map(([subject, lessonList]) => ({
-    subject,
-    lessons: lessonList
-      .filter(lesson => !lesson.draft) // <-- filtra draft
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+const sectionName = collection === "informatica" ? "Informatica" : "Matematica";
+const sectionHref = `/${collection}`;
+const currentUrl = `/${collection}/${entry.slug}`;
+const currentCategory = categoryOf(entry);
+const category = categoryMeta(currentCategory);
+
+// Sidebar: lezioni pubblicate raggruppate per categoria, ordinate per `order`
+const published = await getPublishedLessons(collection);
+const groupsMap = new Map<string, LessonEntry[]>();
+for (const lesson of published) {
+  const cat = categoryOf(lesson);
+  if (!groupsMap.has(cat)) groupsMap.set(cat, []);
+  groupsMap.get(cat)!.push(lesson);
+}
+const groups = [...groupsMap.entries()]
+  .map(([cat, lessons]) => ({
+    cat,
+    meta: categoryMeta(cat),
+    lessons: lessons.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0)),
   }))
-  .filter(subject => subject.lessons.length > 0) // rimuove soggetti senza lezioni
-  .sort((a, b) => a.subject.localeCompare(b.subject));
+  .sort((a, b) => a.meta.label.localeCompare(b.meta.label));
 
-// Flatten per prev/next
-const flatLessons: LessonItem[] = filteredLessonsArray.flatMap(l => l.lessons);
-const currentIndex = flatLessons.findIndex(l => l.url === frontmatter.url);
+// Precedente / successiva all'interno della stessa categoria
+const siblings = groupsMap.get(currentCategory) ?? [];
+const index = siblings.findIndex((l) => l.slug === entry.slug);
+const prevLesson = index > 0 ? siblings[index - 1] : null;
+const nextLesson = index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : null;
 
-const prevLesson = currentIndex > 0 ? flatLessons[currentIndex - 1] : null;
-const nextLesson = currentIndex < flatLessons.length - 1 ? flatLessons[currentIndex + 1] : null;
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+const difficulty = difficultyInfo(data.difficulty);
+const minutes = readingTime(entry.body);
+const editUrl = `https://github.com/DennisTurco/AppuntiFacili/blob/master/src/content/${collection}/${entry.id}`;
+const description = `${data.title}: appunti di ${category.label} (${sectionName.toLowerCase()}) con spiegazioni ed esempi pratici.`;
 ---
 
-<Layout
-  title={frontmatter.title}
-  description={frontmatter.description}
-  url={frontmatter.url}
-  image={frontmatter.image}
->
-<div class="w-full max-w-[2000px] flex flex-col lg:flex-row mx-auto mt-14 px-4 lg:px-6 gap-6">
+<Layout title={data.title} description={description}>
+  <!-- Barra di avanzamento lettura -->
+  <div class="pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5">
+    <div id="reading-progress" class="h-full w-0 bg-blue-600 dark:bg-blue-400"></div>
+  </div>
+
+  <div id="lesson-grid" class="lesson-grid mx-auto grid max-w-[1440px] gap-10 px-5 lg:px-8">
+    <!-- Applica lo stato salvato della sidebar prima del paint (evita lo "scatto") -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem("lesson-sidebar") === "collapsed") {
+          document.getElementById("lesson-grid").dataset.sidebar = "collapsed";
+        }
+      } catch (e) {}
+    </script>
 
     <!-- Sidebar lezioni -->
-    {filteredLessonsArray.length > 0 && (
-      <aside class="hidden lg:block w-64 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto border-r border-gray-200 dark:border-gray-700 pr-4">
-  <h2 class="text-xl font-bold mb-4 dark:text-gray-100">Lezioni</h2>
+    <aside class="hidden lg:block" aria-label={`Lezioni di ${sectionName}`}>
+      <div class="sticky top-16 flex h-[calc(100vh-4rem)] flex-col pt-8 pb-4">
+        <div class="sidebar-header mb-4 flex items-center justify-between gap-2">
+          <a
+            href={sectionHref}
+            class="sidebar-content inline-flex min-w-0 items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <Icon name="fa6-solid:arrow-left" class="h-3 w-3 shrink-0" />
+            <span class="truncate">Tutti gli appunti di {sectionName}</span>
+          </a>
+          <button
+            type="button"
+            data-sidebar-toggle
+            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            aria-controls="sidebar-panel"
+            aria-expanded="true"
+            aria-label="Comprimi la sidebar"
+            title="Comprimi la sidebar"
+          >
+            <Icon name="fa6-solid:angles-left" class="sidebar-icon-collapse h-3.5 w-3.5" />
+            <Icon name="fa6-solid:angles-right" class="sidebar-icon-expand hidden h-3.5 w-3.5" />
+          </button>
+        </div>
 
-  <div id="lessons-list" class="space-y-2">
-    {filteredLessonsArray.map(({ subject, lessons }) => (
-      <details
-        class="group border border-gray-100 dark:border-gray-700 rounded-md overflow-hidden"
-        open={frontmatter.subject === subject}
-      >
-        <summary
-          class="px-3 py-2 cursor-pointer font-semibold bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-200 flex justify-between items-center"
-        >
-          {subject}
+        <div id="sidebar-panel" class="sidebar-content flex min-h-0 flex-1 flex-col">
+        <label class="relative mb-3 block">
+          <span class="sr-only">Filtra le lezioni</span>
           <Icon
-            name="fa6-solid:chevron-right"
-            class="transition-transform duration-200 group-open:rotate-90 text-gray-500 dark:text-gray-400"
+            name="fa6-solid:magnifying-glass"
+            class="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
           />
-        </summary>
-        <ul class="pl-4 py-2 space-y-1 bg-white dark:bg-slate-900">
-          {lessons.map((lesson) => (
-            <li>
-              <a
-                href={lesson.url}
-                class={`block px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition dark:text-gray-300
-                  ${lesson.url === frontmatter.url ? "bg-gray-200 dark:bg-slate-700 font-semibold dark:text-white" : ""}`}
-              >
-                {lesson.title}
-              </a>
-            </li>
+          <input
+            id="sidebar-filter"
+            type="search"
+            placeholder="Filtra lezioni..."
+            autocomplete="off"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pr-3 pl-9 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-900"
+          />
+        </label>
+
+        <nav id="sidebar-lessons" class="-mx-2 flex-1 overflow-y-auto overscroll-contain px-2 pb-8 text-sm">
+          {groups.map(({ cat, meta, lessons }) => (
+            <details class="sidebar-group group mb-1" open={cat === currentCategory}>
+              <summary class="flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 font-semibold text-slate-800 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/70 [&::-webkit-details-marker]:hidden">
+                <Icon name={meta.icon} class="h-3.5 w-3.5 text-slate-400" />
+                <span class="flex-1">{meta.label}</span>
+                <Icon name="fa6-solid:chevron-right" class="h-2.5 w-2.5 text-slate-400 transition-transform group-open:rotate-90" />
+              </summary>
+              <ul class="mt-1 mb-2 ml-3.5 border-l border-slate-200 dark:border-slate-800">
+                {lessons.map((lesson) => {
+                  const url = `/${collection}/${lesson.slug}`;
+                  const active = url === currentUrl;
+                  return (
+                    <li data-title={lesson.data.title.toLowerCase()}>
+                      <a
+                        href={url}
+                        aria-current={active ? "page" : undefined}
+                        class:list={[
+                          "-ml-px block border-l py-1.5 pr-2 pl-3 leading-snug transition-colors",
+                          active
+                            ? "border-blue-600 font-semibold text-blue-700 dark:border-blue-400 dark:text-blue-300"
+                            : "border-transparent text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:text-slate-400 dark:hover:border-slate-500 dark:hover:text-white",
+                        ]}
+                      >
+                        {lesson.data.title}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
           ))}
-        </ul>
-      </details>
-    ))}
-  </div>
-</aside>
-    )}
+        </nav>
+        </div>
+      </div>
+    </aside>
 
-    <!-- Contenuto principale + TOC -->
-    <div class="flex flex-1 gap-8">
-      <!-- Contenuto centrale -->
-      <div class="prose prose-lg max-w-full flex-1 dark:prose-invert" id="lesson-content">
-        <div class="mb-6">
-          <ActionButtons href={backHref} />
+    <!-- Contenuto -->
+    <article class="min-w-0 pt-8 pb-16">
+      <div class="mx-auto max-w-3xl">
+        <!-- Breadcrumb -->
+        <nav aria-label="Breadcrumb" class="text-sm text-slate-500 dark:text-slate-400">
+          <ol class="flex flex-wrap items-center gap-1.5">
+            <li><a href="/" class="hover:text-slate-900 dark:hover:text-white">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href={sectionHref} class="hover:text-slate-900 dark:hover:text-white">{sectionName}</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="text-slate-700 dark:text-slate-300">{category.label}</li>
+          </ol>
+        </nav>
 
-          <nav class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <a href={backHref} class="hover:underline">{sectionName}</a>
-            {frontmatter.subject && <> › {frontmatter.subject}</>}
-            {" "}› {frontmatter.title}
-          </nav>
+        <header class="mt-6 border-b border-slate-200 pb-8 dark:border-slate-800">
+          <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white">
+            {data.title}
+          </h1>
 
-          <h1 class="text-5xl font-extrabold tracking-tight dark:text-white">{frontmatter.title}</h1>
-
-          <div class="mt-3 flex flex-wrap items-center gap-x-3 text-sm text-gray-600 dark:text-gray-400">
-            <span class="flex items-center gap-1"><span class="font-medium">{frontmatter.author}</span></span>
-            {frontmatter.category && <span class="flex items-center gap-1"><span>{frontmatter.category}</span></span>}
-            {frontmatter.subject && <span class="flex items-center gap-1"><span>{frontmatter.subject}</span></span>}
+          <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <span class="inline-flex items-center gap-1.5">
+              <Icon name="fa6-solid:user" class="h-3.5 w-3.5 opacity-60" />
+              {data.author}
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <Icon name="fa6-solid:calendar" class="h-3.5 w-3.5 opacity-60" />
+              <time datetime={data.lastUpdateDate.toISOString()}>{getFormattedDate(data.lastUpdateDate)}</time>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <Icon name="fa6-solid:clock" class="h-3.5 w-3.5 opacity-60" />
+              {minutes} min di lettura
+            </span>
+            {difficulty && (
+              <span class:list={["badge ring-1 ring-inset", difficulty.classes]}>{difficulty.label}</span>
+            )}
           </div>
 
-          {frontmatter.lastUpdateDate && (
-            <div class="mt-1 text-xs text-gray-400 dark:text-gray-500 italic">
-              Ultima modifica: <time datetime={frontmatter.lastUpdateDate}>{getFormattedDate(frontmatter.lastUpdateDate)}</time>
-            </div>
-          )}
-
-          {frontmatter.tags?.length > 0 && (
-            <div class="mt-4 flex flex-wrap gap-2">
-              {frontmatter.tags.map(tag => (
-                <span class="rounded-full bg-gray-100 dark:bg-slate-700 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition">#{tag}</span>
+          {data.tags?.length > 0 && (
+            <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Tag">
+              {data.tags.map((tag) => (
+                <li class="badge bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">#{tag}</li>
               ))}
-            </div>
+            </ul>
           )}
 
-          {frontmatter.videoLesson && (
-            <div class="mt-6">
-              <a
-                href="/videolezioni"
-                class="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-sky-600 no-underline"
-              >
-                Guarda la videolezione
-              </a>
-            </div>
+          {data.videoLesson && (
+            <a href="/videolezioni" class="btn btn-primary mt-6">
+              <Icon name="fa6-solid:video" class="h-4 w-4" />
+              Guarda la video lezione
+            </a>
           )}
-        </div>
+        </header>
+
+        <!-- Indice (mobile / tablet) -->
+        {toc.length > 0 && (
+          <details class="card mt-6 xl:hidden">
+            <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
+              <Icon name="fa6-solid:list" class="h-3.5 w-3.5 text-slate-400" />
+              In questa lezione
+              <Icon name="fa6-solid:chevron-down" class="ml-auto h-3 w-3 text-slate-400" />
+            </summary>
+            <ul class="border-t border-slate-100 px-4 py-3 text-sm dark:border-slate-800">
+              {toc.map((h) => (
+                <li class:list={[h.depth === 3 && "ml-4"]}>
+                  <a href={`#${h.slug}`} class="block py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400">
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
 
         <!-- Contenuto MD/MDX -->
-        <slot />
-
-{(prevLesson || nextLesson) && (
-  <div class="mt-12 flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
-    {prevLesson ? (
-      <a
-        href={prevLesson.url}
-        class="w-full sm:flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-100 dark:hover:bg-slate-800 transition flex items-center no-underline text-sm sm:text-base"
-      >
-        <span class="text-lg sm:text-xl mr-2 sm:mr-3">←</span>
-        <div class="flex flex-col">
-          <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Precedente</span>
-          <span class="font-semibold text-gray-800 dark:text-gray-200 truncate">{prevLesson.title}</span>
+        <div id="lesson-content" class="prose prose-slate mt-8 max-w-none md:prose-lg dark:prose-invert prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-tight prose-pre:my-0">
+          <slot />
         </div>
-      </a>
-    ) : <div class="hidden sm:flex-1" />}
 
-    {nextLesson ? (
-      <a
-        href={nextLesson.url}
-        class="w-full sm:flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-100 dark:hover:bg-slate-800 transition flex items-center justify-end no-underline text-sm sm:text-base"
-      >
-        <div class="flex flex-col items-end">
-          <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Successiva</span>
-          <span class="font-semibold text-gray-800 dark:text-gray-200 truncate">{nextLesson.title}</span>
+        <!-- Azioni -->
+        <div class="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-200 pt-6 text-sm dark:border-slate-800">
+          <a
+            id="report-link"
+            href="https://github.com/DennisTurco/AppuntiFacili/issues/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+          >
+            <Icon name="fa6-solid:bug" class="h-4 w-4" />
+            Segnala un errore
+          </a>
+          <a
+            href={editUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <Icon name="fa6-brands:github" class="h-4 w-4" />
+            Modifica su GitHub
+          </a>
         </div>
-        <span class="text-lg sm:text-xl ml-2 sm:ml-3">→</span>
-      </a>
-    ) : <div class="hidden sm:flex-1" />}
-  </div>
-)}
 
-        <GoToTopButton />
-        <BookLessonButton />
+        <!-- Precedente / successiva -->
+        {(prevLesson || nextLesson) && (
+          <nav class="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Navigazione tra le lezioni">
+            {prevLesson ? (
+              <a href={`/${collection}/${prevLesson.slug}`} class="card card-hover group flex flex-col p-4">
+                <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <Icon name="fa6-solid:arrow-left" class="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
+                  Precedente
+                </span>
+                <span class="mt-1 font-semibold text-slate-900 dark:text-white">{prevLesson.data.title}</span>
+              </a>
+            ) : <div class="hidden sm:block" />}
+            {nextLesson && (
+              <a href={`/${collection}/${nextLesson.slug}`} class="card card-hover group flex flex-col p-4 text-right">
+                <span class="inline-flex items-center justify-end gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  Successiva
+                  <Icon name="fa6-solid:arrow-right" class="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </span>
+                <span class="mt-1 font-semibold text-slate-900 dark:text-white">{nextLesson.data.title}</span>
+              </a>
+            )}
+          </nav>
+        )}
+
+        <!-- CTA lezioni private -->
+        <aside class="callout mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+            <Icon name="fa6-solid:chalkboard-user" class="h-5 w-5" />
+          </span>
+          <div class="flex-1">
+            <p class="font-semibold text-slate-900 dark:text-white">Qualcosa non è chiaro?</p>
+            <p class="text-sm">Prenota una lezione privata e lo vediamo insieme, in presenza o online.</p>
+          </div>
+          <a href="/insegnanti" class="btn btn-primary shrink-0">Prenota una lezione</a>
+        </aside>
       </div>
+    </article>
 
-      <!-- Table of Contents -->
-      <div class="hidden lg:block w-64">
-        <TableOfContents />
-      </div>
-    </div>
+    <!-- Indice (desktop) -->
+    <aside class="hidden xl:block" aria-label="Indice della lezione">
+      {toc.length > 0 && (
+        <div class="sticky top-16 max-h-[calc(100vh-4rem)] overflow-y-auto pt-8 pb-8">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            In questa lezione
+          </p>
+          <ul id="toc" class="space-y-1 border-l border-slate-200 text-sm dark:border-slate-800">
+            {toc.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  data-toc-link={h.slug}
+                  class:list={[
+                    "-ml-px block border-l border-transparent py-1 leading-snug text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
+                    h.depth === 3 ? "pl-6" : "pl-3",
+                  ]}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            data-scroll-top
+            class="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <Icon name="fa6-solid:arrow-up" class="h-3 w-3" />
+            Torna all'inizio
+          </button>
+        </div>
+      )}
+    </aside>
   </div>
 
-  <BackButton href={backHref} />
-  <LessonSearch client:load />
-  <ScrollOnTop client:load />
+  <!-- Torna su (mobile) -->
+  <button
+    type="button"
+    id="scroll-top-btn"
+    data-scroll-top
+    class="fixed right-5 bottom-5 z-40 inline-flex h-11 w-11 translate-y-4 items-center justify-center rounded-full bg-slate-900 text-white opacity-0 shadow-lg transition-all pointer-events-none hover:bg-slate-700 xl:hidden dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+    aria-label="Torna all'inizio"
+  >
+    <Icon name="fa6-solid:arrow-up" class="h-4 w-4" />
+  </button>
 </Layout>
+
+<style>
+  /* Colonne: sidebar | contenuto | indice. Con la sidebar compressa resta solo il pulsante */
+  @media (min-width: 64rem) {
+    .lesson-grid {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      transition: grid-template-columns 0.2s ease;
+    }
+    .lesson-grid[data-sidebar="collapsed"] {
+      grid-template-columns: 2rem minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 80rem) {
+    .lesson-grid {
+      grid-template-columns: 16rem minmax(0, 1fr) 14rem;
+    }
+    .lesson-grid[data-sidebar="collapsed"] {
+      grid-template-columns: 2rem minmax(0, 1fr) 14rem;
+    }
+  }
+  .lesson-grid[data-sidebar="collapsed"] .sidebar-content {
+    display: none;
+  }
+  .lesson-grid[data-sidebar="collapsed"] .sidebar-icon-collapse {
+    display: none;
+  }
+  .lesson-grid[data-sidebar="collapsed"] .sidebar-icon-expand {
+    display: block;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-grid {
+      transition: none;
+    }
+  }
+
+  #toc a.is-active {
+    border-color: var(--color-blue-600);
+    color: var(--color-blue-700);
+    font-weight: 600;
+  }
+  :global(.dark) #toc a.is-active {
+    border-color: var(--color-blue-400);
+    color: var(--color-blue-300);
+  }
+  #scroll-top-btn.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    cleanup?.();
+    cleanup = null;
+
+    const content = document.getElementById("lesson-content");
+    if (!content) return;
+
+    // Link "Segnala un errore" con l'URL della pagina precompilato
+    const report = document.getElementById("report-link") as HTMLAnchorElement | null;
+    if (report) {
+      const params = new URLSearchParams({
+        title: `Errore nella pagina: ${document.title}`,
+        body: `Pagina: ${window.location.href}\n\nDescrizione dell'errore:\n`,
+      });
+      report.href = `https://github.com/DennisTurco/AppuntiFacili/issues/new?${params}`;
+    }
+
+    // Sidebar comprimibile (stato ricordato tra le pagine)
+    const grid = document.getElementById("lesson-grid");
+    const sidebarToggle = document.querySelector<HTMLButtonElement>("[data-sidebar-toggle]");
+    const syncSidebarToggle = () => {
+      const collapsed = grid?.dataset.sidebar === "collapsed";
+      const label = collapsed ? "Espandi la sidebar" : "Comprimi la sidebar";
+      sidebarToggle?.setAttribute("aria-expanded", String(!collapsed));
+      sidebarToggle?.setAttribute("aria-label", label);
+      sidebarToggle?.setAttribute("title", label);
+    };
+    syncSidebarToggle();
+    sidebarToggle?.addEventListener("click", () => {
+      if (!grid) return;
+      const collapse = grid.dataset.sidebar !== "collapsed";
+      if (collapse) grid.dataset.sidebar = "collapsed";
+      else delete grid.dataset.sidebar;
+      try {
+        localStorage.setItem("lesson-sidebar", collapse ? "collapsed" : "expanded");
+      } catch {}
+      syncSidebarToggle();
+    });
+
+    // Sidebar: porta la lezione corrente in vista e attiva il filtro
+    const sidebar = document.getElementById("sidebar-lessons");
+    const currentLink = sidebar?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (sidebar && currentLink) {
+      const offset = currentLink.getBoundingClientRect().top - sidebar.getBoundingClientRect().top;
+      sidebar.scrollTop += offset - sidebar.clientHeight / 2;
+    }
+
+    const filter = document.getElementById("sidebar-filter") as HTMLInputElement | null;
+    filter?.addEventListener("input", () => {
+      const q = filter.value.trim().toLowerCase();
+      sidebar?.querySelectorAll<HTMLDetailsElement>(".sidebar-group").forEach((group) => {
+        let visible = 0;
+        group.querySelectorAll<HTMLLIElement>("li[data-title]").forEach((li) => {
+          const match = !q || (li.dataset.title ?? "").includes(q);
+          li.hidden = !match;
+          if (match) visible++;
+        });
+        group.hidden = visible === 0;
+        if (q && visible) group.open = true;
+      });
+    });
+
+    // Torna su
+    document.querySelectorAll<HTMLButtonElement>("[data-scroll-top]").forEach((btn) =>
+      btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" })),
+    );
+
+    // Indice attivo + barra di avanzamento + pulsante "torna su"
+    const progress = document.getElementById("reading-progress");
+    const scrollTopBtn = document.getElementById("scroll-top-btn");
+    const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
+    const headings = tocLinks
+      .map((a) => document.getElementById(a.dataset.tocLink ?? ""))
+      .filter((h): h is HTMLElement => h !== null);
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const scrollY = window.scrollY;
+
+      const rect = content.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const ratio = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
+      if (progress) progress.style.width = `${ratio * 100}%`;
+
+      scrollTopBtn?.classList.toggle("is-visible", scrollY > 600);
+
+      let current = -1;
+      headings.forEach((h, i) => {
+        if (h.getBoundingClientRect().top <= 120) current = i;
+      });
+      tocLinks.forEach((a, i) => a.classList.toggle("is-active", i === current));
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+
+    cleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  });
+</script>

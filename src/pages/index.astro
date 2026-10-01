@@ -1,13 +1,119 @@
 ---
+import { Icon } from "astro-icon/components";
 import Container from "@/components/container.astro";
 import Hero from "@/components/hero.astro";
 import Subjects from "@/components/subjects.astro";
 import Layout from "@/layouts/Layout.astro";
+import { getFormattedDate } from "@/utils/all";
+import { categoryMeta, categoryOf, getPublishedLessons, type LessonEntry } from "@/utils/lessons";
+
+const informatica = await getPublishedLessons("informatica");
+const matematica = await getPublishedLessons("matematica");
+
+// Categorie ordinate per numero di lezioni
+const categoriesOf = (entries: LessonEntry[]) => {
+  const counts = new Map<string, number>();
+  for (const e of entries) counts.set(categoryOf(e), (counts.get(categoryOf(e)) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
+};
+
+const infoCategories = categoriesOf(informatica);
+const mathCategories = categoriesOf(matematica);
+
+const stats = [
+  { value: informatica.length + matematica.length, label: "Lezioni" },
+  { value: infoCategories.length + mathCategories.length, label: "Argomenti" },
+  { value: 2, label: "Insegnanti" },
+];
+
+const subjects = [
+  {
+    title: "Informatica",
+    href: "/informatica",
+    icon: "fa6-solid:code",
+    description: "Linguaggi di programmazione, database, algoritmi e buone pratiche di sviluppo.",
+    count: informatica.length,
+    categories: infoCategories,
+  },
+  {
+    title: "Matematica",
+    href: "/matematica",
+    icon: "fa6-solid:square-root-variable",
+    description: "Dai numeri alle derivate: teoria, esempi svolti ed esercizi.",
+    count: matematica.length,
+    categories: mathCategories,
+  },
+];
+
+const latest = [...informatica, ...matematica]
+  .sort((a, b) => b.data.lastUpdateDate.valueOf() - a.data.lastUpdateDate.valueOf())
+  .slice(0, 6);
 ---
 
-<Layout title="">
+<Layout>
   <Container>
-    <Hero />
-    <Subjects />
+    <Hero stats={stats} />
+    <Subjects subjects={subjects} />
+
+    <!-- Ultimi aggiornamenti -->
+    <section class="mt-20" aria-labelledby="latest-title">
+      <div class="flex items-end justify-between gap-4">
+        <h2 id="latest-title" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+          Aggiornati di recente
+        </h2>
+      </div>
+      <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {latest.map((lesson) => {
+          const cat = categoryMeta(categoryOf(lesson));
+          return (
+            <li>
+              <a
+                href={`/${lesson.collection}/${lesson.slug}`}
+                class="card card-hover flex h-full flex-col p-5"
+              >
+                <span class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <Icon name={cat.icon} class="h-3.5 w-3.5" />
+                  {cat.label}
+                </span>
+                <span class="mt-2 font-display text-lg font-semibold leading-snug text-slate-900 dark:text-white">
+                  {lesson.data.title}
+                </span>
+                <time
+                  datetime={lesson.data.lastUpdateDate.toISOString()}
+                  class="mt-auto pt-4 text-xs text-slate-500 dark:text-slate-400"
+                >
+                  Aggiornato il {getFormattedDate(lesson.data.lastUpdateDate)}
+                </time>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+
+    <!-- CTA lezioni private -->
+    <section class="mt-20 overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 text-center sm:px-12 dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
+      <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        Ti serve una mano in più?
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-slate-300">
+        Prenota una lezione privata di informatica, matematica o fisica, in presenza o a distanza su Discord.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="/insegnanti" class="btn btn-lg bg-white text-slate-900 hover:bg-slate-100">
+          <Icon name="fa6-solid:calendar" class="h-4 w-4" />
+          Prenota una lezione
+        </a>
+        <a
+          href="https://discord.com/invite/9Jb4Gt3HhB"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-lg border border-slate-600 text-white hover:bg-slate-800"
+        >
+          <Icon name="fa6-brands:discord" class="h-4 w-4" />
+          Entra nel Discord
+        </a>
+      </div>
+    </section>
   </Container>
 </Layout>

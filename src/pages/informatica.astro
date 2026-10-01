@@ -12,31 +12,23 @@ const categoriesOrder = [
   "typescript",
   "html",
   "sql",
+  "postgresql",
   "php",
+  "web-api",
+  "dev-practices",
   "algorithms-and-data-structures",
 ];
 
-const icons = {
-  c: "fa6-solid:bookmark",
-  cpp: "fa6-solid:bookmark",
-  java: "fa6-brands:java",
-  python: "fa6-brands:python",
-  sql: "fa6-solid:database",
-  html: "fa6-brands:html5",
-  csharp: "fa6-solid:hashtag",
-  typescript: "simple-icons:typescript",
-  php: "fa6-solid:hashtag",
-  "algorithms-and-data-structures": "fa6-solid:diagram-project",
-};
+const description =
+  "Linguaggi di programmazione, database, algoritmi e buone pratiche di sviluppo, con esempi di codice pronti da provare.";
 ---
 
-<Layout title="Appunti di Informatica">
+<Layout title="Appunti di Informatica" description={description}>
   <LessonsSection
     collection="informatica"
     title="Informatica"
+    description={description}
     categoriesOrder={categoriesOrder}
-    icons={icons}
-    basePath="/informatica"
-    githubbutton={true}`  `
+    githubbutton
   />
 </Layout>

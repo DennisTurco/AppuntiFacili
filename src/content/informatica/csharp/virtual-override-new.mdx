@@ -1,8 +1,8 @@
 ---
 title: "virtual, override e new — Method Hiding vs Overriding"
-order: 7
+order: 8
 draft: false
-lastUpdateDate: "2026-06-09"
+lastUpdateDate: "2026-10-01"
 subject: "C#"
 category: "Informatica"
 difficulty: "complesso"
@@ -11,20 +11,14 @@ author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 1. Introduzione al polimorfismo in C#
+## 1. Introduzione: tipo statico e tipo dinamico
 
-In C#, quando una classe deriva da un'altra, possono succedere tre cose diverse:
+Quando una classe deriva da un'altra e ridichiara un metodo con lo stesso nome, in C# possono succedere due cose molto diverse:
 
-- **Overloading**: stesso nome, firma diversa.
-- **Overriding** (`virtual` / `override`): la classe derivata **sostituisce davvero** il comportamento della base nel modello polimorfico.
-- **Hiding** (`new`): la classe derivata **nasconde** un membro della base, ma non entra nella stessa catena di dispatch virtuale.
+- **Overriding** (`virtual` / `override`): la derivata **sostituisce davvero** il comportamento della base nel modello polimorfico.
+- **Hiding** (`new`): la derivata **nasconde** il membro della base, ma resta fuori dalla catena di dispatch virtuale.
 
-La distinzione cruciale è tra:
-
-- **tipo statico** della variabile: quello noto al compilatore;
-- **tipo dinamico** dell'oggetto: quello reale a runtime.
-
-Con `override`, vince il tipo dinamico. Con `new`, vince il tipo statico.
+Per capire la differenza bisogna distinguere il **tipo statico** della variabile (quello noto al compilatore) dal **tipo dinamico** dell'oggetto (quello reale a runtime). Con `override` vince il tipo dinamico, con `new` vince il tipo statico.
 
 ```cs
 public class Animale
@@ -53,7 +47,7 @@ Console.WriteLine(a2.FaiVerso()); // ...
 Console.WriteLine(l.FaiVerso());  // Auuuu
 ```
 
-Nel secondo caso l'oggetto è `Lupo`, ma la chiamata passa dalla variabile `Animale`, quindi il metodo nascosto con `new` non partecipa al polimorfismo della base.
+Nel secondo caso l'oggetto è un `Lupo`, ma la chiamata passa da una variabile `Animale`: il metodo nascosto con `new` non partecipa al polimorfismo della base.
 
 ```mermaid
 graph TD
@@ -64,253 +58,71 @@ graph TD
 
 ## 2. virtual e override — Method Overriding
 
-Un metodo `virtual` definisce un comportamento ereditabile e ridefinibile. Un metodo `override` non crea un metodo indipendente: **riempie lo stesso slot virtuale** della classe base con un'implementazione più specifica.
+Un metodo `virtual` definisce un comportamento ereditabile e ridefinibile. Un metodo `override` non crea un metodo indipendente: **riempie lo stesso slot virtuale** della base con un'implementazione più specifica.
 
 ```cs
 public class Documento
 {
-    public virtual string Esporta()
-    {
-        return "Documento generico";
-    }
+    public virtual string Esporta() => "Documento generico";
 }
 
 public class Pdf : Documento
 {
-    public override string Esporta()
-    {
-        return "Esportazione PDF";
-    }
+    public override string Esporta() => "Esportazione PDF";
 }
 
 public class Word : Documento
 {
-    public override string Esporta()
-    {
-        return "Esportazione Word";
-    }
+    public override string Esporta() => "Esportazione Word";
 }
 ```
 
-### Polimorfismo a runtime
-
 ```cs
-Documento[] documenti =
-{
-    new Pdf(),
-    new Word(),
-    new Documento()
-};
+Documento[] documenti = { new Pdf(), new Word(), new Documento() };
 
 foreach (var doc in documenti)
-{
     Console.WriteLine(doc.Esporta());
-}
+
+// Esportazione PDF
+// Esportazione Word
+// Documento generico
 ```
 
-Il compilatore controlla che `Esporta` esista sul tipo statico `Documento`; il CLR sceglie poi l'implementazione concreta in base al tipo reale dell'istanza.
+Il compilatore controlla che `Esporta` esista sul tipo statico `Documento`; il CLR sceglie poi l'implementazione concreta in base al tipo reale di ogni istanza.
 
-### override non è un nuovo contratto
+<Aside variant="info">
+Un `override` deve avere stesso nome, stessi parametri, stesso tipo di ritorno (salvo la covarianza vista più avanti) e la stessa accessibilità del metodo base. Non introduce un nuovo contratto: lo implementa.
+</Aside>
 
-Quando fai `override`, mantieni la stessa firma logica del metodo base:
-
-- stesso nome;
-- stessa lista di parametri;
-- stessa accessibilità compatibile;
-- stesso significato semantico atteso;
-- stesso slot virtuale.
-
-Questo è il motivo per cui `override` è adatto al polimorfismo vero: tutte le classi derivate vengono trattate come sostituti della base.
-
-```mermaid
-classDiagram
-    Documento <|-- Pdf
-    Documento <|-- Word
-    class Documento {
-        +virtual Esporta() string
-    }
-    class Pdf {
-        +override Esporta() string
-    }
-    class Word {
-        +override Esporta() string
-    }
-```
-
-## 3. Dispatch virtuale interno: vtable, slot e IL/CLR
-
-Dietro `virtual` / `override` c'è un meccanismo di runtime spesso descritto come **vtable** (*virtual method table*). Nel CLR il termine tecnico più vicino è **MethodTable** del tipo, ma a livello didattico si può pensare a una vtable.
-
-### Un'unica tabella virtuale per ogni tipo runtime
-
-Ogni tipo concreto caricato dal CLR possiede una struttura dati che contiene, tra le altre cose, i riferimenti ai metodi virtuali risolvibili su quel tipo. In forma semplificata:
-
-- c'è **una tabella per tipo**;
-- ogni metodo virtuale occupa uno **slot**;
-- un `override` **riusa lo slot** della base;
-- un metodo `new` crea un membro distinto e **non sostituisce lo slot** esistente.
-
-Formalmente, se il metodo virtuale occupa lo slot $i$, per un tipo $T$ possiamo immaginare:
-
-$$
-VTable(T)[i] = \text{implementazione piu specifica del metodo virtuale nello slot } i \text{ per } T
-$$
-
-Se `Base.M()` è virtuale e `Derivata.M()` è `override`, allora:
-
-$$
-slot(Base.M) = slot(Derivata.M)
-$$
-
-Se invece `Derivata.M()` usa `new`, in generale:
-
-$$
-slot(Derivata.M) \neq slot(Base.M)
-$$
-
-oppure, più precisamente, il metodo nascosto non sostituisce affatto lo slot della base.
-
-### Esempio concettuale di slot
+Un esempio che userai ogni giorno: `ToString()` è virtuale in `object`, quindi ogni classe può ridefinirlo e `Console.WriteLine` o l'interpolazione di stringhe useranno automaticamente la tua versione.
 
 ```cs
-public class Base
+public class Prodotto
 {
-    public virtual void A() { }
-    public virtual void B() { }
+    public string Nome { get; init; } = "";
+    public decimal Prezzo { get; init; }
+
+    public override string ToString() => $"{Nome} ({Prezzo:C})";
 }
 
-public class Derivata : Base
-{
-    public override void A() { }
-    public new void B() { }
-}
+object o = new Prodotto { Nome = "Mouse", Prezzo = 19.90m };
+Console.WriteLine(o); // Mouse (19,90 €)
 ```
 
-Possiamo immaginare la situazione così:
+### Gerarchie a più livelli e base.
 
-```mermaid
-graph TD
-    subgraph Base MethodTable
-        B0[slot 0 -> Base.A]
-        B1[slot 1 -> Base.B]
-    end
-
-    subgraph Derivata MethodTable
-        D0[slot 0 -> Derivata.A]
-        D1[slot 1 -> Base.B]
-        D2[metodo separato -> Derivata.B hidden con new]
-    end
-```
-
-La chiamata virtuale a `B` passando da una reference `Base` continuerà a usare `slot 1`, che in `Derivata` punta ancora a `Base.B`, perché `new` non ha fatto override di quello slot.
-
-### IL: call vs callvirt
-
-A livello IL ci sono due istruzioni molto importanti:
-
-- `call`: chiamata diretta al metodo specificato;
-- `callvirt`: chiamata virtuale, che usa l'istanza per trovare la destinazione a runtime.
-
-Esempio concettuale:
+Se una classe intermedia non ridefinisce il metodo, eredita l'implementazione del tipo base più vicino che lo fa:
 
 ```cs
-Base x = new Derivata();
-x.A(); // virtual
-x.B(); // non virtual oppure hidden
-```
+public class A { public virtual string Nome() => "A"; }
+public class B : A { public override string Nome() => "B"; }
+public class C : B { }
 
-IL semplificato:
-
-```cs
-ldloc x
-callvirt instance void Base::A()
-
-ldloc x
-call instance void Base::B()
-```
-
-Attenzione a una sottigliezza importante: il compilatore C# emette spesso `callvirt` anche per metodi di istanza non virtuali, perché così ottiene anche il controllo di `null`. Quindi:
-
-- **non ogni `callvirt` significa vero dispatch virtuale**;
-- il vero dispatch dinamico avviene solo se il metodo chiamato è virtuale nel metadata del tipo.
-
-### Come il CLR arriva al metodo giusto
-
-Dal punto di vista concettuale:
-
-1. il compilatore determina quale **membro** stai tentando di chiamare usando il tipo statico;
-2. per i metodi virtuali, quel membro corrisponde a uno **slot**;
-3. a runtime l'oggetto contiene un riferimento al proprio tipo concreto;
-4. il CLR legge la MethodTable del tipo concreto;
-5. nello slot richiesto trova il puntatore al metodo corretto;
-6. esegue quel metodo.
-
-Quindi, nella pratica moderna del CLR, la ricerca non richiede di "scansionare" tutta la gerarchia a ogni chiamata: la gerarchia viene consolidata nella MethodTable del tipo, e la chiamata usa direttamente lo slot già risolto.
-
-## 4. Ordine di risoluzione dei metodi nella gerarchia
-
-Quando scrivi `obj.Metodo()`, la risoluzione avviene in due fasi diverse: una a compile time, una a runtime.
-
-### Fase 1: selezione del membro a compile time
-
-Il compilatore parte dal **tipo statico** della variabile:
-
-```cs
-Base obj = new Derivata();
-obj.Metodo();
-```
-
-Il compilatore vede solo che `obj` è di tipo `Base`, quindi controlla:
-
-- esiste `Metodo` in `Base`?
-- è accessibile?
-- è virtuale o no?
-
-Se `Metodo` non esiste su `Base`, la chiamata non compila, anche se l'oggetto reale è `Derivata`.
-
-### Fase 2: dispatch a runtime
-
-Se il metodo selezionato è virtuale, il CLR usa il tipo dinamico dell'oggetto.
-
-Concettualmente la regola è:
-
-1. parti dal tipo reale dell'istanza;
-2. cerca se quel tipo ha un override dello slot richiesto;
-3. se non lo ha, eredita l'implementazione del tipo base più vicino;
-4. continua finché trovi l'implementazione effettiva.
-
-Di nuovo: concettualmente si parla di "salire o scendere nella gerarchia", ma l'implementazione reale usa slot già materializzati nella MethodTable del tipo.
-
-### Esempio con più livelli
-
-```cs
-public class A
-{
-    public virtual string Nome() => "A";
-}
-
-public class B : A
-{
-    public override string Nome() => "B";
-}
-
-public class C : B
-{
-}
-```
-
-```cs
 A x = new C();
-Console.WriteLine(x.Nome()); // "B"
+Console.WriteLine(x.Nome()); // B
 ```
 
-`C` non ridefinisce `Nome`, quindi nello slot virtuale eredita il puntatore a `B.Nome`.
-
-### base. non usa il normale dispatch virtuale
-
-Quando in un override scrivi `base.Nome()`, non stai dicendo "scegli a runtime il più derivato". Stai dicendo:
-
-- invoca l'implementazione del **tipo base immediato**.
+Dentro un override, `base.Metodo()` invoca l'implementazione del **tipo base immediato**, senza dispatch virtuale. È il modo standard per estendere invece di sostituire:
 
 ```cs
 public class Veicolo
@@ -327,33 +139,73 @@ public class Sportiva : Auto
 {
     public override string Descrizione() => base.Descrizione() + " -> Sportiva";
 }
+
+Veicolo v = new Sportiva();
+Console.WriteLine(v.Descrizione()); // Veicolo -> Auto -> Sportiva
 ```
 
-`base.Descrizione()` in `Sportiva` chiama `Auto.Descrizione`, non "qualunque implementazione più derivata".
+<Aside variant="warning">
+La risoluzione avviene in due fasi: a compile time il compilatore sceglie il membro guardando **solo** il tipo statico; a runtime, se il membro è virtuale, il CLR sceglie l'implementazione in base al tipo dinamico. Se un metodo esiste solo in `Derivata`, `Base b = new Derivata(); b.Metodo();` non compila.
+</Aside>
 
-## 5. new — Method Hiding, warning del compilatore e re-implementazione delle interfacce
+## 3. Come funziona: vtable e slot
 
-`new` indica esplicitamente che stai **nascondendo** un membro ereditato. Non stai facendo override. Stai creando un nuovo punto di accesso con lo stesso nome.
+Dietro `virtual` / `override` c'è una **tabella dei metodi virtuali** (*vtable*; nel CLR fa parte della *MethodTable* del tipo). In forma semplificata:
+
+- ogni tipo concreto ha **una tabella**;
+- ogni metodo virtuale occupa uno **slot**;
+- un `override` **riusa lo slot** della base;
+- un metodo `new` è un membro distinto e **non sostituisce** lo slot esistente.
+
+```cs
+public class Base
+{
+    public virtual void A() { }
+    public virtual void B() { }
+}
+
+public class Derivata : Base
+{
+    public override void A() { }
+    public new void B() { }
+}
+```
+
+```mermaid
+graph TD
+    subgraph Base MethodTable
+        B0[slot 0 -> Base.A]
+        B1[slot 1 -> Base.B]
+    end
+
+    subgraph Derivata MethodTable
+        D0[slot 0 -> Derivata.A]
+        D1[slot 1 -> Base.B]
+        D2[metodo separato -> Derivata.B hidden con new]
+    end
+```
+
+Una chiamata a `B` tramite una reference `Base` legge lo slot 1, che in `Derivata` punta ancora a `Base.B`. La gerarchia viene "consolidata" nella tabella al caricamento del tipo, quindi a runtime non si scansiona la catena di ereditarietà: si legge direttamente lo slot.
+
+<Aside variant="info">
+In IL esistono `call` (chiamata diretta) e `callvirt` (chiamata tramite l'istanza). Il compilatore C# emette `callvirt` anche per metodi non virtuali, per ottenere gratis il controllo su `null`: il vero dispatch dinamico avviene solo se il metodo è virtuale nei metadata.
+</Aside>
+
+## 4. new — Method Hiding
+
+`new` dichiara esplicitamente che stai **nascondendo** un membro ereditato: crei un nuovo punto di accesso con lo stesso nome, non un override.
 
 ```cs
 public class Forma
 {
-    public string Descrizione()
-    {
-        return "Sono una forma";
-    }
+    public string Descrizione() => "Sono una forma";
 }
 
 public class Cerchio : Forma
 {
-    public new string Descrizione()
-    {
-        return "Sono un cerchio";
-    }
+    public new string Descrizione() => "Sono un cerchio";
 }
-```
 
-```cs
 Cerchio c = new Cerchio();
 Forma f = c;
 
@@ -361,23 +213,11 @@ Console.WriteLine(c.Descrizione()); // Sono un cerchio
 Console.WriteLine(f.Descrizione()); // Sono una forma
 ```
 
-### Il warning quando dimentichi new
+<Aside variant="warning">
+Se ridichiari un membro con la stessa firma **senza** scrivere `new`, ottieni il warning CS0108 ("il membro nasconde un membro ereditato"). Spesso significa che volevi un `override` e hai dimenticato `virtual` nella base: non zittire il warning con `new` senza averci pensato.
+</Aside>
 
-Se in una classe derivata dichiari un membro con lo stesso nome e la stessa firma di uno della base ma **senza** scrivere `new`, il compilatore segnala un warning simile a:
-
-> Il membro nasconde un membro ereditato; usare la parola chiave new se l'occultamento era intenzionale.
-
-Perché esiste questo warning?
-
-- perché molto spesso il programmatore voleva fare `override` ma ha dimenticato `virtual` nella base o `override` nella derivata;
-- perché il comportamento di `new` è meno intuitivo nel codice polimorfico;
-- perché il cambio di comportamento dipende dal tipo della variabile e può generare bug silenziosi.
-
-In altre parole, il warning serve a farti dichiarare apertamente l'intenzione.
-
-### Nascondere un metodo virtuale con new
-
-È possibile anche nascondere un metodo virtuale:
+Si può nascondere anche un metodo **virtuale**, ed è il caso più insidioso: il metodo della derivata sembra sostituire quello base, ma vive fuori dalla catena di override.
 
 ```cs
 public class Base
@@ -389,9 +229,7 @@ public class Derivata : Base
 {
     public new void Stampa() => Console.WriteLine("Derivata");
 }
-```
 
-```cs
 Base b = new Derivata();
 Derivata d = new Derivata();
 
@@ -399,18 +237,18 @@ b.Stampa(); // Base
 d.Stampa(); // Derivata
 ```
 
-Questo è uno dei casi più pericolosi: il metodo della derivata sembra "sostituire" quello base, ma in realtà vive fuori dalla catena di override.
+Il bug tipico emerge con le collezioni, dove gli elementi sono quasi sempre visti tramite il tipo base:
 
-### Interfacce e re-implementazione nella classe derivata
+```cs
+var lista = new List<Base> { new Derivata(), new Derivata() };
 
-Con le interfacce la storia si complica. Una classe base può già implementare un'interfaccia, e una classe derivata può decidere di:
+foreach (var item in lista)
+    item.Stampa(); // Base, Base  (non "Derivata"!)
+```
 
-- ereditare semplicemente quella implementazione;
-- fare `override` se il membro base è virtuale;
-- **re-implementare l'interfaccia** nella classe derivata;
-- usare `new` insieme alla nuova dichiarazione dell'interfaccia.
+### Interfacce e re-implementazione
 
-Esempio:
+Se la classe derivata **ripete** l'interfaccia nella propria lista di base, ne re-mappa i membri ai propri metodi, anche se questi usano `new`:
 
 ```cs
 public interface IFormatter
@@ -439,25 +277,17 @@ Console.WriteLine(bf.Format()); // Base
 Console.WriteLine(f.Format());  // Json
 ```
 
-La parte sorprendente è l'ultima riga: ripetendo `IFormatter` nella lista delle interfacce, la classe derivata **re-mappa** l'interfaccia al proprio metodo `Format`, anche se quel metodo usa `new`.
+Senza `, IFormatter` nella dichiarazione di `JsonFormatter`, anche l'ultima riga stamperebbe `Base`, perché la mappatura dell'interfaccia verrebbe ereditata dalla base.
 
-Se invece la derivata **non** re-dichiara l'interfaccia, in molti casi eredita la mappatura della base.
+<Aside variant="tip">
+Usa `new` solo con un motivo preciso: compatibilità con una libreria che non puoi modificare, re-implementazione di un'interfaccia o un'API volutamente non polimorfica. Se vuoi un comportamento sostituibile, la risposta è quasi sempre `virtual` + `override`.
+</Aside>
 
-### Conclusione operativa su new
+## 5. abstract, sealed e covarianza del tipo di ritorno
 
-Usa `new` solo quando vuoi davvero uno di questi effetti:
+### abstract
 
-- separare intenzionalmente due API con lo stesso nome;
-- adattare un tipo legacy senza cambiare il suo comportamento polimorfico;
-- re-implementare esplicitamente un'interfaccia nella classe derivata.
-
-Se vuoi polimorfismo normale, `new` è quasi sempre la scelta sbagliata.
-
-## 6. abstract, sealed, covarianza del tipo di ritorno e pattern Template Method
-
-### abstract: contratto incompleto ma polimorfico
-
-Un metodo `abstract` occupa uno slot virtuale ma non ha corpo. Le classi concrete derivate devono completarlo.
+Un metodo `abstract` occupa uno slot virtuale ma non ha corpo: le classi concrete derivate **devono** implementarlo, e la classe astratta non può essere istanziata.
 
 ```cs
 public abstract class Forma
@@ -471,75 +301,61 @@ public class Rettangolo : Forma
     public double Base { get; }
     public double Altezza { get; }
 
-    public Rettangolo(double @base, double altezza)
-    {
-        Base = @base;
-        Altezza = altezza;
-    }
+    public Rettangolo(double @base, double altezza) => (Base, Altezza) = (@base, altezza);
 
     public override double Area() => Base * Altezza;
 }
+
+// var f = new Forma();          // errore CS0144: classe astratta
+Forma r = new Rettangolo(3, 4);
+Console.WriteLine(r.Area());     // 12
 ```
 
-`abstract` è quindi "più forte" di `virtual`: non solo permette l'override, ma lo rende obbligatorio prima di poter istanziare il tipo concreto.
+### sealed override
 
-### sealed override: chiude la catena
-
-Un metodo può essere virtuale nella base, overridden in una derivata, e poi chiuso con `sealed override`.
+`sealed override` mantiene lo stesso slot ma impedisce ulteriori ridefinizioni nelle classi successive:
 
 ```cs
-public class Animale
-{
-    public virtual string FaiVerso() => "...";
-}
-
 public class Cane : Animale
 {
     public sealed override string FaiVerso() => "Bau!";
 }
-```
 
-Lo slot rimane lo stesso, ma non può più essere ridefinito nelle classi successive.
+public class Labrador : Cane
+{
+    // public override string FaiVerso() => "Woof"; // errore CS0239: membro sealed
+}
+```
 
 ### Covariant return types (C# 9+)
 
-Da C# 9 in poi, un `override` può restituire un tipo più derivato del tipo di ritorno del metodo base, purché sia compatibile per sostituzione.
+Da C# 9 un `override` può restituire un tipo **più derivato** di quello del metodo base:
 
 ```cs
 public class Documento
 {
-    public virtual Stream ApriStream()
-    {
-        return Stream.Null;
-    }
+    public virtual Stream ApriStream() => Stream.Null;
 }
 
 public class DocumentoInMemoria : Documento
 {
-    public override MemoryStream ApriStream()
-    {
-        return new MemoryStream();
-    }
+    public override MemoryStream ApriStream() => new MemoryStream();
 }
+
+DocumentoInMemoria d = new DocumentoInMemoria();
+MemoryStream ms = d.ApriStream(); // nessun cast necessario
 ```
 
-Qui `MemoryStream` deriva da `Stream`, quindi la sostituzione è lecita. Il chiamante che vede un `Documento` continua a ricevere almeno uno `Stream`; il chiamante che conosce `DocumentoInMemoria` può beneficiare del tipo più specifico.
+Chi vede un `Documento` riceve comunque uno `Stream`; chi conosce il tipo concreto ottiene direttamente il `MemoryStream`.
 
 ### Template Method Pattern
 
-Un pattern classico che sfrutta `abstract` e `virtual` è il **Template Method**: la classe base definisce lo scheletro dell'algoritmo, mentre le derivate personalizzano alcuni passi.
+Un pattern classico che combina `abstract` e `virtual`: la base definisce lo scheletro dell'algoritmo (non virtuale), le derivate personalizzano solo alcuni passi.
 
 ```cs
 public abstract class ReportGenerator
 {
-    public string Genera()
-    {
-        string header = CreaHeader();
-        string body = CreaBody();
-        string footer = CreaFooter();
-
-        return header + "\n" + body + "\n" + footer;
-    }
+    public string Genera() => $"{CreaHeader()}\n{CreaBody()}\n{CreaFooter()}";
 
     protected virtual string CreaHeader() => "Header standard";
     protected abstract string CreaBody();
@@ -551,29 +367,18 @@ public class SalesReportGenerator : ReportGenerator
     protected override string CreaHeader() => "Header vendite";
     protected override string CreaBody() => "Corpo report vendite";
 }
+
+Console.WriteLine(new SalesReportGenerator().Genera());
+// Header vendite
+// Corpo report vendite
+// Footer standard
 ```
 
-Qui il metodo `Genera` non dovrebbe essere ridefinito liberamente: rappresenta il flusso dell'algoritmo. Le estensioni controllate avvengono tramite i metodi virtuali/astratti.
+## 6. Costruttori, classi astratte e interfacce
 
-```mermaid
-flowchart TD
-    A[Genera] --> B[CreaHeader virtual]
-    B --> C[CreaBody abstract]
-    C --> D[CreaFooter virtual]
-```
+### Ordine dei costruttori e chiamate virtuali
 
-## 7. Costruttori, ordine di inizializzazione, classi astratte e interfacce
-
-## 7.1 Ordine di esecuzione dei costruttori
-
-In una gerarchia di ereditarietà, il corpo del costruttore della base viene eseguito prima del corpo del costruttore della derivata.
-
-In forma semplificata:
-
-1. viene allocato l'oggetto;
-2. l'istanza viene inizialmente azzerata;
-3. si eseguono inizializzatori e costruttore della base;
-4. poi inizializzatori e costruttore della derivata.
+Il corpo del costruttore della base viene eseguito **prima** di quello della derivata. Ma il tipo dinamico dell'oggetto è già quello della derivata: se la base chiama un metodo virtuale nel costruttore, viene eseguito l'override su un oggetto non ancora inizializzato.
 
 ```cs
 public class Base
@@ -581,211 +386,69 @@ public class Base
     public Base()
     {
         Console.WriteLine("Costruttore Base");
-    }
-}
-
-public class Derivata : Base
-{
-    public Derivata()
-    {
-        Console.WriteLine("Costruttore Derivata");
-    }
-}
-```
-
-Output:
-
-```cs
-Costruttore Base
-Costruttore Derivata
-```
-
-```mermaid
-sequenceDiagram
-    participant CLR
-    participant B as Base
-    participant D as Derivata
-    CLR->>B: Esegue costruttore Base
-    B-->>CLR: Base completata
-    CLR->>D: Esegue costruttore Derivata
-    D-->>CLR: Derivata completata
-```
-
-### Chiamare metodi virtuali nel costruttore è pericoloso
-
-Questo è un gotcha molto serio:
-
-```cs
-public class Base
-{
-    public Base()
-    {
         Inizializza();
     }
 
-    protected virtual void Inizializza()
-    {
-        Console.WriteLine("Base");
-    }
+    protected virtual void Inizializza() { }
 }
 
 public class Derivata : Base
 {
-    private string nome = "Pronto";
+    private string nome;
 
-    protected override void Inizializza()
+    public Derivata()
     {
-        Console.WriteLine(nome.Length);
+        Console.WriteLine("Costruttore Derivata");
+        nome = "Pronto";
     }
+
+    protected override void Inizializza() => Console.WriteLine(nome.Length);
 }
+
+new Derivata();
+// Costruttore Base
+// NullReferenceException: nome non è ancora stato assegnato
 ```
 
-Sembra innocuo, ma durante l'esecuzione del costruttore di `Base`, la parte `Derivata` potrebbe non essere ancora completamente inizializzata. In casi reali, campi, dipendenze o invarianti della derivata possono essere ancora in stato non valido.
+<Aside variant="danger">
+Non chiamare metodi virtuali da costruttori (né da finalizer): l'override gira prima che il costruttore della derivata abbia impostato campi e invarianti. Il risultato sono `NullReferenceException` o, peggio, stati incoerenti silenziosi.
+</Aside>
 
-Regola pratica:
+<Aside variant="info">
+Gli inizializzatori di campo (`private string nome = "Pronto";`) vengono eseguiti **prima** della chiamata al costruttore base: per questo il bug si manifesta tipicamente con i campi assegnati nel corpo del costruttore o tramite dependency injection.
+</Aside>
 
-- evita chiamate a metodi virtuali da costruttori;
-- evita anche chiamate virtuali da distruttori/finalizer o da logica di inizializzazione delicata.
+### Classe astratta o interfaccia?
 
-## 7.2 Classi astratte vs interfacce
+| | Classe `abstract` | Interfaccia |
+|---|---|---|
+| Stato (campi di istanza) | Sì | No |
+| Implementazione condivisa | Sì, anche complessa | Solo default methods (C# 8+) |
+| Ereditarietà multipla | No | Sì |
+| Uso tipico | Stessa famiglia, algoritmo base, Template Method | Capacità o ruolo trasversale |
 
-Sia le classi astratte sia le interfacce possono descrivere un contratto, ma servono a scopi diversi.
-
-### Preferisci una classe abstract quando:
-
-- vuoi condividere **stato** tramite campi;
-- vuoi condividere **implementazione base** non banale;
-- vuoi imporre una forte relazione "is-a";
-- vuoi usare il Template Method Pattern.
-
-### Preferisci un'interfaccia quando:
-
-- vuoi definire solo una **capacità** o un ruolo;
-- vuoi supportare implementazioni eterogenee;
-- ti serve ereditarietà multipla di contratto;
-- non vuoi imporre una gerarchia concreta comune.
-
-### Default interface implementations (C# 8+)
-
-Da C# 8, un'interfaccia può avere implementazioni di default:
+Da C# 8 un'interfaccia può avere implementazioni di default, utili per piccoli comportamenti comuni:
 
 ```cs
 public interface ILogger
 {
     void Log(string message);
 
-    void LogWarning(string message)
-    {
-        Log("[WARN] " + message);
-    }
+    void LogWarning(string message) => Log("[WARN] " + message);
 }
 ```
 
-Questo riduce la necessità di classi base solo per condividere piccoli pezzi di comportamento.
+Questo non trasforma le interfacce in classi astratte: restano senza stato di istanza e il loro dispatch è distinto da quello dei metodi virtuali di classe.
 
-Però attenzione:
+## 7. Prestazioni e Principio di Sostituzione di Liskov
 
-- le interfacce non diventano automaticamente un sostituto perfetto delle classi astratte;
-- non gestiscono stato di istanza come una classe base normale;
-- il modello di dispatch delle interfacce è distinto da quello dei virtual method di classe.
+Una chiamata virtuale richiede un'indirezione in più (leggere il tipo dell'oggetto, poi lo slot) e rende più difficile l'inlining. Nella pratica però il costo è trascurabile rispetto ad allocazioni, I/O, rete o database, e il JIT moderno spesso **devirtualizza** la chiamata quando conosce il tipo concreto.
 
-In pratica:
+<Aside variant="tip">
+Non evitare `virtual` per paura delle prestazioni: prima progetta correttamente, poi misura. Se una classe non è pensata per essere estesa, marcala `sealed`: comunichi l'intenzione e aiuti il JIT a devirtualizzare.
+</Aside>
 
-- **classe abstract**: stessa famiglia, stato condiviso, algoritmo base;
-- **interfaccia**: contratto trasversale, capacità, accoppiamento minore.
-
-## 8. Prestazioni, devirtualizzazione del JIT e Principio di Sostituzione di Liskov
-
-## 8.1 Prestazioni: virtual call vs non-virtual call
-
-Una chiamata non virtuale è, concettualmente, più semplice:
-
-- il target è noto direttamente;
-- il runtime può emettere una chiamata diretta.
-
-Una chiamata virtuale richiede invece un livello di indirezione:
-
-1. leggere il tipo reale dell'oggetto;
-2. recuperare la MethodTable;
-3. leggere il puntatore nello slot corretto;
-4. invocare il metodo trovato.
-
-In forma ideale:
-
-$$
-\text{direct call} \approx \text{salto diretto a un indirizzo noto}
-$$
-
-$$
-\text{virtual call} \approx \text{indirizzo letto indirettamente da uno slot}
-$$
-
-Questo comporta in genere:
-
-- un piccolo overhead in più;
-- meno opportunità immediate di inline;
-- analisi più complessa per il JIT.
-
-### Ma il costo reale moderno è spesso piccolo
-
-Nei programmi reali, la differenza è spesso trascurabile rispetto a:
-
-- allocazioni;
-- accesso a memoria;
-- I/O;
-- query database;
-- serializzazione;
-- rete.
-
-Quindi non bisogna evitare `virtual` per paura prematura delle prestazioni.
-
-### Devirtualizzazione del JIT
-
-Il JIT del .NET runtime può spesso **devirtualizzare** una chiamata, cioè trasformarla in pratica in una chiamata diretta quando riesce a dimostrare il target effettivo.
-
-Esempi comuni:
-
-- il tipo concreto è noto nel punto di chiamata;
-- il metodo è `sealed` oppure la classe è `sealed`;
-- analisi di profilo o di tipo consente di dedurre il target;
-- il metodo viene poi anche inline-ato.
-
-Quindi il quadro reale è:
-
-- `virtual` non significa automaticamente "lento";
-- `non-virtual` non significa automaticamente "più veloce in modo misurabile";
-- prima si progetta correttamente, poi eventualmente si misura.
-
-### Interfacce e costi
-
-Anche il dispatch tramite interfaccia può essere più costoso di una chiamata diretta, ma il runtime moderno usa cache e ottimizzazioni. Dal punto di vista del design, l'interfaccia va scelta per il modello di astrazione, non come micro-ottimizzazione.
-
-## 8.2 Principio di Sostituzione di Liskov (LSP)
-
-Il **Liskov Substitution Principle** afferma, in forma informale, che un oggetto di una classe derivata deve poter essere usato al posto di un oggetto della classe base senza rompere la correttezza del programma.
-
-Una formulazione compatta è:
-
-$$
-S <: T \implies \forall P,\; P(T) \text{ corretto } \Rightarrow P(S) \text{ corretto}
-$$
-
-dove:
-
-- `S` indica il sottotipo;
-- `T` indica il supertipo;
-- `P` indica un programma che usa oggetti di tipo `T`.
-
-### Cosa significa per virtual/override
-
-Un override corretto non dovrebbe:
-
-- richiedere precondizioni più forti della base;
-- garantire postcondizioni più deboli della base;
-- violare invarianti attesi dalla base;
-- sorprendere il chiamante con effetti collaterali incompatibili.
-
-Esempio di cattivo override:
+Più importante delle prestazioni è il **Liskov Substitution Principle**: un oggetto derivato deve poter sostituire la base senza rompere la correttezza del programma. Un override non dovrebbe richiedere precondizioni più forti, garantire meno della base o violarne gli invarianti.
 
 ```cs
 public class FileRepository
@@ -793,114 +456,32 @@ public class FileRepository
     public virtual void Save(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("value");
+            throw new ArgumentException("Valore non valido", nameof(value));
+        // ... salva su file
     }
 }
 
 public class ReadOnlyRepository : FileRepository
 {
-    public override void Save(string value)
-    {
-        throw new NotSupportedException();
-    }
+    public override void Save(string value) => throw new NotSupportedException();
 }
 ```
 
-Se il contratto di `FileRepository` promette che `Save` salva dati validi, la derivata `ReadOnlyRepository` rompe il principio di sostituzione: il chiamante che si aspetta un `FileRepository` funzionante riceve un oggetto che non rispetta più il contratto operativo.
+Chi riceve un `FileRepository` si aspetta che `Save` salvi dati validi: `ReadOnlyRepository` rompe il contratto. Meglio separare le capacità (ad esempio `IReadRepository` e `IWriteRepository`) invece di forzare un'ereditarietà sbagliata. `virtual` non è solo sintassi: è un impegno di design.
 
-Per questo motivo `virtual` non è solo sintassi: è un impegno di design.
-
-## 9. Pattern avanzati: double dispatch / Visitor e linee guida pratiche
-
-## 9.1 Double dispatch e Visitor
-
-Il dispatch virtuale classico usa una sola dimensione dinamica: il tipo dell'oggetto su cui chiami il metodo. Ma a volte vuoi scegliere il comportamento in base a **due tipi runtime**.
-
-Esempio tipico: una forma geometrica che deve essere elaborata da un visitor specializzato.
-
-```cs
-public interface IShapeVisitor
-{
-    void Visit(Circle circle);
-    void Visit(Rectangle rectangle);
-}
-
-public abstract class Shape
-{
-    public abstract void Accept(IShapeVisitor visitor);
-}
-
-public class Circle : Shape
-{
-    public override void Accept(IShapeVisitor visitor)
-    {
-        visitor.Visit(this);
-    }
-}
-
-public class Rectangle : Shape
-{
-    public override void Accept(IShapeVisitor visitor)
-    {
-        visitor.Visit(this);
-    }
-}
-```
-
-Qui succede un doppio passaggio:
-
-1. `shape.Accept(visitor)` usa dispatch virtuale sul tipo reale di `shape`;
-2. dentro `Accept`, la chiamata `visitor.Visit(this)` seleziona l'overload corretto in base al tipo statico noto di `this` in quella classe concreta.
-
-Questo pattern simula il **double dispatch** ed è il cuore del **Visitor pattern**.
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant S as Shape
-    participant C as Circle
-    participant V as Visitor
-    Client->>S: Accept(visitor)
-    S-->>C: dispatch virtuale a Circle.Accept
-    C->>V: Visit(this)
-```
-
-## 9.2 Quando usare davvero new
-
-`new` ha senso solo in casi mirati:
-
-- compatibilità con librerie esistenti;
-- re-implementazione di un'interfaccia nella derivata;
-- API separata volutamente non polimorfica;
-- casi in cui vuoi rompere esplicitamente la catena di override.
-
-Se stai modellando comportamento sostituibile, usa:
-
-- `virtual` nella base;
-- `override` nella derivata;
-- `sealed override` quando vuoi chiudere ulteriormente la gerarchia.
-
-## 9.3 Tabella riepilogativa estesa
+## 8. Riepilogo
 
 | Tema | `virtual` / `override` | `new` |
 |---|---|---|
 | Catena polimorfica | Sì | No |
-| Risoluzione principale | Tipo dinamico dell'oggetto | Tipo statico della variabile |
+| Risoluzione | Tipo dinamico dell'oggetto | Tipo statico della variabile |
 | Slot vtable | Riutilizzato | Non sostituito |
 | Compatibilità con LSP | Attesa e raccomandata | Spesso problematica |
-| Prestazioni | Indirette ma spesso ottimizzabili | Simili a un normale metodo non virtuale |
 | Uso tipico | Estensibilità corretta | Compatibilità o occultamento intenzionale |
 
-## 9.4 Regole pratiche finali
+Regole pratiche: per il polimorfismo usa `virtual` / `override` (e `sealed override` per chiudere la catena); usa `new` solo con un motivo documentabile; non chiamare metodi virtuali dai costruttori; verifica che ogni override rispetti il contratto della base.
 
-1. Se vuoi polimorfismo, usa `virtual` / `override`.
-2. Se usi `new`, fallo solo con un motivo preciso e documentabile.
-3. Non chiamare metodi virtuali dai costruttori.
-4. Usa classi astratte per condividere stato e algoritmo; interfacce per definire capacità.
-5. Verifica che ogni override rispetti il contratto della base: LSP prima della sintassi.
-6. Non ottimizzare prematuramente: misura prima di evitare `virtual`.
-
-## 10. Quiz
+## 9. Quiz
 
 import Quiz from '../../../components/Quiz.jsx';
 
@@ -986,12 +567,12 @@ d:"super.Metodo()"
 correctAnswer:"c"
 },
 {
-question:"Una classe abstract può essere istanziata direttamente?",
+question:"Perché è pericoloso chiamare un metodo virtuale dal costruttore della classe base?",
 answers:{
-a:"Sì, sempre",
-b:"Solo con new()",
-c:"No, non può essere istanziata",
-d:"Solo se tutti i metodi abstract sono implementati"
+a:"Perché il compilatore non lo permette",
+b:"Perché viene sempre eseguita la versione della base",
+c:"Perché viene eseguito l'override della derivata prima che il suo costruttore abbia inizializzato i campi",
+d:"Perché i metodi virtuali non possono essere protected"
 },
 correctAnswer:"c"
 },
@@ -1007,9 +588,9 @@ correctAnswer:"c"
 }
 ]} />
 
-## 11. Esercizi
+## 10. Esercizi
 
-### 11.1 Gerarchia veicoli con polimorfismo
+### 10.1 Gerarchia veicoli con polimorfismo
 
 **Scenario**: Modella una gerarchia di veicoli che calcolano il costo del carburante in modo diverso.
 
@@ -1021,7 +602,7 @@ correctAnswer:"c"
 
 *Obiettivo: vedere il polimorfismo virtual/override in azione con un array di tipo base.*
 
-### 11.2 Method hiding — trappola del new
+### 10.2 Method hiding — trappola del new
 
 **Scenario**: Capire perché `new` può portare a comportamenti inaspettati.
 
@@ -1034,7 +615,7 @@ correctAnswer:"c"
 
 *Obiettivo: capire la differenza pratica tra method hiding e method overriding.*
 
-### 11.3 Gerarchia con abstract e sealed
+### 10.3 Gerarchia con abstract e sealed
 
 **Scenario**: Costruisci un sistema di calcolo area per forme geometriche.
 
@@ -1046,3 +627,15 @@ correctAnswer:"c"
 5. Usa un array `Forma[]` per calcolare l'area totale di tutte le forme.
 
 *Obiettivo: combinare abstract, virtual, override e sealed in un esempio reale.*
+
+### 10.4 Template Method per l'esportazione
+
+**Scenario**: Implementa un esportatore di dati che segue sempre lo stesso flusso.
+
+**Consegna**:
+1. Crea una classe `abstract Esportatore` con un metodo non virtuale `string Esporta(IEnumerable<string> righe)` che chiama in ordine `Intestazione()`, `FormattaRiga(string)` per ogni riga e `Chiusura()`.
+2. Rendi `FormattaRiga` `abstract` e gli altri due `virtual` con un'implementazione vuota di default.
+3. Implementa `EsportatoreCsv` e `EsportatoreHtml` (quest'ultimo ridefinisce anche intestazione e chiusura con i tag `table`).
+4. Verifica che `Esporta` produca output diversi senza essere mai ridefinito.
+
+*Obiettivo: applicare il Template Method Pattern combinando abstract e virtual.*

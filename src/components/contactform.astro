@@ -1,171 +1,112 @@
 ---
 ---
 
-<!-- To make this contact form work, create your free access key from https://web3forms.com/
-     Then you will get all form submissions in your email inbox. -->
-<form
-  action="https://api.web3forms.com/submit"
-  method="POST"
-  id="form"
-  class="needs-validation"
-  novalidate
->
+<!-- Form gestito da https://web3forms.com/ -->
+<form action="https://api.web3forms.com/submit" method="POST" id="contact-form" class="space-y-5" novalidate>
   <input type="hidden" name="access_key" value="91280369-2293-46c0-a34f-1c452d54da17" />
   <input type="checkbox" class="hidden" style="display:none" name="botcheck" />
 
-  <!-- Nome -->
-  <div class="mb-5">
-    <input
-      type="text"
-      placeholder="Nome e Cognome"
-      required
-      class="w-full px-4 py-3 border-2 placeholder:text-gray-800 rounded-md outline-hidden focus:ring-4 border-gray-300 focus:border-gray-600 ring-gray-100"
-      name="name"
-    />
-    <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
-      Nome richiesto.
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label for="cf-name" class="label">Nome e cognome</label>
+      <input id="cf-name" type="text" name="name" required autocomplete="name" class="input" />
+      <p class="field-error">Inserisci il tuo nome.</p>
+    </div>
+    <div>
+      <label for="cf-email" class="label">Email</label>
+      <input id="cf-email" type="email" name="email" required autocomplete="email" placeholder="nome@esempio.it" class="input" />
+      <p class="field-error">Inserisci un indirizzo email valido.</p>
     </div>
   </div>
 
-  <!-- Email -->
-  <div class="mb-5">
-    <input
-      id="email_address"
-      type="email"
-      placeholder="Indirizzo email"
-      name="email"
-      required
-      class="w-full px-4 py-3 border-2 placeholder:text-gray-800 rounded-md outline-hidden focus:ring-4 border-gray-300 focus:border-gray-600 ring-gray-100"
-    />
-    <div class="empty-feedback text-red-400 text-sm mt-1">
-      Indirizzo email richiesto.
-    </div>
-    <div class="invalid-feedback text-red-400 text-sm mt-1">
-      Inserisci un messaggio valido.
-    </div>
-  </div>
-
-  <!-- Tipo di richiesta (dropdown) -->
-  <div class="mb-5">
-    <select
-      id="request_type"
-      name="Tipo di richiesta"
-      required
-      class="w-full px-4 py-3 border-2 rounded-md outline-hidden focus:ring-4 border-gray-300 focus:border-gray-600 ring-gray-100"
-    >
-      <option value="" disabled selected>Seleziona il tipo di richiesta</option>
+  <div>
+    <label for="cf-type" class="label">Tipo di richiesta</label>
+    <select id="cf-type" name="Tipo di richiesta" required class="input">
+      <option value="" disabled selected>Seleziona...</option>
       <option value="richiesta_generica">Richiesta generica</option>
       <option value="segnalazione_problema">Segnalazione di un problema</option>
       <option value="richiesta_lezione">Richiesta di lezione</option>
       <option value="aggiunta_argomento">Richiesta aggiunta argomento</option>
       <option value="modifica_argomento">Richiesta modifica argomento</option>
       <option value="richiesta_video_lezione">Richiesta video lezione</option>
-      <option value="richiesta_video_lezione">Richiesta di recurero account</option>
+      <option value="recupero_account">Richiesta di recupero account</option>
       <option value="altro">Altro</option>
     </select>
-    <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
-      Seleziona un tipo di richiesta.
-    </div>
+    <p class="field-error">Seleziona un tipo di richiesta.</p>
   </div>
 
-  <!-- Messaggio -->
-  <div class="mb-3">
-    <textarea
-      name="message"
-      required
-      placeholder="Il tuo messaggio"
-      class="w-full px-4 py-3 border-2 placeholder:text-gray-800 rounded-md outline-hidden h-36 focus:ring-4 border-gray-300 focus:border-gray-600 ring-gray-100"
-    ></textarea>
-    <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
-      Inserisci il messaggio.
-    </div>
+  <div>
+    <label for="cf-message" class="label">Messaggio</label>
+    <textarea id="cf-message" name="message" required rows="6" class="input resize-y"></textarea>
+    <p class="field-error">Scrivi il tuo messaggio.</p>
   </div>
 
-  <!-- Pulsante invio -->
-  <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition text-lg">
-    Invia
-  </button>
+  <button type="submit" class="btn btn-lg btn-primary w-full">Invia messaggio</button>
 
-  <div id="result" class="mt-3 text-center"></div>
+  <p id="contact-result" class="hidden rounded-lg px-4 py-3 text-center text-sm" role="status"></p>
 </form>
 
 <style>
-  .invalid-feedback,
-  .empty-feedback {
-    display: none;
-  }
+  @reference "../styles/global.css";
 
-  .was-validated :placeholder-shown:invalid ~ .empty-feedback {
-    display: block;
+  .field-error {
+    @apply mt-1 hidden text-sm text-red-600 dark:text-red-400;
   }
-
-  .was-validated :not(:placeholder-shown):invalid ~ .invalid-feedback {
-    display: block;
-  }
-
-  .is-invalid,
   .was-validated :invalid {
-    border-color: #dc3545;
+    @apply border-red-500 dark:border-red-500;
+  }
+  .was-validated :invalid + .field-error {
+    display: block;
   }
 </style>
 
-<script is:inline>
-  const form = document.getElementById("form");
-  const result = document.getElementById("result");
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const form = document.getElementById("contact-form") as HTMLFormElement | null;
+    const result = document.getElementById("contact-result");
+    if (!form || !result) return;
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    form.classList.add("was-validated");
+    const showResult = (message: string, ok: boolean) => {
+      result.textContent = message;
+      result.className = ok
+        ? "rounded-lg bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+        : "rounded-lg bg-red-50 px-4 py-3 text-center text-sm text-red-800 dark:bg-red-950/50 dark:text-red-300";
+    };
 
-    // validazione manuale
-    const requiredFields = form.querySelectorAll("[required]");
-    let valid = true;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      form.classList.add("was-validated");
+      if (!form.checkValidity()) return;
 
-    requiredFields.forEach((field) => {
-      if (!field.value.trim()) {
-        field.classList.add("is-invalid");
-        valid = false;
-      } else {
-        field.classList.remove("is-invalid");
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Invio in corso...";
+      }
+
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        });
+        const json = await response.json();
+        if (response.ok) {
+          showResult("Messaggio inviato! Ti risponderò il prima possibile.", true);
+          form.reset();
+          form.classList.remove("was-validated");
+        } else {
+          showResult(json.message ?? "Errore nell'invio del messaggio, riprova più tardi.", false);
+        }
+      } catch (error) {
+        console.error(error);
+        showResult("Errore nell'invio del messaggio, riprova più tardi.", false);
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = "Invia messaggio";
+        }
       }
     });
-
-    if (!valid) return; // blocca invio se i campi sono vuoti
-    const formData = new FormData(form);
-    const object = Object.fromEntries(formData);
-    const json = JSON.stringify(object);
-
-    result.innerHTML = "Invio...";
-
-    fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: json,
-    })
-      .then(async (response) => {
-        let json = await response.json();
-        if (response.status == 200) {
-          result.classList.add("text-green-500");
-          result.innerHTML = json.message;
-        } else {
-          console.log(response);
-          result.classList.add("text-red-500");
-          result.innerHTML = json.message;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        result.innerHTML = "Errore nell'invio del messaggio, riprova più tardi";
-      })
-      .then(function () {
-        form.reset();
-        form.classList.remove("was-validated");
-        setTimeout(() => {
-          result.style.display = "none";
-        }, 5000);
-      });
   });
 </script>

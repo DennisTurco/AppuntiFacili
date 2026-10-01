@@ -1,8 +1,8 @@
 ---
 title: "Lambda expressions"
-order: 11
+order: 15
 draft: false
-lastUpdateDate: "2026-06-10"
+lastUpdateDate: "2026-10-01"
 subject: "C#"
 category: "Informatica"
 difficulty: "medio"
@@ -13,272 +13,138 @@ videoLesson: false
 
 ## 1. Introduzione
 
-Le **lambda expressions** sono il modo più compatto e potente con cui il C# moderno rappresenta una funzione anonima.
-Quando scrivi una lambda, stai descrivendo un comportamento che può essere:
+Le **lambda expressions** sono il modo più compatto con cui il C# moderno rappresenta una **funzione anonima**.
+Una lambda descrive un comportamento che può essere:
 
-- assegnato a un **delegate**;
-- passato come **parametro**;
+- assegnato a un **delegate** o passato come **parametro**;
 - restituito da un metodo;
 - trasformato in un **expression tree**;
 - usato per costruire query **LINQ**.
 
-Dal punto di vista storico, l'idea non nasce in C#, ma nella logica matematica.
+L'idea viene dal **lambda calculus** di Alonzo Church (1936), dove una funzione si scrive $\lambda x . e$ ($x$ parametro, $e$ corpo) ed è la base teorica della **programmazione funzionale**: le funzioni sono **valori di prima classe**, che si possono passare, restituire e comporre.
 
-### 1.1 Origine matematica: lambda calculus
-
-Nel 1936 **Alonzo Church** introdusse il **lambda calculus**, un formalismo matematico per descrivere funzioni, applicazione di funzioni e computazione.
-
-Le due idee fondamentali sono:
-
-- **astrazione**: definire una funzione;
-- **applicazione**: applicare una funzione a un argomento.
-
-La forma classica è:
-
-$$
-\lambda x . e
-$$
-
-dove:
-
-- $x$ è il parametro;
-- $e$ è il corpo dell'espressione.
-
-Applicare la funzione a un valore significa sostituire il parametro con l'argomento:
-
-$$
-(\lambda x . e)(v) \to e[x := v]
-$$
-
-Esempio:
-
-$$
-(\lambda x . x + 1)(4) \to 5
-$$
-
-Questo formalismo è la base teorica di gran parte della **programmazione funzionale**.
-
-### 1.2 Relazione con la programmazione funzionale
-
-In programmazione funzionale una funzione è trattata come **valore di prima classe**:
-
-- può essere passata come argomento;
-- può essere restituita;
-- può essere composta con altre funzioni;
-- può catturare il contesto in cui è stata creata.
-
-Le lambda expressions in C# portano proprio questa idea nel linguaggio object-oriented di .NET.
-
-### 1.3 Introduzione in C#
-
-Le lambda expressions sono state introdotte con **C# 3.0** nel **2007**, insieme a:
-
-- **LINQ**;
-- type inference migliorata;
-- extension methods;
-- anonymous types;
-- expression trees.
-
-Da quel momento il C# ha adottato un modello ibrido: orientato agli oggetti, ma con forti strumenti funzionali.
+<Aside variant="info">
+Le lambda sono arrivate con **C# 3.0** (2007), insieme a LINQ, extension methods, anonymous types ed expression trees. Da allora il C# è un linguaggio ibrido: orientato agli oggetti, ma con forti strumenti funzionali.
+</Aside>
 
 ## 2. Sintassi
 
-La sintassi base di una lambda è:
+La forma base è:
 
 ```cs
 (parametri) => espressione
 ```
 
-L'operatore `=>` si legge spesso come "va in" oppure "produce".
+L'operatore `=>` si legge "va in" oppure "produce".
 
-### 2.1 Expression lambda
+### 2.1 Expression lambda e statement lambda
 
-Una **expression lambda** ha come corpo una singola espressione:
+Una **expression lambda** ha come corpo una singola espressione, il cui valore viene restituito implicitamente.
+Una **statement lambda** usa un blocco `{ }` e, se il delegate ha un tipo di ritorno, richiede `return` esplicito.
 
 ```cs
+// expression lambda
 Func<int, int> raddoppia = x => x * 2;
-Func<int, int, int> somma = (x, y) => x + y;
-```
 
-Se il corpo è una singola espressione, il valore viene restituito implicitamente.
-
-### 2.2 Statement lambda
-
-Una **statement lambda** usa un blocco di istruzioni:
-
-```cs
-Action<string> saluta = nome =>
-{
-    string messaggio = $"Ciao {nome}";
-    Console.WriteLine(messaggio);
-};
-```
-
-In questo caso, se il delegate ha un tipo di ritorno, devi usare `return` esplicito:
-
-```cs
+// statement lambda
 Func<int, int, int> max = (a, b) =>
 {
     if (a > b)
         return a;
-
     return b;
 };
+
+Console.WriteLine(raddoppia(4)); // 8
+Console.WriteLine(max(3, 7));    // 7
 ```
 
-### 2.3 Parentesi opzionali e lambda senza parametri
-
-Con un solo parametro le parentesi possono essere omesse:
+### 2.2 Parametri, parentesi e tipi
 
 ```cs
-Func<int, int> quadrato = x => x * x;
-```
-
-Senza parametri servono sempre le parentesi vuote:
-
-```cs
-Action saluto = () => Console.WriteLine("ciao");
-```
-
-Con più parametri le parentesi sono obbligatorie:
-
-```cs
-Func<int, int, int> prodotto = (x, y) => x * y;
-```
-
-### 2.4 Tipo inferito dal contesto
-
-Una lambda non ha un tipo "da sola".
-Il tipo viene **inferito dal contesto di destinazione**:
-
-```cs
-Func<int, bool> pari = x => x % 2 == 0;
-Predicate<string> vuota = s => string.IsNullOrWhiteSpace(s);
-```
-
-Qui è il compilatore che deduce:
-
-- che `x` è un `int`;
-- che il risultato deve essere `bool`;
-- che la lambda deve essere convertita a `Func<int, bool>` o `Predicate<string>`.
-
-### 2.5 Tipo esplicito dei parametri
-
-Se vuoi puoi dichiarare esplicitamente i tipi:
-
-```cs
-Func<int, int, int> somma = (int x, int y) => x + y;
-```
-
-Questo è utile quando:
-
-- vuoi rendere il codice più leggibile;
-- l'inferenza non è immediata;
-- stai lavorando con overload complessi.
-
-### 2.6 Esempio panoramico
-
-```cs
-Action stampa = () => Console.WriteLine("Nessun parametro");
-Func<int, int> doppio = x => x * 2;
-Func<int, int, int> differenza = (x, y) => x - y;
+Action saluto = () => Console.WriteLine("ciao");           // nessun parametro: () obbligatorie
+Func<int, int> quadrato = x => x * x;                       // un parametro: parentesi opzionali
+Func<int, int, int> prodotto = (x, y) => x * y;             // più parametri: parentesi obbligatorie
+Func<int, int, int> somma = (int x, int y) => x + y;        // tipi espliciti
 Func<int, int> assoluto = (int x) => x < 0 ? -x : x;
 
-stampa();
-Console.WriteLine(doppio(5));
-Console.WriteLine(differenza(10, 3));
-Console.WriteLine(assoluto(-9));
+saluto();                           // ciao
+Console.WriteLine(prodotto(3, 4));  // 12
+Console.WriteLine(assoluto(-9));    // 9
 ```
+
+Una lambda **non ha un tipo da sola**: il tipo viene **inferito dal contesto di destinazione**.
+In `Func<int, bool> pari = x => x % 2 == 0;` è il compilatore a dedurre che `x` è un `int` e che il risultato deve essere `bool`.
+
+<Aside variant="tip">
+I tipi espliciti dei parametri sono utili quando l'inferenza non è immediata o ci sono overload ambigui. Nei casi semplici lasciali inferire: il codice resta più pulito.
+</Aside>
 
 ## 3. Lambda e delegate
 
-Una lambda in C# non vive nel vuoto: viene quasi sempre convertita in un **delegate** o in un **expression tree**.
-
-### 3.1 Shorthand per delegate anonimo
-
-Queste due forme sono concettualmente equivalenti:
+Una lambda viene quasi sempre convertita in un **delegate** (o in un expression tree, vedi sezione 5).
+È una **shorthand sintattica** del vecchio delegate anonimo:
 
 ```cs
-Func<int, int> doppio1 = delegate (int x)
-{
-    return x * 2;
-};
-
-Func<int, int> doppio2 = x => x * 2;
+Func<int, int> doppio1 = delegate (int x) { return x * 2; };
+Func<int, int> doppio2 = x => x * 2; // equivalente, più compatto
 ```
 
-La lambda è quindi una **shorthand sintattica** per rappresentare un delegate anonimo in modo più compatto.
+### 3.1 `Func`, `Action`, `Predicate` e delegate personalizzati
 
-### 3.2 Assegnazione a `Func`, `Action` e `Predicate`
-
-Le lambda sono usate continuamente con i delegati generici predefiniti:
+- `Action<T...>`: nessun valore di ritorno;
+- `Func<T..., TResult>`: restituisce un valore (l'ultimo tipo generico è il ritorno);
+- `Predicate<T>`: restituisce `bool`.
 
 ```cs
 Action<string> log = messaggio => Console.WriteLine($"LOG: {messaggio}");
-Func<decimal, decimal, decimal> sconto = (prezzo, percentuale) => prezzo * (1 - percentuale);
+Func<decimal, decimal, decimal> sconto = (prezzo, perc) => prezzo * (1 - perc);
 Predicate<int> positivo = n => n > 0;
 
-log("Operazione completata");
-Console.WriteLine(sconto(100m, 0.15m));
-Console.WriteLine(positivo(42));
+log("Operazione completata");          // LOG: Operazione completata
+Console.WriteLine(sconto(100m, 0.15m)); // 85,00
+Console.WriteLine(positivo(42));        // True
 ```
 
-Riepilogo:
-
-- `Action<T...>`: nessun valore di ritorno;
-- `Func<T..., TResult>`: restituisce un valore;
-- `Predicate<T>`: restituisce `bool`.
-
-### 3.3 Assegnazione a un delegate personalizzato
-
-Una lambda può essere assegnata anche a un delegato dichiarato da te:
+Puoi assegnare una lambda anche a un delegate dichiarato da te, utile quando vuoi dare un **nome semantico** alla firma:
 
 ```cs
 public delegate decimal CalcoloPrezzo(decimal imponibile, decimal iva);
 
 CalcoloPrezzo totale = (imponibile, iva) => imponibile + iva;
-
-decimal risultato = totale(100m, 22m);
-Console.WriteLine(risultato);
+Console.WriteLine(totale(100m, 22m)); // 122
 ```
 
-Questo è utile quando vuoi dare un **nome semantico** alla firma.
+### 3.2 Lambda come callback
 
-### 3.4 Lambda come callback
-
-Molti metodi ricevono lambda come parametri:
+Molti metodi ricevono un comportamento come parametro: il chiamante lo definisce **inline** con una lambda.
 
 ```cs
-public static void EseguiOperazione(int valore, Action<int> callback)
+static void EseguiOperazione(int valore, Action<int> callback)
 {
     Console.WriteLine("Elaborazione...");
     callback(valore);
 }
 
 EseguiOperazione(10, x => Console.WriteLine($"Risultato: {x * 3}"));
+// Elaborazione...
+// Risultato: 30
 ```
 
-Qui la lambda è una **callback inline**: il chiamante definisce direttamente il comportamento da eseguire.
-
-### 3.5 Conversione implicita e overload
-
-La stessa lambda può essere compatibile con più target, ma il contesto decide la conversione:
+Un esempio più realistico: lo stesso metodo di ordinamento, con criteri diversi passati come lambda.
 
 ```cs
-Func<int, bool> filtro = x => x > 10;
-Expression<Func<int, bool>> filtroEspressione = x => x > 10;
+var parole = new List<string> { "banana", "uva", "mela", "albicocca" };
+
+parole.Sort((a, b) => a.Length.CompareTo(b.Length));
+Console.WriteLine(string.Join(", ", parole)); // uva, mela, banana, albicocca
+
+parole.Sort((a, b) => string.Compare(a, b, StringComparison.Ordinal));
+Console.WriteLine(string.Join(", ", parole)); // albicocca, banana, mela, uva
 ```
-
-La sintassi è uguale, ma il risultato semantico è diverso:
-
-- nel primo caso ottieni **codice eseguibile**;
-- nel secondo una **struttura dati** che descrive il codice.
 
 ## 4. Closures
 
-Una **closure** si verifica quando una lambda cattura variabili definite nel suo **outer scope**.
-
-### 4.1 Definizione
+Una **closure** si verifica quando una lambda cattura variabili del suo **outer scope**:
 
 ```cs
 int fattore = 3;
@@ -287,53 +153,7 @@ Func<int, int> moltiplica = x => x * fattore;
 Console.WriteLine(moltiplica(10)); // 30
 ```
 
-La lambda non usa solo il parametro `x`, ma anche la variabile esterna `fattore`.
-Questo significa che la lambda "chiude sopra" il contesto in cui è nata.
-
-### 4.2 Come funziona internamente
-
-Quando una lambda cattura variabili, il compilatore genera una classe nascosta, spesso chiamata concettualmente **display class**, con:
-
-- un campo per ogni variabile catturata;
-- un metodo che contiene il corpo della lambda.
-
-Esempio concettuale:
-
-```cs
-int fattore = 3;
-Func<int, int> moltiplica = x => x * fattore;
-```
-
-viene trasformato in qualcosa di simile a:
-
-```cs
-private sealed class DisplayClass
-{
-    public int fattore;
-
-    public int Moltiplica(int x)
-    {
-        return x * fattore;
-    }
-}
-
-DisplayClass closure = new DisplayClass();
-closure.fattore = 3;
-Func<int, int> moltiplica = closure.Moltiplica;
-```
-
-```mermaid
-flowchart TD
-    A[Codice sorgente con lambda] --> B[Compilatore]
-    B --> C[Display class generata]
-    C --> D[Campo fattore]
-    C --> E[Metodo Moltiplica]
-    E --> F[Delegate Func<int,int>]
-```
-
-### 4.3 La variabile catturata non viene copiata
-
-Uno degli aspetti più importanti è questo: di solito viene catturata la **variabile**, non il suo valore al momento della creazione.
+Viene catturata la **variabile**, non il suo valore al momento della creazione: se la variabile cambia, la lambda vede il nuovo valore.
 
 ```cs
 int contatore = 0;
@@ -341,15 +161,19 @@ Action incrementa = () => contatore++;
 
 incrementa();
 incrementa();
-
 Console.WriteLine(contatore); // 2
+
+fattore = 5;
+Console.WriteLine(moltiplica(10)); // 50, non 30!
 ```
 
-La lambda sta lavorando sulla stessa variabile `contatore`.
+<Aside variant="info">
+Internamente il compilatore genera una classe nascosta (**display class**) con un campo per ogni variabile catturata e un metodo con il corpo della lambda. Per questo una variabile catturata vive almeno quanto il delegate che la usa, anche dopo la fine del metodo in cui è stata dichiarata.
+</Aside>
 
-### 4.4 Captured variable trap nei loop
+### 4.1 Captured variable trap nei loop
 
-Il problema classico compare nei cicli:
+Il problema classico compare nei cicli `for`:
 
 ```cs
 var azioni = new List<Action>();
@@ -360,166 +184,67 @@ for (int i = 0; i < 3; i++)
 }
 
 foreach (var azione in azioni)
-{
     azione();
-}
+// Output: 3 3 3 (non 0 1 2)
 ```
 
-Molti principianti si aspettano:
-
-```text
-0
-1
-2
-```
-
-ma l'output tipico è:
-
-```text
-3
-3
-3
-```
-
-perché tutte le lambda catturano la stessa variabile `i`, che al termine del ciclo vale `3`.
-
-### 4.5 Soluzione: variabile temporanea
-
-La soluzione è creare una nuova variabile locale per ogni iterazione:
+Tutte le lambda catturano **la stessa** variabile `i`, che a fine ciclo vale `3`.
+La soluzione è una copia locale per ogni iterazione:
 
 ```cs
-var azioni = new List<Action>();
-
 for (int i = 0; i < 3; i++)
 {
     int copia = i;
-    azioni.Add(() => Console.WriteLine(copia));
+    azioni.Add(() => Console.WriteLine(copia)); // 0 1 2
 }
 ```
 
-Così ogni lambda cattura una variabile distinta.
+<Aside variant="warning">
+Da C# 5 il `foreach` crea una nuova variabile a ogni iterazione, quindi non ha più questo problema. Con `for` (e con variabili mutate a mano) la trappola esiste ancora: se vuoi "congelare" un valore, copialo in una variabile locale.
+</Aside>
 
-### 4.6 `for` e `foreach`
+Le closure sono utilissime, ma possono anche tenere in vita oggetti grandi più del previsto e introdurre allocazioni aggiuntive (vedi sezione 8).
 
-Storicamente il problema era molto noto con `foreach`.
-Le versioni moderne di C# hanno corretto il comportamento di `foreach`, ma con `for` la regola resta concettualmente importante:
+## 5. Delegate vs expression tree
 
-- se catturi una variabile che cambia, tutte le lambda osserveranno quel cambiamento;
-- se vuoi congelare il valore, crea una variabile temporanea.
-
-### 4.7 Lifetime della variabile catturata
-
-Una variabile locale normale vive sullo stack del metodo.
-Una variabile catturata, invece, deve sopravvivere finché la lambda esiste.
-
-In termini concettuali:
-
-$$
-Lifetime(captured\ variable) \ge Lifetime(delegate)
-$$
-
-Questo significa che la closure può estendere la vita di oggetti che altrimenti sarebbero stati rilasciati prima.
-
-### 4.8 Implicazioni pratiche
-
-Le closure sono utilissime, ma possono introdurre:
-
-- allocazioni aggiuntive;
-- riferimenti indesiderati a oggetti grandi;
-- bug difficili da vedere;
-- comportamento sorprendente in codice asincrono o nei loop.
-
-## 5. Expression lambda vs Statement lambda
-
-Non tutte le lambda sono equivalenti.
-La differenza più importante è tra **expression lambda** e **statement lambda**.
-
-### 5.1 Expression lambda
-
-Una expression lambda ha un solo nodo espressivo:
-
-```cs
-Func<int, bool> pari = x => x % 2 == 0;
-```
-
-Questa forma può essere convertita sia in un delegate sia, in molti casi, in un **expression tree**:
-
-```cs
-Expression<Func<int, bool>> expr = x => x % 2 == 0;
-```
-
-Un expression tree non esegue direttamente il codice: lo rappresenta come struttura ad albero.
-
-```mermaid
-graph TD
-    A[x => x.Price > 100] --> B[Expression Tree]
-    B --> C[Provider LINQ]
-    C --> D[Traduzione SQL o altra query]
-```
-
-### 5.2 Statement lambda
-
-Una statement lambda usa un blocco:
-
-```cs
-Func<int, bool> test = x =>
-{
-    Console.WriteLine($"Controllo {x}");
-    return x % 2 == 0;
-};
-```
-
-Questa forma è perfetta per callback e logica in memoria, ma **non** può essere convertita nello stesso modo a un expression tree traducibile da provider come Entity Framework Core.
-
-### 5.3 `Func<T, TResult>` vs `Expression<Func<T, TResult>>`
-
-Questa è una distinzione fondamentale:
+La stessa lambda può diventare due cose molto diverse, a seconda del tipo di destinazione:
 
 ```cs
 Func<Prodotto, bool> filtroInMemoria = p => p.Prezzo > 100;
 Expression<Func<Prodotto, bool>> filtroTraducibile = p => p.Prezzo > 100;
 ```
 
-Nel primo caso:
+- `Func<...>`: **codice eseguibile** dal runtime .NET; tipico di `IEnumerable<T>` e LINQ to Objects.
+- `Expression<Func<...>>`: una **struttura dati ad albero** che descrive il codice; un provider la legge e la traduce (SQL, API remote...). Tipico di `IQueryable<T>` ed **EF Core**.
 
-- il codice viene eseguito dal runtime .NET;
-- tipico di `IEnumerable<T>` e LINQ to Objects.
+Un expression tree si può ispezionare e, se serve, compilare in un delegate:
 
-Nel secondo caso:
+```cs
+using System.Linq.Expressions;
 
-- il provider legge la struttura dell'espressione;
-- può tradurla in SQL, API query, regole, filtri remoti;
-- tipico di `IQueryable<T>` ed **EF Core**.
+Expression<Func<int, bool>> expr = x => x % 2 == 0;
 
-### 5.4 Perché EF Core usa expression tree
+Console.WriteLine(expr.Body);     // ((x % 2) == 0)
+Console.WriteLine(expr.NodeType); // Lambda
 
-Con EF Core:
+Func<int, bool> pari = expr.Compile();
+Console.WriteLine(pari(4));       // True
+```
+
+Con EF Core, se `db.Prodotti` è un `IQueryable<Prodotto>`, la lambda non viene eseguita su ogni record ma tradotta in SQL:
 
 ```cs
 var query = db.Prodotti.Where(p => p.Prezzo > 100);
+// SELECT * FROM Prodotti WHERE Prezzo > 100
 ```
 
-se `Prodotti` è `IQueryable<Prodotto>`, la lambda non viene eseguita subito su ogni record.
-Viene prima analizzata e tradotta in qualcosa di simile a:
-
-```sql
-SELECT *
-FROM Prodotti
-WHERE Prezzo > 100
-```
-
-Se usassi una lambda non traducibile, per esempio con logica arbitraria o statement body, il provider potrebbe:
-
-- lanciare un'eccezione;
-- oppure spostare parte del lavoro lato client, con impatto prestazionale.
+<Aside variant="warning">
+Solo le **expression lambda** possono diventare expression tree: una statement lambda (con blocco `{ }`) non compila se assegnata a `Expression<...>`. Inoltre, se dentro la lambda chiami metodi C# che il provider non sa tradurre, EF Core lancia un'eccezione o sposta il lavoro lato client, con impatto sulle prestazioni.
+</Aside>
 
 ## 6. Lambda con LINQ
 
-LINQ è il terreno naturale delle lambda expressions.
-
-### 6.1 `Where`, `Select` e chaining
-
-Supponiamo di avere:
+LINQ è il terreno naturale delle lambda. Useremo questa collezione:
 
 ```cs
 public class Studente
@@ -532,178 +257,95 @@ public class Studente
 
 var studenti = new List<Studente>
 {
-    new() { Nome = "Anna", Eta = 21, Corso = "Informatica", Voti = new() { 28, 30, 27 } },
-    new() { Nome = "Luca", Eta = 19, Corso = "Matematica", Voti = new() { 18, 24, 21 } },
+    new() { Nome = "Anna",  Eta = 21, Corso = "Informatica", Voti = new() { 28, 30, 27 } },
+    new() { Nome = "Luca",  Eta = 19, Corso = "Matematica",  Voti = new() { 18, 24, 21 } },
     new() { Nome = "Marta", Eta = 23, Corso = "Informatica", Voti = new() { 30, 29, 30 } },
-    new() { Nome = "Paolo", Eta = 22, Corso = "Fisica", Voti = new() { 25, 26, 24 } }
+    new() { Nome = "Paolo", Eta = 22, Corso = "Fisica",      Voti = new() { 25, 26, 24 } }
 };
-
-var risultati = studenti
-    .Where(s => s.Corso == "Informatica")
-    .Select(s => new
-    {
-        s.Nome,
-        Media = s.Voti.Average()
-    })
-    .OrderByDescending(s => s.Media)
-    .ToList();
 ```
 
-Qui le lambda descrivono l'intera pipeline:
+### 6.1 `Where`, `Select`, `OrderBy`
 
-- filtro con `Where`;
-- proiezione con `Select`;
-- ordinamento con `OrderByDescending`.
-
-Costo concettuale in memoria:
-
-$$
-T_{Where+Select}(n) = O(n)
-$$
-
-mentre un ordinamento aggiunge tipicamente:
-
-$$
-T_{OrderBy}(n) = O(n \log n)
-$$
-
-### 6.2 `GroupBy`
+Le lambda descrivono l'intera pipeline: filtro, proiezione, ordinamento.
 
 ```cs
-var gruppiPerCorso = studenti
+var risultati = studenti
+    .Where(s => s.Corso == "Informatica")
+    .Select(s => new { s.Nome, Media = s.Voti.Average() })
+    .OrderByDescending(s => s.Media)
+    .ToList();
+
+foreach (var r in risultati)
+    Console.WriteLine($"{r.Nome}: {r.Media:F1}");
+// Marta: 29,7
+// Anna: 28,3
+```
+
+### 6.2 `GroupBy` e `Aggregate`
+
+La lambda di `GroupBy` sceglie la **chiave** di raggruppamento:
+
+```cs
+var perCorso = studenti
     .GroupBy(s => s.Corso)
     .Select(g => new
     {
         Corso = g.Key,
-        NumeroStudenti = g.Count(),
-        MediaCorso = g.SelectMany(s => s.Voti).Average()
+        Numero = g.Count(),
+        Media = g.SelectMany(s => s.Voti).Average()
     });
+
+foreach (var g in perCorso)
+    Console.WriteLine($"{g.Corso}: {g.Numero} studenti, media {g.Media:F1}");
+// Informatica: 2 studenti, media 29,0
+// Matematica: 1 studenti, media 21,0
+// Fisica: 1 studenti, media 25,0
 ```
 
-La lambda di `GroupBy` sceglie la chiave di raggruppamento.
-
-### 6.3 `Join`
-
-```cs
-var docenti = new[]
-{
-    new { Corso = "Informatica", Docente = "Prof.ssa Rinaldi" },
-    new { Corso = "Matematica", Docente = "Prof. Greco" },
-    new { Corso = "Fisica", Docente = "Prof. Neri" }
-};
-
-var piano = studenti.Join(
-    docenti,
-    studente => studente.Corso,
-    docente => docente.Corso,
-    (studente, docente) => new
-    {
-        studente.Nome,
-        studente.Corso,
-        docente.Docente
-    });
-```
-
-Le lambda del `Join` definiscono:
-
-- chiave sinistra;
-- chiave destra;
-- proiezione finale.
-
-### 6.4 `Aggregate`
-
-`Aggregate` è uno dei metodi più "funzionali" di LINQ:
+`Aggregate` riceve l'**accumulatore** corrente e l'**elemento** corrente, e produce il nuovo accumulatore:
 
 ```cs
 int sommaVotiAnna = studenti
     .First(s => s.Nome == "Anna")
     .Voti
     .Aggregate(0, (acc, voto) => acc + voto);
+
+Console.WriteLine(sommaVotiAnna); // 85
 ```
 
-Qui la lambda riceve:
+### 6.3 Query syntax vs method syntax
 
-- l'accumulatore corrente;
-- l'elemento corrente;
-- e produce il nuovo accumulatore.
-
-### 6.5 Query syntax vs method syntax
-
-La query syntax:
+La query syntax viene tradotta dal compilatore in chiamate di metodo con lambda:
 
 ```cs
-var query =
+var q1 =
     from s in studenti
     where s.Eta >= 21
     orderby s.Nome
     select s.Nome;
-```
 
-viene tradotta dal compilatore in method syntax:
-
-```cs
-var query = studenti
+// equivalente
+var q2 = studenti
     .Where(s => s.Eta >= 21)
     .OrderBy(s => s.Nome)
     .Select(s => s.Nome);
 ```
 
-La query syntax è spesso più leggibile in query complesse con join multipli.
-La method syntax è più uniforme e mette in primo piano le lambda.
+<Aside variant="tip">
+La query syntax è spesso più leggibile con join multipli; la method syntax è più uniforme e copre tutti gli operatori (`Count`, `Aggregate`, `Take`...). Nella pratica si usa soprattutto la method syntax.
+</Aside>
 
-### 6.6 Esempio completo con collezioni complesse
+### 6.4 Esempio con lambda annidate
 
 ```cs
-public class Ordine
-{
-    public int Id { get; set; }
-    public string Cliente { get; set; } = "";
-    public string Citta { get; set; } = "";
-    public List<RigaOrdine> Righe { get; set; } = new();
-}
-
-public class RigaOrdine
-{
-    public string Prodotto { get; set; } = "";
-    public int Quantita { get; set; }
-    public decimal PrezzoUnitario { get; set; }
-}
+public record RigaOrdine(string Prodotto, int Quantita, decimal PrezzoUnitario);
+public record Ordine(string Cliente, string Citta, List<RigaOrdine> Righe);
 
 var ordini = new List<Ordine>
 {
-    new()
-    {
-        Id = 1,
-        Cliente = "Alfa Srl",
-        Citta = "Milano",
-        Righe = new()
-        {
-            new() { Prodotto = "Monitor", Quantita = 2, PrezzoUnitario = 180m },
-            new() { Prodotto = "Mouse", Quantita = 5, PrezzoUnitario = 20m }
-        }
-    },
-    new()
-    {
-        Id = 2,
-        Cliente = "Beta Spa",
-        Citta = "Roma",
-        Righe = new()
-        {
-            new() { Prodotto = "Notebook", Quantita = 1, PrezzoUnitario = 1200m },
-            new() { Prodotto = "Dock", Quantita = 2, PrezzoUnitario = 90m }
-        }
-    },
-    new()
-    {
-        Id = 3,
-        Cliente = "Gamma Srl",
-        Citta = "Milano",
-        Righe = new()
-        {
-            new() { Prodotto = "Monitor", Quantita = 1, PrezzoUnitario = 220m },
-            new() { Prodotto = "Tastiera", Quantita = 3, PrezzoUnitario = 45m }
-        }
-    }
+    new("Alfa Srl",  "Milano", new() { new("Monitor", 2, 180m), new("Mouse", 5, 20m) }),
+    new("Beta Spa",  "Roma",   new() { new("Notebook", 1, 1200m) }),
+    new("Gamma Srl", "Milano", new() { new("Monitor", 1, 220m), new("Tastiera", 3, 45m) })
 };
 
 var report = ordini
@@ -711,302 +353,100 @@ var report = ordini
     .Select(o => new
     {
         o.Cliente,
-        Totale = o.Righe.Sum(r => r.Quantita * r.PrezzoUnitario),
-        Prodotti = o.Righe.Select(r => r.Prodotto).ToList()
+        Totale = o.Righe.Sum(r => r.Quantita * r.PrezzoUnitario)
     })
-    .OrderByDescending(x => x.Totale)
-    .ToList();
+    .OrderByDescending(x => x.Totale);
+
+foreach (var r in report)
+    Console.WriteLine($"{r.Cliente}: {r.Totale}");
+// Alfa Srl: 460
+// Gamma Srl: 355
 ```
 
-Questo esempio mostra lambda annidate in:
+Qui una lambda (`r => r.Quantita * r.PrezzoUnitario`) vive **dentro** un'altra lambda (`o => new { ... }`).
 
-- `Where`;
-- `Select`;
-- `Sum`;
-- `Select` interno;
-- `OrderByDescending`.
+## 7. Lambda ricorsive e local functions
 
-## 7. Lambda ricorsive
-
-Le lambda in C# non hanno un nome intrinseco come i metodi.
-Per questo non puoi scrivere una ricorsione diretta "naturale" nel corpo senza un appoggio esterno.
-
-### 7.1 Perché non si ricorre direttamente
-
-Questa forma non è praticabile come un metodo nominato:
-
-```cs
-// concettualmente desiderato, ma non esiste un nome interno della lambda
-// n => n <= 1 ? 1 : n * ???(n - 1)
-```
-
-Serve una variabile locale che contenga il delegate.
-
-### 7.2 Pattern per lambda ricorsiva
+Una lambda non ha un nome, quindi non può richiamare sé stessa direttamente: serve una variabile che contenga il delegate.
 
 ```cs
 Func<int, int>? fattoriale = null;
-
 fattoriale = n => n <= 1 ? 1 : n * fattoriale!(n - 1);
 
 Console.WriteLine(fattoriale(5)); // 120
 ```
 
-Oppure con una firma più esplicita:
-
-```cs
-Func<int, long>? fibonacci = null;
-
-fibonacci = n =>
-{
-    if (n <= 1)
-        return n;
-
-    return fibonacci!(n - 1) + fibonacci!(n - 2);
-};
-```
-
-Funziona, ma non è sempre la soluzione più leggibile.
-
-### 7.3 Confronto con le local functions
-
-Lo stesso fattoriale con una local function:
-
-```cs
-static int Fattoriale(int n)
-{
-    if (n <= 1)
-        return 1;
-
-    return n * Fattoriale(n - 1);
-}
-```
-
-oppure dentro un metodo:
+Funziona, ma la **local function** è molto più naturale:
 
 ```cs
 int Calcola(int valore)
 {
-    static int Fattoriale(int n)
-    {
-        if (n <= 1)
-            return 1;
-
-        return n * Fattoriale(n - 1);
-    }
-
     return Fattoriale(valore);
+
+    static int Fattoriale(int n) => n <= 1 ? 1 : n * Fattoriale(n - 1);
 }
 ```
 
-Per ricorsione vera, la local function di solito è più naturale.
+Quando scegliere l'una o l'altra:
 
-## 8. Local functions vs lambda
-
-Lambda e local functions non sono intercambiabili in tutto.
-
-### 8.1 Quando preferire una local function
-
-Una **local function** è spesso migliore quando:
-
-- hai bisogno di **ricorsione**;
-- vuoi usare parametri `ref`, `out` o `in`;
-- vuoi un nome locale che renda il codice più leggibile;
-- vuoi evitare closure con una `static local function`.
-
-Esempio con `ref`:
-
-```cs
-void Incrementa(ref int x)
-{
-    x++;
-}
-```
-
-Una lambda non può esporre la stessa ergonomia in tutti questi scenari.
-
-### 8.2 Quando preferire una lambda
-
-La lambda è ideale quando:
-
-- devi passare un comportamento inline;
-- stai scrivendo una query LINQ;
-- vuoi una callback breve;
-- il codice è piccolo e locale al punto d'uso.
+- **Local function**: ricorsione, parametri `ref`/`out`/`in`, logica locale strutturata con un nome leggibile.
+- **Lambda**: callback inline, query LINQ, codice breve vicino al punto d'uso.
 
 ```cs
 var nomi = new[] { "anna", "luca", "marta" };
-var maiuscoli = nomi.Select(n => n.ToUpperInvariant()).ToList();
+var maiuscoli = nomi.Select(n => n.ToUpperInvariant()).ToList(); // ANNA, LUCA, MARTA
 ```
 
-### 8.3 `static local function`
+<Aside variant="tip">
+Se una lambda supera 4-5 righe o contiene logica di business, estraila in una local function o in un metodo con un nome: la query LINQ torna leggibile e la logica diventa testabile.
+</Aside>
 
-Una `static local function` non può catturare variabili esterne.
-Questo porta due vantaggi:
+## 8. Performance e static lambda
 
-- evita closure accidentali;
-- può eliminare allocazioni inutili.
+Una lambda **senza capture** (`x => x * 2`) è praticamente gratuita: il delegate viene creato una volta e riusato.
+Una lambda **con capture** richiede in genere una display class e un nuovo delegate **ogni volta che la closure viene creata** (non a ogni invocazione): più allocazioni e più pressione sul GC.
 
-```cs
-int[] dati = [1, 2, 3, 4];
-int soglia = 2;
-
-var filtrati = dati.Where(static x => x > 2).ToArray();
-```
-
-La stessa idea vale per le **static lambda** introdotte in C# 9:
-
-```cs
-Func<int, int> triplo = static x => x * 3;
-```
-
-Se provi a catturare variabili esterne, il compilatore segnala errore.
-
-### 8.4 Sintesi pratica
-
-- **Local function**: logica locale strutturata, ricorsione, ref/out, migliore nominazione.
-- **Lambda**: callback inline, LINQ, composizione rapida, codice breve.
-
-## 9. Performance delle lambda
-
-Le lambda sono comode, ma non sono sempre "gratis".
-
-### 9.1 Lambda senza closure
-
-Se una lambda **non cattura** variabili esterne:
-
-```cs
-Func<int, int> doppio = x => x * 2;
-```
-
-il compilatore/runtime può spesso ottimizzare la situazione e riusare istanze delegate già create.
-
-Costo concettuale:
-
-$$
-M_{no\ capture} \approx 0\ allocazioni\ per\ invocazione
-$$
-
-ovvero nessuna nuova allocazione ad ogni chiamata del delegate.
-
-### 9.2 Lambda con closure
-
-Se invece catturi variabili esterne:
-
-```cs
-int fattore = 2;
-Func<int, int> moltiplica = x => x * fattore;
-```
-
-in genere servono:
-
-- una display class;
-- un delegate che punta al metodo generato.
-
-Costo concettuale:
-
-$$
-M_{capture} = O(1)\ allocazioni\ addizionali
-$$
-
-per ogni creazione della closure, non per ogni singola invocazione.
-
-### 9.3 Benchmark concettuale
-
-Confronto tipico:
-
-```cs
-Func<int, int> senzaCapture = static x => x * 2;
-
-int fattore = 2;
-Func<int, int> conCapture = x => x * fattore;
-```
-
-In un benchmark reale, la seconda forma può mostrare:
-
-- più allocazioni;
-- maggiore pressione sul GC;
-- overhead visibile in codice molto caldo.
-
-Questo non significa "non usare mai closure", ma **usarle consapevolmente**.
-
-### 9.4 Static lambda in C# 9
-
-La `static lambda` serve proprio a impedire catture accidentali:
+Con le **static lambda** (C# 9) dichiari che la lambda non deve catturare nulla, e il compilatore lo verifica:
 
 ```cs
 var numeri = Enumerable.Range(1, 5);
-var quadrati = numeri.Select(static n => n * n).ToList();
-```
+var quadrati = numeri.Select(static n => n * n).ToList(); // OK
 
-Se scrivessi:
-
-```cs
 int offset = 10;
-var valori = numeri.Select(static n => n + offset).ToList();
+// var valori = numeri.Select(static n => n + offset).ToList();
+// errore CS8820: una lambda static non può fare riferimento a 'offset'
 ```
 
-il compilatore lo rifiuterebbe, perché una lambda `static` non può catturare `offset`.
+<Aside variant="info">
+Nel codice applicativo il costo delle closure è quasi sempre trascurabile. Diventa rilevante in librerie, hot path ed elaborazioni massive: lì `static` è un modo semplice per evitare catture accidentali.
+</Aside>
 
-### 9.5 Regola pratica
+## 9. Pattern funzionali
 
-Le lambda sono quasi sempre perfette nel codice applicativo.
-L'attenzione alle allocazioni diventa importante soprattutto in:
+### 9.1 Currying e partial application
 
-- librerie;
-- hot path;
-- elaborazione massiva;
-- codice realtime o ad altissima frequenza.
-
-## 10. Lambda in programmazione funzionale in C#
-
-Le lambda permettono di applicare vari pattern funzionali anche in C#.
-
-### 10.1 Currying manuale
-
-Il **currying** trasforma una funzione con più argomenti in una catena di funzioni con un argomento alla volta.
+Il **currying** trasforma una funzione con più argomenti in una catena di funzioni a un argomento.
+La **partial application** fissa alcuni argomenti per ottenere una funzione più specializzata.
 
 ```cs
+// currying
 Func<int, Func<int, int>> sommaCurried = x => y => x + y;
-
 var aggiungi10 = sommaCurried(10);
 Console.WriteLine(aggiungi10(5)); // 15
-```
 
-In notazione teorica:
-
-$$
-f : (A \times B) \to C
-$$
-
-può essere trasformata in:
-
-$$
-f' : A \to (B \to C)
-$$
-
-### 10.2 Partial application
-
-La **partial application** consiste nel fissare alcuni argomenti per ottenere una funzione più specializzata.
-
-```cs
-Func<decimal, decimal, decimal> applicaSconto = (prezzo, percentuale) => prezzo * (1 - percentuale);
+// partial application
+Func<decimal, decimal, decimal> applicaSconto = (prezzo, perc) => prezzo * (1 - perc);
 Func<decimal, decimal> scontoBlackFriday = prezzo => applicaSconto(prezzo, 0.30m);
-
-Console.WriteLine(scontoBlackFriday(200m)); // 140
+Console.WriteLine(scontoBlackFriday(200m)); // 140,00
 ```
 
-### 10.3 Composizione di funzioni
+### 9.2 Composizione e pipeline
 
-Una utility di composizione:
+La composizione $(g \circ f)(x) = g(f(x))$ si implementa restituendo una lambda:
 
 ```cs
-static Func<TInput, TOutput> Compose<TInput, TMiddle, TOutput>(
-    Func<TMiddle, TOutput> g,
-    Func<TInput, TMiddle> f)
-{
-    return x => g(f(x));
-}
+static Func<TIn, TOut> Compose<TIn, TMid, TOut>(Func<TMid, TOut> g, Func<TIn, TMid> f)
+    => x => g(f(x));
 
 Func<int, int> doppio = x => x * 2;
 Func<int, string> formatta = x => $"Valore: {x}";
@@ -1015,25 +455,13 @@ var pipeline = Compose(formatta, doppio);
 Console.WriteLine(pipeline(5)); // Valore: 10
 ```
 
-Formalmente:
-
-$$
-(g \circ f)(x) = g(f(x))
-$$
-
-### 10.4 Pipeline operator pattern
-
-Il C# non ha un vero pipeline operator come altri linguaggi, ma puoi simulare il pattern:
+Il C# non ha un pipeline operator, ma un extension method lo simula bene:
 
 ```cs
 public static class FunctionalExtensions
 {
-    public static TResult Pipe<TSource, TResult>(
-        this TSource value,
-        Func<TSource, TResult> func)
-    {
-        return func(value);
-    }
+    public static TResult Pipe<TSource, TResult>(this TSource value, Func<TSource, TResult> func)
+        => func(value);
 }
 
 string output = 5
@@ -1041,60 +469,27 @@ string output = 5
     .Pipe(x => x + 1)
     .Pipe(x => $"Risultato finale: {x}");
 
-Console.WriteLine(output);
+Console.WriteLine(output); // Risultato finale: 11
 ```
 
-Questa tecnica rende visibile il flusso trasformativo dei dati.
+## 10. Best practice
 
-## 11. Anti-pattern e best practice
+- tieni le lambda **brevi e focalizzate**; se il corpo cresce, estrai in metodo o local function;
+- usa nomi espliciti per le variabili che contengono delegate;
+- nei loop `for`, crea una copia locale del valore da catturare;
+- usa `static` per impedire catture accidentali nei punti critici;
+- con `IQueryable`, scrivi lambda **traducibili** dal provider;
+- preferisci `Func`, `Action`, `Predicate`; usa delegate personalizzati quando la firma ha un significato di dominio.
 
-Le lambda sono uno strumento molto espressivo, ma possono rendere il codice peggiore se usate male.
+<Aside variant="tip">
+In ogni punto del codice chiediti che ruolo ha la lambda: **codice eseguibile** (delegate), **struttura dati** (expression tree) o **closure** che porta con sé parte dell'ambiente esterno. Capirlo evita la maggior parte degli errori.
+</Aside>
 
-### 11.1 Anti-pattern comuni
-
-- usare lambda molto lunghe dentro una query, rendendo il codice illeggibile;
-- catturare variabili mutate nei loop senza volerlo;
-- mettere logica di business complessa in callback anonime sparse;
-- usare lambda quando una local function nominata sarebbe più chiara;
-- passare lambda non traducibili a provider `IQueryable`;
-- ignorare il costo delle closure in punti critici.
-
-### 11.2 Best practice
-
-- tieni le lambda **brevi e focalizzate**;
-- usa nomi espliciti nelle variabili che contengono delegate;
-- se il corpo cresce, estrai in **metodo** o **local function**;
-- usa `static` quando vuoi impedire capture accidentali;
-- con `IQueryable`, scrivi lambda **traducibili**;
-- nei loop, crea una copia locale del valore da catturare;
-- preferisci delegate standard (`Func`, `Action`, `Predicate`) quando la firma è banale;
-- usa delegate personalizzati quando il significato semantico della firma conta.
-
-### 11.3 Modello mentale finale
-
-Una lambda in C# può essere vista come uno di questi tre ruoli:
-
-1. **codice eseguibile** convertito in delegate;
-2. **struttura dati** convertita in expression tree;
-3. **closure** che porta con sé parte dell'ambiente esterno.
-
-Capire quale dei tre stai usando, in ogni punto del codice, è la chiave per non sbagliare.
-
-## 12. Quiz
+## 11. Quiz
 
 import Quiz from '../../../components/Quiz.jsx';
 
 <Quiz client:load questions={[
-{
-question:"Da quale formalismo matematico deriva il concetto moderno di lambda expression?",
-answers:{
-a:"Teoria dei grafi",
-b:"Lambda calculus di Alonzo Church",
-c:"Macchine di Turing a stati finiti",
-d:"Calcolo vettoriale"
-},
-correctAnswer:"b"
-},
 {
 question:"Quale sintassi rappresenta correttamente una lambda expression in C#?",
 answers:{
@@ -1187,9 +582,9 @@ correctAnswer:"b"
 }
 ]} />
 
-## 13. Esercizi
+## 12. Esercizi
 
-### 13.1 Esercizio
+### 12.1 Esercizio
 
 **Scenario**:
 Stai sviluppando un pannello amministrativo per un e-commerce e vuoi permettere agli operatori di applicare filtri dinamici ai prodotti.
@@ -1207,14 +602,14 @@ Stai sviluppando un pannello amministrativo per un e-commerce e vuoi permettere 
 
 *Obiettivo didattico: usare le lambda come callback riutilizzabili e capire il ruolo di `Func<T, bool>` nei filtri dinamici.*
 
-### 13.2 Esercizio
+### 12.2 Esercizio
 
 **Scenario**:
 Vuoi costruire un piccolo modulo analytics per analizzare gli ordini di un gestionale.
 
 **Consegna**:
 
-1. Crea le classi `Ordine` e `RigaOrdine`.
+1. Crea le classi (o record) `Ordine` e `RigaOrdine`.
 2. Ogni ordine deve avere `Cliente`, `Citta` e una lista di righe con `Prodotto`, `Quantita`, `PrezzoUnitario`.
 3. Usa LINQ con lambda per ottenere:
    - il totale di ogni ordine;
@@ -1225,28 +620,28 @@ Vuoi costruire un piccolo modulo analytics per analizzare gli ordini di un gesti
 
 *Obiettivo didattico: consolidare `Where`, `Select`, `GroupBy`, `SelectMany` e `Aggregate` in uno scenario realistico.*
 
-### 13.3 Esercizio
+### 12.3 Esercizio
 
 **Scenario**:
 Stai implementando un motore di regole per assegnare sconti a clienti premium.
 
 **Consegna**:
 
-1. Crea un delegate o usa `Func<decimal, decimal>` per rappresentare una trasformazione di prezzo.
+1. Usa `Func<decimal, decimal>` per rappresentare una trasformazione di prezzo.
 2. Implementa tre lambda:
    - sconto del 10%;
    - sconto del 20%;
    - sconto del 10% seguito da IVA al 22%.
 3. Crea una utility `Compose` per comporre due funzioni.
 4. Mostra come ottenere una pipeline di trasformazioni da applicare a un prezzo iniziale.
-5. Spiega, nel codice o a voce, dove stai facendo currying, partial application o composizione.
+5. Indica nel codice dove stai facendo currying, partial application o composizione.
 
 *Obiettivo didattico: applicare pattern funzionali reali con lambda annidate e composizione di funzioni.*
 
-### 13.4 Esercizio
+### 12.4 Esercizio
 
 **Scenario**:
-Hai una coda di job da eseguire in background e vuoi registrare callback diverse per successo, errore e retry.
+Hai una coda di job da eseguire in background e vuoi registrare callback diverse per successo ed errore.
 
 **Consegna**:
 
@@ -1256,7 +651,7 @@ Hai una coda di job da eseguire in background e vuoi registrare callback diverse
    - scrivere su console;
    - incrementare contatori esterni;
    - salvare i job falliti in una lista.
-4. Riproduci volontariamente un caso di closure in un ciclo e osserva il problema.
+4. Riproduci volontariamente un caso di closure in un ciclo `for` e osserva il problema.
 5. Correggi il bug introducendo una variabile temporanea locale nel loop.
 
 *Obiettivo didattico: comprendere callback, closure, lifetime delle variabili catturate e bug classici nei loop.*

@@ -1,0 +1,74 @@
+---
+import { Icon } from "astro-icon/components";
+import Container from "@/components/container.astro";
+
+interface Props {
+  teacher: string;
+  calendarUrl: string;
+  showGithub?: boolean;
+}
+
+const { teacher, calendarUrl, showGithub = false } = Astro.props;
+
+const resources = [
+  { title: "Lezioni a distanza su Discord", href: "https://discord.com/invite/9Jb4Gt3HhB", icon: "fa6-brands:discord", external: true },
+  ...(showGithub
+    ? [{ title: "Programmi ed esercizi di informatica", href: "https://github.com/DennisTurco/AppuntiLezioni", icon: "fa6-brands:github", external: true }]
+    : []),
+  { title: "Appunti del sito", href: "/", icon: "fa6-solid:book-open", external: false },
+];
+---
+
+<Container>
+  <div class="mx-auto max-w-5xl py-12 md:py-16">
+    <a href="/insegnanti" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+      <Icon name="fa6-solid:arrow-left" class="h-3 w-3" />
+      Tutti gli insegnanti
+    </a>
+    <h1 class="page-title mt-4">Prenota una lezione con {teacher}</h1>
+    <p class="page-subtitle max-w-2xl">
+      Scegli un orario libero dal calendario: l'appuntamento verrà sincronizzato con il tuo Google Calendar.
+    </p>
+
+    <div class="mt-8 grid gap-4 md:grid-cols-[1fr_auto]">
+      <div class="callout flex items-start gap-3">
+        <Icon name="fa6-solid:circle-info" class="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+        <p>
+          Non trovi un orario e hai urgenza? <a href="/contact" class="link">Contattami</a> e cercherò di aggiungere
+          un momento adatto.
+        </p>
+      </div>
+      <ul class="card flex flex-col justify-center gap-2 p-5 text-sm">
+        {resources.map((r) => (
+          <li>
+            <a
+              href={r.href}
+              {...(r.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              class="inline-flex items-center gap-2 font-medium text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
+            >
+              <Icon name={r.icon} class="h-4 w-4 opacity-70" />
+              {r.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Calendario (desktop) -->
+    <div class="card mt-8 hidden overflow-hidden md:block">
+      <iframe
+        src={calendarUrl}
+        title={`Calendario prenotazioni di ${teacher}`}
+        class="h-[900px] w-full border-0 bg-white"
+        loading="lazy"></iframe>
+    </div>
+
+    <!-- Mobile -->
+    <div class="mt-8 md:hidden">
+      <a href={calendarUrl} target="_blank" rel="noopener noreferrer" class="btn btn-lg btn-primary w-full">
+        <Icon name="fa6-solid:calendar" class="h-4 w-4" />
+        Apri il calendario e prenota
+      </a>
+    </div>
+  </div>
+</Container>

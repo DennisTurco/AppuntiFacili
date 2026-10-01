@@ -1,0 +1,448 @@
+---
+title: "partial, readonly e static class"
+order: 14
+draft: false
+lastUpdateDate: "2026-10-01"
+subject: "C#"
+category: "Informatica"
+difficulty: "medio"
+tags: ["csharp", "programmazione", "modificatori", "partial", "readonly", "const", "init", "static"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Introduzione
+
+Questa è la seconda parte della lezione sui modificatori. Dopo `internal` e `sealed`, qui vediamo parole chiave che riguardano **come è organizzato** un tipo e **quanto è mutabile**:
+
+- **partial**: come una definizione è **distribuita** su più file;
+- **const**, **readonly**, **readonly struct** e **init**: come **limitare la mutabilità** di campi, proprietà e istanze;
+- **static class**: tipi che contengono solo membri statici, come utility ed extension methods.
+
+## 2. partial
+
+`partial` permette di dividere la **stessa definizione logica** in più file. Il compilatore unisce tutte le parti in un solo tipo finale.
+
+### 2.1 `partial class`
+
+```cs
+// File: Student.cs
+public partial class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+```
+
+```cs
+// File: Student.Validation.cs
+public partial class Student : IValidatable
+{
+    public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+}
+```
+
+Il tipo finale `Student` è una sola classe con `Id`, `Name`, `IsValid()` e l'interfaccia `IValidatable`: campi, metodi, attributi e interfacce dichiarati nelle varie parti vengono uniti.
+
+Regole fondamentali:
+
+- tutte le parti devono essere marcate `partial`, con lo **stesso nome**, nello **stesso namespace** e nello **stesso assembly**;
+- se il tipo è generico, i parametri di tipo devono coincidere;
+- non puoi avere due base class diverse né due membri identici in conflitto.
+
+```cs
+namespace School.Core.Models;
+public partial class Student { }
+```
+
+```cs
+namespace School.Core.Entities;
+public partial class Student { }   // Tipo DIVERSO: il namespace cambia
+```
+
+### 2.2 Codice generato + codice manuale
+
+Il caso d'uso reale di `partial` è separare il codice **generato** da quello scritto a mano. Nei progetti WinForms trovi `MainForm.cs` e `MainForm.Designer.cs`:
+
+```cs
+// File: MainForm.cs (scritto da te)
+public partial class MainForm : Form
+{
+    public MainForm() => InitializeComponent();
+
+    private void SaveButton_Click(object? sender, EventArgs e)
+        => MessageBox.Show("Salvato");
+}
+```
+
+```cs
+// File: MainForm.Designer.cs (generato dal designer)
+public partial class MainForm
+{
+    private Button saveButton = null!;
+
+    private void InitializeComponent()
+    {
+        saveButton = new Button { Text = "Salva" };
+        saveButton.Click += SaveButton_Click;
+        Controls.Add(saveButton);
+    }
+}
+```
+
+Lo stesso accade con lo scaffolding di Entity Framework: il tool genera le entità, tu le estendi in un file separato.
+
+```cs
+// File generato da EF (verrà sovrascritto)
+public partial class Course
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = null!;
+}
+
+// File manuale (resta intatto)
+public partial class Course
+{
+    public string DisplayLabel => $"{Id} - {Title}";
+}
+```
+
+<Aside variant="danger">
+Non scrivere mai logica dentro i file generati (`*.Designer.cs`, entità di scaffolding): alla prossima rigenerazione le modifiche vengono perse senza avvisi. Mettila sempre nella parte manuale.
+</Aside>
+
+### 2.3 `partial method`
+
+Le partial method permettono a codice generato e manuale di agganciarsi tramite "hook". Nella **forma classica** (implicitamente `private`, ritorno `void`) l'implementazione è facoltativa:
+
+```cs
+public partial class StudentImporter
+{
+    partial void OnBeforeSave(Student student);   // dichiarazione (es. generata)
+
+    public void Save(Student student)
+    {
+        OnBeforeSave(student);   // se non implementata, la chiamata viene rimossa
+        Console.WriteLine("Salvataggio...");
+    }
+}
+
+public partial class StudentImporter
+{
+    partial void OnBeforeSave(Student student)    // implementazione manuale
+    {
+        if (string.IsNullOrWhiteSpace(student.Name))
+            throw new InvalidOperationException("Nome obbligatorio");
+    }
+}
+```
+
+Da C# 9 una partial method può avere un modificatore di accesso esplicito, un ritorno non `void` o parametri `out`: in quel caso l'implementazione è **obbligatoria**. È la forma usata dai source generator:
+
+```cs
+public partial class SearchValidator
+{
+    public partial bool IsAllowed(string query);
+}
+
+public partial class SearchValidator
+{
+    public partial bool IsAllowed(string query)
+        => !string.IsNullOrWhiteSpace(query) && query.Length >= 3;
+}
+```
+
+Un esempio reale è il generatore di regex di .NET 7+: tu scrivi solo la dichiarazione, il compilatore genera il corpo.
+
+```cs
+public static partial class Validators
+{
+    [GeneratedRegex(@"^\d{5}$")]
+    public static partial Regex Cap();
+}
+
+Console.WriteLine(Validators.Cap().IsMatch("20100")); // True
+```
+
+<Aside variant="info">
+Da C# 13 esistono anche le **partial property**: una parte dichiara la proprietà, un'altra (spesso generata) fornisce `get` e `set`. Il principio è lo stesso delle partial method.
+</Aside>
+
+Evita invece `partial` per spezzare in dieci file una classe enorme: rende difficile capire dove sta la logica e nasconde una classe che andrebbe divisa in più tipi.
+
+## 3. `const`, `readonly`, `readonly struct` e `init`
+
+Non sono sinonimi, ma condividono l'idea di **limitare la mutabilità**.
+
+### 3.1 `const` vs `readonly`
+
+`const` è un valore noto a **compile time**, implicitamente `static`, limitato a numeri, `char`, `bool`, `string`, `enum` e `null`. `readonly` è un campo assegnabile solo alla dichiarazione o nel costruttore, con valore deciso a **runtime** e di qualsiasi tipo.
+
+```cs
+public class TaxRules
+{
+    public const decimal Vat = 0.22m;                              // compile time
+    public static readonly DateTime LoadedAt = DateTime.UtcNow;    // runtime
+    public readonly Guid Id;
+
+    public TaxRules() => Id = Guid.NewGuid();   // OK nel costruttore
+}
+```
+
+| Aspetto | `const` | `readonly` |
+| --- | --- | --- |
+| Valutazione | Compile time | Runtime |
+| Static implicito | Sì | No |
+| Tipi ammessi | Costanti compile-time | Qualsiasi tipo |
+| Assegnabile nel costruttore | No | Sì |
+| Inlining tra assembly | Sì | No |
+
+<Aside variant="warning">
+Le `const` pubbliche vengono copiate (**inlineate**) nel codice dei consumer. Se la libreria cambia `Version = 2` ma il progetto chiamante non viene ricompilato, continua a vedere `1`. Per valori che potrebbero cambiare tra versioni usa `static readonly`.
+</Aside>
+
+```cs
+// Libreria v1 → poi aggiornata a v2 senza ricompilare l'app
+public static class LibInfo
+{
+    public const int ApiVersion = 2;                 // l'app vede ancora 1
+    public static readonly int SchemaVersion = 2;    // l'app vede 2
+}
+```
+
+### 3.2 `readonly` blocca il riferimento, non l'oggetto
+
+```cs
+public class Settings
+{
+    public readonly List<string> Roles = new();
+}
+
+var settings = new Settings();
+settings.Roles.Add("Admin");        // OK: la lista è modificabile
+// settings.Roles = new();          // Errore: il riferimento è readonly
+```
+
+Se vuoi impedire anche la modifica del contenuto, esponi un tipo di sola lettura:
+
+```cs
+public class Settings
+{
+    private readonly List<string> _roles = new() { "User" };
+    public IReadOnlyList<string> Roles => _roles;
+}
+
+// settings.Roles.Add("Admin");     // Errore: IReadOnlyList non ha Add
+```
+
+<Aside variant="tip">
+Regola pratica: campi privati `readonly` per tutto ciò che viene assegnato una volta sola (ad esempio le dipendenze iniettate nel costruttore) e collezioni esposte come `IReadOnlyList` o `IReadOnlyCollection`. Il compilatore ti segnala subito ogni riassegnazione accidentale.
+</Aside>
+
+### 3.3 `readonly struct`
+
+Un `readonly struct` garantisce che l'istanza sia immutabile: tutti i campi devono essere `readonly`. Comunica l'intenzione ed evita copie difensive da parte del compilatore.
+
+```cs
+public readonly struct Money
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    public Money(decimal amount, string currency)
+    {
+        Amount = amount;
+        Currency = currency;
+    }
+
+    public Money Add(decimal value) => new(Amount + value, Currency); // nuova istanza
+}
+```
+
+### 3.4 Proprietà `init` (C# 9)
+
+Le proprietà `init` si assegnano nel costruttore o nell'object initializer, ma non dopo:
+
+```cs
+public class StudentProfile
+{
+    public string Name { get; init; } = string.Empty;
+    public int Age { get; init; }
+}
+
+var profile = new StudentProfile { Name = "Luca", Age = 17 };
+// profile.Age = 18;   // Errore: init-only
+```
+
+## 4. static class
+
+Una `static class` contiene solo membri statici, non può essere istanziata né ereditata (il compilatore la tratta come `abstract sealed`). È il posto obbligato per i **metodi di estensione**:
+
+```cs
+public static class StringExtensions
+{
+    public static string Truncate(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+            return value;
+
+        return value[..maxLength];
+    }
+}
+
+Console.WriteLine("Programmazione".Truncate(7)); // Program
+```
+
+| Aspetto | `static class` | `sealed class` |
+| --- | --- | --- |
+| Istanziabile | No | Sì |
+| Membri di istanza | No | Sì |
+| Ereditarietà | No | No |
+| Uso tipico | Utility, extension methods | Tipo concreto finale |
+
+<Aside variant="warning">
+Una `static class` con stato mutabile (ad esempio un campo `static List` modificato da più punti) diventa di fatto una variabile globale: è difficile da testare e non è thread-safe. Usala per funzioni pure e costanti; se serve stato condiviso, preferisci un servizio registrato come singleton nella dependency injection.
+</Aside>
+
+## 5. Riepilogo
+
+- `partial` controlla **come il tipo è distribuito nei file**: usalo soprattutto con designer, scaffolding e source generator, non per spezzare classi enormi.
+- Le partial method classiche sono hook facoltativi; quelle con accesso esplicito o ritorno non `void` vanno sempre implementate.
+- `const` solo per valori davvero fissi; per valori che possono cambiare tra versioni usa `static readonly`.
+- `readonly` blocca il riferimento, non l'oggetto: per il contenuto servono tipi di sola lettura; `readonly struct` e `init` aiutano a modellare tipi meno mutabili.
+- `static class` per utility ed extension methods, non come contenitore di logica casuale.
+
+Errori frequenti: scrivere logica nei file generati, dichiarare parti `partial` in namespace diversi, pensare che `readonly` renda immutabile l'oggetto referenziato.
+
+## 6. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Perché partial è molto usato con designer e source generator?",
+answers:{
+a:"Perché evita il compilatore",
+b:"Perché permette di dividere la stessa definizione tra codice generato e codice manuale",
+c:"Perché rende il tipo automaticamente public",
+d:"Perché sostituisce l'ereditarietà"
+},
+correctAnswer:"b"
+},
+{
+question:"Due dichiarazioni partial class Student si trovano nei namespace School.Core.Models e School.Core.Entities. Cosa succede?",
+answers:{
+a:"Il compilatore le unisce in un'unica classe",
+b:"Si ottengono due tipi diversi, perché le parti devono stare nello stesso namespace",
+c:"Il compilatore sceglie la parte nel namespace più corto",
+d:"Diventano automaticamente una classe e una sottoclasse"
+},
+correctAnswer:"b"
+},
+{
+question:"Una partial method classica (private, ritorno void) viene dichiarata ma non implementata. Cosa succede?",
+answers:{
+a:"Errore di compilazione",
+b:"Viene lanciata un'eccezione a runtime quando è chiamata",
+c:"La dichiarazione e le chiamate vengono rimosse dal compilatore",
+d:"Viene generata un'implementazione che restituisce null"
+},
+correctAnswer:"c"
+},
+{
+question:"Quale affermazione su const è corretta?",
+answers:{
+a:"Può essere assegnato nel costruttore",
+b:"È sempre di istanza",
+c:"È valutato a compile time ed è implicitamente static",
+d:"Può essere usato solo con classi sealed"
+},
+correctAnswer:"c"
+},
+{
+question:"Quale affermazione su readonly è corretta?",
+answers:{
+a:"Rende immutabile qualsiasi oggetto referenziato",
+b:"Permette assegnazione alla dichiarazione o nel costruttore",
+c:"È sempre compile-time",
+d:"È sinonimo di const"
+},
+correctAnswer:"b"
+},
+{
+question:"Dato public readonly List<string> Roles = new(); quale istruzione compila?",
+answers:{
+a:"settings.Roles = new();",
+b:"settings.Roles = null;",
+c:"settings.Roles.Add('Admin');",
+d:"Nessuna delle precedenti"
+},
+correctAnswer:"c"
+},
+{
+question:"Quando si può assegnare una proprietà dichiarata con get; init;?",
+answers:{
+a:"In qualsiasi momento",
+b:"Solo nel costruttore o nell'object initializer",
+c:"Mai, è sempre di sola lettura",
+d:"Solo da una classe derivata"
+},
+correctAnswer:"b"
+},
+{
+question:"Dove devono essere dichiarati i metodi di estensione?",
+answers:{
+a:"In una partial class",
+b:"In una sealed class",
+c:"In una static class",
+d:"In una private class"
+},
+correctAnswer:"c"
+}
+]} />
+
+## 7. Esercizi
+
+### 7.1 WinForms o WPF designer con `partial`
+
+**Scenario**:
+Stai simulando la struttura di una finestra desktop gestita in parte dal designer e in parte dal tuo codice applicativo.
+
+**Consegna**:
+
+1. Crea un file `MainForm.cs` con una `partial class MainForm` e un event handler `SaveButton_Click`.
+2. Crea un file `MainForm.Designer.cs` con un'altra parte della stessa classe che definisce un bottone e `InitializeComponent()`.
+3. Fai in modo che il click del bottone richiami l'handler definito nel file principale.
+4. Spiega perché `partial` evita conflitti quando il designer rigenera il codice.
+
+*Obiettivo didattico: vedere il caso d'uso reale più comune di `partial class`.*
+
+### 7.2 Configurazione immutabile con `readonly`, `const` e `init`
+
+**Scenario**:
+Devi modellare la configurazione di un servizio scolastico. Alcuni valori sono costanti, altri si decidono a runtime ma non devono più cambiare dopo l'avvio.
+
+**Consegna**:
+
+1. Definisci una costante `const int MaxStudentsPerClass = 30`.
+2. Definisci un campo `static readonly DateTime StartupTime` inizializzato a runtime.
+3. Crea una classe `SchoolOptions` con proprietà `init` come `Name` e `Region`, e una lista di materie esposta come `IReadOnlyList<string>`.
+4. Se vuoi approfondire, trasforma un value object `SchoolYear` in `readonly struct`.
+5. Spiega perché `const`, `readonly` e `init` risolvono problemi diversi.
+
+*Obiettivo didattico: collegare i modificatori di immutabilità ai casi d'uso reali di configurazione e dominio.*
+
+### 7.3 Extension methods in una `static class`
+
+**Scenario**:
+Nel registro elettronico ripeti spesso le stesse operazioni sulle stringhe: abbreviare i nomi lunghi e normalizzare i codici fiscali inseriti dagli utenti.
+
+**Consegna**:
+
+1. Crea una `public static class StudentStringExtensions`.
+2. Aggiungi un metodo di estensione `Initials(this string fullName)` che restituisca le iniziali (es. "Mario Rossi" diventa "M.R.").
+3. Aggiungi un metodo di estensione `NormalizeTaxCode(this string code)` che rimuova gli spazi e converta in maiuscolo.
+4. Prova a scrivere `new StudentStringExtensions()` e a ereditare dalla classe: annota gli errori di compilazione.
+5. Spiega perché la classe non deve contenere campi statici mutabili.
+
+*Obiettivo didattico: usare `static class` per utility ed extension methods e capirne i limiti.*

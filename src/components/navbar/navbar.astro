@@ -1,114 +1,123 @@
 ---
-import Container from "@/components/container.astro";
-import Dropdown from "./dropdown.astro";
-import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 import { Icon } from "astro-icon/components";
-import { supabase } from "../../lib/supabaseClient.js";
+import { Image } from "astro:assets";
 import UserMenu from "@/components/UserMenu.jsx";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import type { User } from '@supabase/supabase-js';
+import DarkModeToggle from "@/components/DarkModeToggle.astro";
+import logo from "@/assets/favicon.webp";
 
-// menuitems definiti qui
 const menuitems = [
-  { title: "Home", path: "/", icon: "fa6-solid:house" },
-  {
-    title: "Materie",
-    path: "#",
-    icon: "fa6-solid:book-open",
-    children: [
-      { title: "Informatica", path: "/informatica" },
-      { title: "Matematica", path: "/matematica" },
-    ],
-  },
-  { title: "Insegnanti", path: "/insegnanti", icon: "fa6-solid:chalkboard-user" },
-  { title: "Contattami", path: "/contact", icon: "fa6-solid:envelope" },
-  { title: "Video Lezioni", badge: true, path: "/videolezioni", icon: "fa6-solid:video" },
-  { title: "Portfolio", path: "https://dennisturco.com/", icon: "fa6-solid:briefcase" },
+  { title: "Informatica", path: "/informatica", icon: "fa6-solid:code" },
+  { title: "Matematica", path: "/matematica", icon: "fa6-solid:square-root-variable" },
+  { title: "Lezioni private", path: "/insegnanti", icon: "fa6-solid:chalkboard-user" },
+  { title: "Video lezioni", path: "/videolezioni", icon: "fa6-solid:video" },
+  { title: "Contatti", path: "/contact", icon: "fa6-solid:envelope" },
 ];
 
-let user: User | null = null;
-
-// controlla se l'utente è loggato
-const checkUser = async () => {
-  const { data } = await supabase.auth.getUser();
-  user = data.user;
-};
-
-checkUser();
-
-// logout semplice
-const logout = async () => {
-  await supabase.auth.signOut();
-  user = null;
-  location.reload(); // ricarica la pagina per aggiornare la navbar
-};
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 ---
 
-<Container>
-  <header class="flex flex-col lg:flex-row justify-between items-center my-5 bg-white dark:bg-slate-900 transition-colors duration-200">
-    <Astronav>
-      <div class="flex w-full lg:w-auto items-center justify-between">
-        <a href="/" class="text-lg">
-          <span class="font-bold text-slate-800 dark:text-slate-100">Appunti</span><span class="text-slate-500 dark:text-slate-400">Facili</span>
-        </a>
-        <div class="block lg:hidden">
-          <MenuIcon class="w-4 h-4 text-gray-800 dark:text-gray-200" />
-        </div>
-      </div>
+<header
+  class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/85"
+>
+  <nav class="mx-auto flex h-16 max-w-(--breakpoint-xl) items-center justify-between gap-4 px-5" aria-label="Navigazione principale">
+    <a href="/" class="flex shrink-0 items-center gap-2 font-display text-lg" aria-label="AppuntiFacili - Home">
+      <Image src={logo} alt="" width={28} height={28} class="h-7 w-7 rounded-md" loading="eager" />
+      <span>
+        <span class="font-bold text-slate-900 dark:text-white">Appunti</span><span class="text-slate-500 dark:text-slate-400">Facili</span>
+      </span>
+    </a>
 
-      <MenuItems class="hidden w-full lg:w-auto mt-2 lg:flex lg:mt-0 items-center">
-        <ul class="flex flex-col lg:flex-row lg:gap-3">
-          {
-            menuitems.map((item, index) => (
-              <>
-                {item.children && (
-                  <Dropdown
-                    title={item.title}
-                    icon={item.icon}
-                    children={item.children}
-                    lastItem={index === menuitems.length - 1}
-                  />
-
-                )}
-
-                {!item.children && (
-                  <li>
-                    <a
-                      href={item.path}
-                      class="flex items-center gap-1 lg:px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                    >
-                      {item.icon && (
-                        <Icon name={item.icon} class="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      )}
-                      <span>{item.title}</span>
-                    </a>
-                  </li>
-                )}
-              </>
-            ))
-          }
-        </ul>
-
-        <div class="flex gap-2 ml-4">
-          <UserMenu client:load />
-        </div>
-
-        <div class="ml-2 hidden lg:flex items-center gap-1">
-          <!-- Dark mode toggle -->
-          <DarkModeToggle client:load />
-
-          <!-- Discord -->
+    <!-- Desktop -->
+    <ul class="hidden items-center gap-1 lg:flex">
+      {menuitems.map((item) => (
+        <li>
           <a
-            href="https://discord.com/invite/9Jb4Gt3HhB"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center justify-center rounded-md p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="Discord"
+            href={item.path}
+            aria-current={isActive(item.path) ? "page" : undefined}
+            class:list={[
+              "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              isActive(item.path)
+                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
+            ]}
           >
-            <Icon name="fa6-brands:discord" class="w-5 h-5" />
+            {item.title}
           </a>
-        </div>
-      </MenuItems>
-    </Astronav>
-  </header>
-</Container>
+        </li>
+      ))}
+    </ul>
+
+    <div class="flex items-center gap-1">
+      <div class="hidden lg:block">
+        <UserMenu client:idle />
+      </div>
+      <a
+        href="https://discord.com/invite/9Jb4Gt3HhB"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#5865F2] sm:inline-flex dark:text-slate-400 dark:hover:bg-slate-800"
+        aria-label="Discord"
+        title="Unisciti al Discord"
+      >
+        <Icon name="fa6-brands:discord" class="h-5 w-5" />
+      </a>
+      <DarkModeToggle />
+
+      <!-- Mobile menu button -->
+      <button
+        type="button"
+        id="mobile-menu-button"
+        class="inline-flex rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Apri il menu"
+      >
+        <Icon name="fa6-solid:bars" class="h-5 w-5 menu-open-icon" />
+        <Icon name="fa6-solid:xmark" class="hidden h-5 w-5 menu-close-icon" />
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile -->
+  <div id="mobile-menu" class="hidden border-t border-slate-200 lg:hidden dark:border-slate-800">
+    <ul class="mx-auto flex max-w-(--breakpoint-xl) flex-col gap-1 px-5 py-3">
+      {menuitems.map((item) => (
+        <li>
+          <a
+            href={item.path}
+            aria-current={isActive(item.path) ? "page" : undefined}
+            class:list={[
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium",
+              isActive(item.path)
+                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
+            ]}
+          >
+            <Icon name={item.icon} class="h-4 w-4 opacity-70" />
+            {item.title}
+          </a>
+        </li>
+      ))}
+      <li class="mt-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+        <UserMenu client:idle mobile />
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const button = document.getElementById("mobile-menu-button");
+    const menu = document.getElementById("mobile-menu");
+    if (!button || !menu) return;
+
+    button.addEventListener("click", () => {
+      const open = menu.classList.toggle("hidden") === false;
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute("aria-label", open ? "Chiudi il menu" : "Apri il menu");
+      button.querySelector(".menu-open-icon")?.classList.toggle("hidden", open);
+      button.querySelector(".menu-close-icon")?.classList.toggle("hidden", !open);
+    });
+  });
+</script>

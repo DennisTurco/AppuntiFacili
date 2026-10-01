@@ -1,16 +1,27 @@
 import { useState, useEffect } from "react";
+import { Lock, LogIn, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { videos } from "@/data/videos.ts";
 
+function EmptyState({ icon: Icon, title, children }) {
+  return (
+    <div className="col-span-full rounded-2xl border border-dashed border-slate-300 px-6 py-14 text-center dark:border-slate-700">
+      <Icon className="mx-auto h-8 w-8 text-slate-400" />
+      <p className="mt-4 font-semibold text-slate-800 dark:text-slate-200">{title}</p>
+      <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">{children}</div>
+    </div>
+  );
+}
+
 export default function AuthorizedVideos() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
+    supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
-    };
-    fetchUser();
+      setLoading(false);
+    });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
@@ -18,34 +29,50 @@ export default function AuthorizedVideos() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  if (!user) {
+  if (loading) {
     return (
-      <p className="col-span-full text-center text-red-500">
-        Devi essere loggato per vedere i video. <a href="/login" class="text-blue-600 font-semibold underline hover:text-blue-800">Login</a>
-      </p>
+      <div className="col-span-full flex justify-center py-14 text-slate-400">
+        <Loader2 className="h-6 w-6 animate-spin" aria-label="Caricamento" />
+      </div>
     );
   }
 
-  const authorizedVideos = videos.filter(video => video.allowed.includes(user.email));
+  if (!user) {
+    return (
+      <EmptyState icon={LogIn} title="Accedi per vedere i video">
+        <a href="/login" className="btn btn-primary mt-4">Accedi</a>
+        <p className="mt-3">
+          Non hai un account? <a href="/register" className="link">Registrati</a>
+        </p>
+      </EmptyState>
+    );
+  }
+
+  const authorizedVideos = videos.filter((video) => video.allowed.includes(user.email));
 
   if (authorizedVideos.length === 0) {
     return (
-      <p className="col-span-full text-center text-gray-700">
-        Non sei autorizzato a vedere i video. Contattami per richiedere l'accesso.
-      </p>
+      <EmptyState icon={Lock} title="Nessun video disponibile per il tuo account">
+        <p>
+          <a href="/contact" className="link">Contattami</a> per richiedere l'accesso.
+        </p>
+      </EmptyState>
     );
   }
 
-  return authorizedVideos.map((video, index) => (
-    <div key={index} className="bg-white shadow-lg rounded-2xl p-6 flex flex-col items-center">
-      <h2 className="text-xl font-semibold mb-4">{video.title}</h2>
-      <iframe
-        className="w-full h-64 md:h-80 rounded"
-        src={video.url}
-        title={video.title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      ></iframe>
-    </div>
+  return authorizedVideos.map((video) => (
+    <article key={video.url} className="card overflow-hidden">
+      <div className="aspect-video bg-slate-100 dark:bg-slate-800">
+        <iframe
+          className="h-full w-full"
+          src={video.url}
+          title={video.title}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        ></iframe>
+      </div>
+      <h2 className="px-5 py-4 text-lg font-semibold text-slate-900 dark:text-white">{video.title}</h2>
+    </article>
   ));
 }

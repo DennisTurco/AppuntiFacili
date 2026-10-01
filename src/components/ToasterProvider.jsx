@@ -1,14 +1,13 @@
 import { Toaster } from "react-hot-toast";
 
-export default function ToasterProvider({ children }) {
+export default function ToasterProvider() {
   return (
-    <>
-      {children}
-      <Toaster
-        position="top-center"
-        reverseOrder={false}  // opzionale: mantiene l'ordine normale dei toast
-        gutter={8}            // spazio tra i toast
-      />
-    </>
+    <Toaster
+      position="top-center"
+      gutter={8}
+      toastOptions={{
+        className: "rounded-xl! text-sm! shadow-lg! dark:bg-slate-800! dark:text-slate-100!",
+      }}
+    />
   );
 }

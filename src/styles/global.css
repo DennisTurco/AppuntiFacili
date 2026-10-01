@@ -4,22 +4,24 @@
 @plugin '@tailwindcss/typography';
 
 /* Class-based dark mode for Tailwind v4 */
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Inter per il testo (più leggibile su paragrafi lunghi),
+     Bricolage Grotesque per titoli e brand */
   --font-sans:
-    Bricolage Grotesque Variable, Inter Variable, Inter, ui-sans-serif,
-    system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', 'Noto Color Emoji';
+    Inter Variable, Inter, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-display:
+    Bricolage Grotesque Variable, Inter Variable, ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'Fira Code', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
   looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
 */
 @layer base {
   *,
@@ -30,44 +32,241 @@
     border-color: var(--color-gray-200, currentColor);
   }
 
+  .dark *,
+  .dark ::after,
+  .dark ::before {
+    border-color: var(--color-slate-700, currentColor);
+  }
+
   html {
     color-scheme: light;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   html.dark {
     color-scheme: dark;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   body {
     background-color: #ffffff;
-    color: #111827;
+    color: var(--color-slate-900);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   .dark body {
-    background-color: #0f172a;
-    color: #f1f5f9;
+    background-color: var(--color-slate-950);
+    color: var(--color-slate-100);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  /* Le ancore non finiscono sotto la navbar sticky */
+  :where(h1, h2, h3, h4, h5, h6)[id] {
+    scroll-margin-top: 6rem;
+  }
+
+  ::selection {
+    background-color: var(--color-blue-200);
+    color: var(--color-slate-900);
+  }
+
+  .dark ::selection {
+    background-color: var(--color-blue-800);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
   }
 }
 
+/* ---------- Componenti riutilizzabili ---------- */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold no-underline transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-lg {
+    @apply px-5 py-3 text-base;
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500;
+  }
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800;
+  }
+  .btn-ghost {
+    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  }
+  .card-hover {
+    @apply transition hover:-translate-y-0.5 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
+  }
+
+  .link {
+    @apply font-semibold text-blue-600 underline decoration-blue-600/30 underline-offset-4 transition hover:decoration-blue-600 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:decoration-blue-400;
+  }
+
+  .callout {
+    @apply rounded-2xl border border-blue-200 bg-blue-50 p-5 text-slate-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-slate-300;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400;
+  }
+
+  .page-title {
+    @apply text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white;
+  }
+  .page-subtitle {
+    @apply mt-4 text-lg text-slate-600 dark:text-slate-400;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+}
+
+/* ---------- Prose (contenuto delle lezioni) ---------- */
+.prose {
+  --tw-prose-links: var(--color-blue-600);
+}
+
+.prose a {
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  transition: text-decoration-color 0.15s ease;
+}
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
 .prose code:not(pre code) {
-  background-color: #e4e2e2;
-  color: #b40707;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.35rem;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.875rem;
+  background-color: var(--color-slate-100);
+  color: var(--color-rose-700);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-slate-200);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
   font-weight: 500;
+}
+.prose code:not(pre code)::before,
+.prose code:not(pre code)::after {
+  content: none;
 }
 
 .dark .prose code:not(pre code) {
-  background-color: #2d2d2d;
-  color: #f87171;
+  background-color: var(--color-slate-800);
+  border-color: var(--color-slate-700);
+  color: var(--color-rose-300);
+}
+
+.prose pre {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-slate-200);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Tabelle: scroll orizzontale su mobile, bordo arrotondato, intestazione distinta */
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.prose table thead {
+  background-color: var(--color-slate-50);
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+.prose table thead th {
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  color: var(--color-slate-900);
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.prose table tbody td {
+  padding: 0.6rem 1rem;
+  vertical-align: top;
+}
+
+.prose table tbody tr {
+  border-bottom: 1px solid var(--color-slate-100);
+  transition: background-color 0.1s ease;
+}
+
+.prose table tbody tr:last-child {
+  border-bottom: 0;
+}
+
+.prose table tbody tr:nth-child(even) {
+  background-color: rgb(15 23 42 / 0.02);
+}
+
+.prose table tbody tr:hover {
+  background-color: rgb(37 99 235 / 0.04);
+}
+
+/* border-collapse: separate non disegna i bordi delle righe: li mettiamo sulle celle */
+.prose table thead th {
+  border-bottom: 1px solid var(--color-slate-200);
+}
+.prose table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--color-slate-100);
+}
+.dark .prose table thead th {
+  border-bottom-color: var(--color-slate-700);
+}
+.dark .prose table tbody tr:not(:last-child) td {
+  border-bottom-color: var(--color-slate-800);
+}
+
+.prose table code:not(pre code) {
+  white-space: nowrap;
+}
+
+.prose img {
+  border-radius: 0.75rem;
+  margin-inline: auto;
 }
 
 /* Prose dark mode */
 .dark .prose {
-  color: #d1d5db;
+  --tw-prose-links: var(--color-blue-400);
+  color: var(--color-slate-300);
 }
 
 .dark .prose h1,
@@ -75,52 +274,69 @@
 .dark .prose h3,
 .dark .prose h4,
 .dark .prose h5,
-.dark .prose h6 {
-  color: #f9fafb;
-}
-
+.dark .prose h6,
 .dark .prose strong {
-  color: #f9fafb;
-}
-
-.dark .prose a {
-  color: #93c5fd;
-}
-
-.dark .prose a:hover {
-  color: #bfdbfe;
+  color: var(--color-slate-50);
 }
 
 .dark .prose blockquote {
-  border-left-color: #4b5563;
-  color: #9ca3af;
+  border-left-color: var(--color-slate-600);
+  color: var(--color-slate-400);
+}
+
+.dark .prose table {
+  border-color: var(--color-slate-800);
 }
 
 .dark .prose table thead {
-  background-color: #1e293b;
-  color: #f9fafb;
+  background-color: var(--color-slate-900);
+  border-bottom-color: var(--color-slate-700);
+}
+
+.dark .prose table thead th {
+  color: var(--color-slate-100);
 }
 
 .dark .prose table tbody tr {
-  border-bottom-color: #374151;
+  border-bottom-color: var(--color-slate-800);
 }
 
 .dark .prose table tbody tr:nth-child(even) {
-  background-color: #1e293b;
+  background-color: rgb(255 255 255 / 0.025);
+}
+
+.dark .prose table tbody tr:hover {
+  background-color: rgb(96 165 250 / 0.06);
+}
+
+.dark .prose table td {
+  color: var(--color-slate-300);
 }
 
 .dark .prose pre {
-  background-color: #1e293b !important;
-  color: #e2e8f0 !important;
+  border-color: var(--color-slate-800);
+}
+
+/* Shiki dual theme: in dark mode usa i colori del tema scuro (github-dark-dimmed) */
+.dark .astro-code,
+.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+.dark .astro-code span {
+  background-color: transparent !important;
 }
 
 .dark .prose hr {
-  border-color: #374151;
+  border-color: var(--color-slate-700);
 }
 
 .dark .prose ul li::marker,
 .dark .prose ol li::marker {
-  color: #9ca3af;
+  color: var(--color-slate-500);
 }
 
 .katex {
@@ -128,33 +344,73 @@
   line-height: 1.2;
 }
 
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}
+
+/* ---------- Bottone "copia codice" ---------- */
 .copy-code {
   position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #eeeeee;
-  color: #374151;
-  padding: 0.25rem 0.5rem;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: rgb(255 255 255 / 0.85);
+  color: var(--color-slate-600);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.375rem;
+  padding: 0.2rem 0.55rem;
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   line-height: 1rem;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.code-wrapper:hover .copy-code,
+.copy-code:focus-visible,
+.copy-code[data-copied] {
+  opacity: 1;
+}
+
+/* Su touch screen il pulsante è sempre visibile */
+@media (hover: none) {
+  .copy-code {
+    opacity: 1;
+  }
 }
 
 .copy-code:hover {
-  background-color: #e4e4e4;
+  background-color: #fff;
+  color: var(--color-slate-900);
+}
+
+.copy-code[data-copied] {
+  color: var(--color-green-700);
+  border-color: var(--color-green-300);
 }
 
 .dark .copy-code {
-  background-color: #374151;
-  color: #d1d5db;
+  background-color: rgb(30 41 59 / 0.85);
+  border-color: var(--color-slate-700);
+  color: var(--color-slate-300);
 }
 
 .dark .copy-code:hover {
-  background-color: #4b5563;
+  background-color: var(--color-slate-700);
+  color: #fff;
 }
 
-/* Mermaid diagrams */
+.dark .copy-code[data-copied] {
+  color: var(--color-green-400);
+  border-color: var(--color-green-800);
+}
+
+/* ---------- Mermaid ---------- */
 pre.mermaid,
 pre.mermaid svg {
   background: #ffffff !important;
@@ -169,6 +425,10 @@ pre.mermaid svg rect.background {
 }
 .dark pre.mermaid svg rect.background {
   fill: transparent !important;
+}
+
+.prose pre.mermaid {
+  border: none;
 }
 
 .mermaid-container {

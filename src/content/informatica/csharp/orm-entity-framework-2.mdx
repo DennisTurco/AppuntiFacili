@@ -1,0 +1,430 @@
+---
+title: "Entity Framework Core (parte 2): query, relazioni e transazioni"
+order: 5
+draft: false
+lastUpdateDate: "2026-10-01"
+subject: "C#"
+category: "Informatica"
+difficulty: "complesso"
+tags: ["csharp", "programmazione", "orm", "entity-framework", "database", "linq"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+Questa lezione prosegue la [parte 1](/informatica/csharp/orm-entity-framework): si danno per scontati `AppDbContext` (registrato come scoped), il Change Tracker, `AsNoTracking()` e la shadow property `IsDeleted`. Gli esempi usano questo modello:
+
+```cs
+public class Categoria { public int Id { get; set; } public string Nome { get; set; } = ""; public ICollection<Prodotto> Prodotti { get; set; } = new List<Prodotto>(); }
+public class Prodotto  { public int Id { get; set; } public string Nome { get; set; } = ""; public decimal Prezzo { get; set; } public int QuantitaInStock { get; set; } public int CategoriaId { get; set; } public Categoria? Categoria { get; set; } }
+
+// Usati negli esempi su N+1 e transazioni
+public class Cliente    { public int Id { get; set; } public string Nome { get; set; } = ""; }
+public class Ordine     { public int Id { get; set; } public int ClienteId { get; set; } public Cliente? Cliente { get; set; } public ICollection<RigaOrdine> Righe { get; set; } = new List<RigaOrdine>(); }
+public class RigaOrdine { public int Id { get; set; } public int Quantita { get; set; } public decimal PrezzoUnitario { get; set; } }
+```
+
+## 1. Operazioni CRUD e query
+
+```cs
+public class ProdottoService
+{
+    private readonly AppDbContext _context;
+
+    public ProdottoService(AppDbContext context) => _context = context;
+
+    public async Task<Prodotto> CreaAsync(Prodotto prodotto)
+    {
+        _context.Prodotti.Add(prodotto);          // Added
+        await _context.SaveChangesAsync();        // INSERT, Id valorizzato dal DB
+        return prodotto;
+    }
+
+    public Task<Prodotto?> GetByIdAsync(int id) =>
+        _context.Prodotti
+            .Include(p => p.Categoria)            // eager loading
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+    public async Task AggiornaPrezzoAsync(int id, decimal prezzo)
+    {
+        var p = await _context.Prodotti.FindAsync(id);
+        if (p is null) return;
+        p.Prezzo = prezzo;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task EliminaAsync(int id)
+    {
+        var p = await _context.Prodotti.FindAsync(id);
+        if (p is null) return;
+        _context.Prodotti.Remove(p);
+        await _context.SaveChangesAsync();
+    }
+}
+```
+
+Una query LINQ viene tradotta in SQL ed eseguita sul server solo quando la **materializzi** (`ToListAsync`, `FirstAsync`, `CountAsync`...). Non tutto è traducibile: se usi un tuo metodo C# dentro un `Where`, EF lancia un'eccezione.
+
+```cs
+// Errore a runtime: EF non sa tradurre IsScontato in SQL
+var x = await _context.Prodotti.Where(p => IsScontato(p)).ToListAsync();
+
+// OK: espressione traducibile
+var y = await _context.Prodotti.Where(p => p.Prezzo < 10).ToListAsync();
+```
+
+<Aside variant="tip">
+Finché non la materializzi, una query è solo un `IQueryable`: puoi comporla a pezzi (ad esempio aggiungendo un `Where` solo se l'utente ha impostato un filtro) ed EF genererà comunque **un'unica** istruzione SQL.
+</Aside>
+
+### 1.1 Proiezioni e paginazione
+
+Se ti servono pochi campi, **proietta** con `Select`: meno dati trasferiti e niente tracking.
+
+```cs
+var lista = await _context.Prodotti
+    .Select(p => new { p.Id, p.Nome, Categoria = p.Categoria!.Nome })
+    .ToListAsync();
+// SELECT p.Id, p.Nome, c.Nome FROM Prodotti p JOIN Categorie c ON ...
+```
+
+Su tabelle grandi non fare mai `ToListAsync()` senza limiti. La **offset pagination** è semplice ma rallenta con pagine lontane (il DB deve comunque scorrere le righe saltate); la **keyset pagination** riparte dall'ultimo valore visto:
+
+```cs
+// Offset: pagina 3 da 20 elementi
+var pagina = await _context.Prodotti.AsNoTracking()
+    .OrderBy(p => p.Id).Skip(2 * 20).Take(20).ToListAsync();
+
+// Keyset: costo costante anche su milioni di righe
+var successivi = await _context.Prodotti.AsNoTracking()
+    .Where(p => p.Id > ultimoIdVisto).OrderBy(p => p.Id).Take(20).ToListAsync();
+```
+
+Usa sempre `OrderBy` su una colonna univoca insieme a `Skip`/`Take`: senza, l'ordine delle pagine non è deterministico.
+
+### 1.2 SQL raw
+
+Quando LINQ non basta, puoi scrivere SQL. `FromSql` restituisce entity, `ExecuteSqlAsync` esegue comandi senza risultato. Entrambi convertono i valori interpolati in **parametri** SQL.
+
+```cs
+decimal soglia = 1000;
+var costosi = await _context.Prodotti
+    .FromSql($"SELECT * FROM Prodotti WHERE Prezzo > {soglia}")
+    .AsNoTracking()
+    .ToListAsync();
+
+int righe = await _context.Database.ExecuteSqlAsync(
+    $"UPDATE Prodotti SET QuantitaInStock = 0 WHERE QuantitaInStock < 0");
+```
+
+Per gli aggiornamenti massivi esistono anche `ExecuteUpdateAsync` ed `ExecuteDeleteAsync`, che restano in LINQ:
+
+```cs
+await _context.Prodotti
+    .Where(p => p.QuantitaInStock == 0)
+    .ExecuteUpdateAsync(s => s.SetProperty(p => p.Prezzo, p => p.Prezzo * 0.9m));
+```
+
+<Aside variant="danger">
+Non concatenare mai input dell'utente in una stringa SQL e non passarla a `FromSqlRaw`/`ExecuteSqlRaw`: è una **SQL injection**. Usa `FromSql` con interpolazione, che parametrizza automaticamente. Ricorda inoltre che questi comandi bypassano il Change Tracker: le entità già tracciate possono restare con valori vecchi.
+</Aside>
+
+## 2. Relazioni
+
+**One-to-Many** è il caso più comune, già visto nella parte 1 con `Categoria` e `Prodotto`: il lato "molti" contiene la FK (`CategoriaId`), il lato "uno" una `ICollection<T>`.
+
+**Many-to-Many**: da EF Core 5 basta una collezione su entrambi i lati e la tabella di join viene creata automaticamente.
+
+```cs
+public class Studente
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public ICollection<Corso> Corsi { get; set; } = new List<Corso>();
+}
+
+public class Corso
+{
+    public int Id { get; set; }
+    public string Titolo { get; set; } = "";
+    public ICollection<Studente> Studenti { get; set; } = new List<Studente>();
+}
+
+// Iscrizione: EF inserisce la riga nella tabella CorsoStudente
+var mario = new Studente { Nome = "Mario" };
+mario.Corsi.Add(await _context.Corsi.FirstAsync(c => c.Titolo == "C#"));
+_context.Studenti.Add(mario);
+await _context.SaveChangesAsync();
+```
+
+Se la tabella di join deve contenere dati propri (es. `DataIscrizione`, `Voto`), modellala come entity esplicita `Iscrizione` con due relazioni One-to-Many.
+
+**One-to-One**: una navigation su entrambi i lati e la FK sul lato dipendente.
+
+```cs
+public class Utente  { public int Id { get; set; } public Profilo? Profilo { get; set; } }
+public class Profilo { public int Id { get; set; } public int UtenteId { get; set; } public Utente? Utente { get; set; } }
+```
+
+### 2.1 Global Query Filters
+
+Un **Global Query Filter** aggiunge automaticamente una condizione a ogni query di una entity. È lo strumento tipico per **soft delete** e **multi-tenancy**.
+
+```cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<Prodotto>()
+        .HasQueryFilter(p => !EF.Property<bool>(p, "IsDeleted"));
+
+    // Multi-tenancy: _tenantId ricevuto nel costruttore del DbContext
+    modelBuilder.Entity<Ordine>()
+        .HasQueryFilter(o => EF.Property<int>(o, "TenantId") == _tenantId);
+}
+
+// Tutte le query escludono i prodotti eliminati...
+var attivi = await _context.Prodotti.ToListAsync();
+// ...a meno di disattivare esplicitamente il filtro
+var tutti = await _context.Prodotti.IgnoreQueryFilters().ToListAsync();
+```
+
+Il filtro è invisibile nel punto in cui scrivi la query: se una query restituisce meno righe del previsto, controlla per prima cosa `OnModelCreating`.
+
+## 3. Loading delle relazioni e problema N+1
+
+| Strategia | Come | Quando |
+|---|---|---|
+| **Eager Loading** | `.Include()` / `.ThenInclude()` | Sai già che la relazione ti serve |
+| **Explicit Loading** | `Entry(x).Reference(...).LoadAsync()` | Carichi la relazione in un secondo momento |
+| **Lazy Loading** | automatico all'accesso (pacchetto `Proxies` + proprietà `virtual`) | Comodo, ma pericoloso nei cicli |
+
+```cs
+// Eager: categoria e relazioni annidate nella stessa query
+var prodotti = await _context.Prodotti
+    .Include(p => p.Categoria)
+    .ThenInclude(c => c!.Sottocategorie)
+    .ToListAsync();
+
+// Explicit
+var prodotto = await _context.Prodotti.FindAsync(1);
+await _context.Entry(prodotto!).Reference(p => p.Categoria).LoadAsync();
+```
+
+Senza Include né lazy loading, le navigation property restano semplicemente `null`.
+
+Il **problema N+1** nasce quando esegui 1 query per gli elementi principali e poi **N** query aggiuntive, una per elemento, per caricare una relazione. Con lazy loading attivo è facilissimo cascarci:
+
+```cs
+var ordini = await _context.Ordini.ToListAsync();      // 1 query
+foreach (var o in ordini)
+    Console.WriteLine(o.Cliente!.Nome);                // +1 query per ogni ordine!
+// 100 ordini = 101 round-trip verso il database
+```
+
+Le soluzioni sono `Include` oppure, meglio ancora per la sola lettura, una proiezione:
+
+```cs
+var ordini = await _context.Ordini
+    .Select(o => new
+    {
+        o.Id,
+        ClienteNome = o.Cliente!.Nome,
+        Totale = o.Righe.Sum(r => r.Quantita * r.PrezzoUnitario)
+    })
+    .ToListAsync();                                    // 1 sola query
+```
+
+Per scoprire un N+1 attiva il logging del SQL: se vedi la stessa query ripetersi decine di volte con parametri diversi, è il segnale.
+
+```cs
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .LogTo(Console.WriteLine, LogLevel.Information));
+```
+
+<Aside variant="warning">
+Più `Include` su collezioni (1:N) nella stessa query producono un join che **moltiplica le righe** (esplosione cartesiana). In quel caso aggiungi `.AsSplitQuery()`: EF esegue una query separata per ogni collezione e ricompone il risultato.
+</Aside>
+
+## 4. Concorrenza e transazioni
+
+### 4.1 Optimistic concurrency
+
+La **concorrenza ottimistica** assume che i conflitti siano rari: due utenti possono leggere la stessa riga, ma al salvataggio EF verifica che nessuno l'abbia modificata nel frattempo. Si ottiene con un **concurrency token**, ad esempio `[Timestamp]` (colonna `rowversion` in SQL Server) o `[ConcurrencyCheck]` su una proprietà.
+
+```cs
+public class Prodotto
+{
+    public int Id { get; set; }
+    public decimal Prezzo { get; set; }
+
+    [Timestamp]
+    public byte[] Versione { get; set; } = Array.Empty<byte>();
+}
+// SQL generato: UPDATE Prodotti SET Prezzo = @p0 WHERE Id = @p1 AND Versione = @p2
+```
+
+Se nessuna riga viene aggiornata (il token è cambiato), EF lancia `DbUpdateConcurrencyException`, proteggendoti dal **lost update**:
+
+```cs
+try
+{
+    await _context.SaveChangesAsync();
+}
+catch (DbUpdateConcurrencyException ex)
+{
+    var entry = ex.Entries.Single();
+    await entry.ReloadAsync(); // ricarica i valori attuali dal DB
+    // ...mostra un messaggio all'utente o riprova
+}
+```
+
+### 4.2 Transazioni esplicite
+
+Ogni `SaveChangesAsync()` è già atomico. Se però devi rendere atomiche **più** chiamate, apri una transazione esplicita:
+
+```cs
+await using var transaction = await _context.Database.BeginTransactionAsync();
+try
+{
+    _context.Ordini.Add(ordine);
+    await _context.SaveChangesAsync();
+
+    _context.MovimentiMagazzino.Add(movimento);
+    await _context.SaveChangesAsync();
+
+    await transaction.CommitAsync();
+}
+catch
+{
+    await transaction.RollbackAsync();
+    throw;
+}
+```
+
+<Aside variant="info">
+Esistono anche i **savepoint** (`CreateSavepointAsync` / `RollbackToSavepointAsync`) per rollback parziali, e `TransactionScope` per transazioni "ambientali" condivise da più servizi. Il loro supporto dipende dal provider: usali solo quando la transazione esplicita non basta.
+</Aside>
+
+## 5. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+{
+question:"Quando viene eseguita sul database una query LINQ di EF Core?",
+answers:{
+a:"Appena si scrive il Where",
+b:"Quando la si materializza, ad esempio con ToListAsync o FirstAsync",
+c:"Solo dopo SaveChangesAsync()",
+d:"All'avvio dell'applicazione"
+},
+correctAnswer:"b"
+},
+{
+question:"Perché FromSql con una stringa interpolata è sicuro contro la SQL injection?",
+answers:{
+a:"Perché rimuove gli apici dall'input",
+b:"Perché converte i valori interpolati in parametri SQL",
+c:"Perché esegue la query in sola lettura",
+d:"Perché passa dal Change Tracker"
+},
+correctAnswer:"b"
+},
+{
+question:"Una relazione One-to-Many si modella con:",
+answers:{
+a:"Due classi senza navigation property",
+b:"Una FK nella classe 'molti' e ICollection<T> nella classe 'uno'",
+c:"Una tabella di join intermedia",
+d:"Solo l'attributo [ForeignKey]"
+},
+correctAnswer:"b"
+},
+{
+question:"Come si esegue una query ignorando un Global Query Filter?",
+answers:{
+a:"Con AsNoTracking()",
+b:"Con IgnoreQueryFilters()",
+c:"Con AsSplitQuery()",
+d:"Non è possibile"
+},
+correctAnswer:"b"
+},
+{
+question:"Il metodo Include() in EF Core serve per:",
+answers:{
+a:"Includere un file di configurazione",
+b:"Eseguire l'eager loading delle navigation property",
+c:"Aggiungere una colonna alla tabella",
+d:"Filtrare i risultati"
+},
+correctAnswer:"b"
+},
+{
+question:"Il problema N+1 si verifica quando:",
+answers:{
+a:"Una migrazione viene applicata N+1 volte",
+b:"Si carica una lista con 1 query e poi si esegue 1 query aggiuntiva per ogni elemento",
+c:"Una tabella ha N+1 colonne",
+d:"Si usano troppi DbContext"
+},
+correctAnswer:"b"
+},
+{
+question:"A cosa serve AsSplitQuery() con più Include su collezioni?",
+answers:{
+a:"A dividere i risultati in pagine",
+b:"A eseguire una query separata per ogni collezione evitando l'esplosione cartesiana",
+c:"A disattivare il lazy loading",
+d:"A eseguire la query su più database"
+},
+correctAnswer:"b"
+},
+{
+question:"Cosa lancia EF se, con un concurrency token, nessuna riga viene aggiornata al salvataggio?",
+answers:{
+a:"NullReferenceException",
+b:"InvalidOperationException",
+c:"DbUpdateConcurrencyException",
+d:"Nessuna eccezione: la modifica viene ignorata"
+},
+correctAnswer:"c"
+}
+]} />
+
+## 6. Esercizi
+
+### 6.1 Catalogo prodotti: CRUD e query
+
+**Scenario**: Sul modello `Prodotto`/`Categoria` della parte 1 costruisci il servizio del catalogo.
+
+**Consegna**:
+1. Scrivi un `ProdottoService` con metodi CRUD (Create, Read, Update, Delete).
+2. Stampa tutti i prodotti con la loro categoria usando `Include()`.
+3. Aggiungi un metodo che restituisce solo `Id`, `Nome` e nome della categoria tramite una proiezione `Select`.
+4. Implementa la keyset pagination (20 prodotti per pagina, ordinati per `Id`).
+5. Se hai svolto il soft delete della parte 1, aggiungi un Global Query Filter su `IsDeleted` e verifica la differenza con `IgnoreQueryFilters()`.
+
+*Obiettivo: padroneggiare CRUD, proiezioni e paginazione con EF Core.*
+
+### 6.2 Sistema di prenotazioni
+
+**Scenario**: Studenti si iscrivono a corsi (relazione Many-to-Many).
+
+**Consegna**:
+1. Crea `Studente` e `Corso` con relazione Many-to-Many.
+2. Aggiungi almeno 3 studenti e 3 corsi.
+3. Iscrivi ogni studente a più corsi.
+4. Stampa per ogni corso la lista degli studenti iscritti.
+
+*Obiettivo: comprendere le relazioni Many-to-Many in EF Core.*
+
+### 6.3 Caccia all'N+1
+
+**Scenario**: Un endpoint elenca 200 ordini con il nome del cliente ed è lentissimo.
+
+**Consegna**:
+1. Attiva `LogTo(Console.WriteLine, LogLevel.Information)` e conta le query eseguite caricando gli ordini e accedendo a `o.Cliente` in un ciclo (con lazy loading attivo).
+2. Riscrivi la query usando `Include()` e verifica che le query diventino una sola.
+3. Riscrivi la query con una proiezione `Select` e `AsNoTracking()`, confrontando il SQL generato.
+
+*Obiettivo: imparare a riconoscere e risolvere il problema N+1 leggendo il SQL generato.*

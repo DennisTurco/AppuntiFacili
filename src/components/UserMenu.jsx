@@ -1,34 +1,36 @@
 import { useState, useEffect, useRef } from "react";
-import { LogOut, LogIn, UserPlus, User } from "lucide-react";
+import { LogOut, LogIn, UserPlus, User, ChevronDown } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
-export default function UserMenu() {
+const itemClass =
+  "flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800";
+
+export default function UserMenu({ mobile = false }) {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    };
-    fetchUser();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
 
-    // Chiude il dropdown se clicchi fuori
+    // Chiude il dropdown se clicchi fuori o premi Esc
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setOpen(false);
-      }
+      if (menuRef.current && !menuRef.current.contains(event.target)) setOpen(false);
+    };
+    const handleKey = (event) => {
+      if (event.key === "Escape") setOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKey);
 
     return () => {
       listener.subscription.unsubscribe();
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKey);
     };
   }, []);
 
@@ -38,69 +40,56 @@ export default function UserMenu() {
     setOpen(false);
   };
 
+  const items = user ? (
+    <>
+      <div className="truncate px-3 py-2 text-xs text-slate-500 dark:text-slate-400" title={user.email}>
+        {user.email}
+      </div>
+      <a href="/videolezioni" className={itemClass}>
+        <User className="h-4 w-4" />
+        Le mie video lezioni
+      </a>
+      <button onClick={logout} className={`${itemClass} hover:text-red-600 dark:hover:text-red-400`}>
+        <LogOut className="h-4 w-4" />
+        Esci
+      </button>
+    </>
+  ) : (
+    <>
+      <a href="/login" className={itemClass}>
+        <LogIn className="h-4 w-4" />
+        Accedi
+      </a>
+      <a href="/register" className={itemClass}>
+        <UserPlus className="h-4 w-4" />
+        Registrati
+      </a>
+    </>
+  );
+
+  // Nel menu mobile le voci sono mostrate direttamente, senza dropdown
+  if (mobile) return <div className="flex flex-col gap-1">{items}</div>;
+
   return (
     <div className="relative" ref={menuRef}>
-      {/* Bottone principale "Account" */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 lg:px-3 py-2 transition-colors"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
       >
-        <User className="w-4 h-4" />
-        <span className="text-sm font-medium">Account</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          className={`w-4 h-4 mt-0.5 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-          />
-        </svg>
+        <User className="h-4 w-4" />
+        <span>{user ? "Account" : "Accedi"}</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 mt-2 w-44  rounded-md shadow-md py-2 z-50"
+          role="menu"
+          className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-900"
         >
-          {user ? (
-            <>
-              <div className="px-3 py-1 text-xs">
-                {user.email}
-              </div>
-              <button
-                onClick={logout}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:text-red-600 dark:hover:text-red-400 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <a
-                href="/login"
-                className="flex items-center gap-2 px-3 py-2 text-sm hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                <LogIn className="w-4 h-4" />
-                Accedi
-              </a>
-              <a
-                href="/register"
-                className="flex items-center gap-2 px-3 py-2 text-sm hover:text-green-600 dark:hover:text-green-400 transition-colors"
-              >
-                <UserPlus className="w-4 h-4" />
-                Registrati
-              </a>
-            </>
-          )}
+          {items}
         </div>
       )}
     </div>

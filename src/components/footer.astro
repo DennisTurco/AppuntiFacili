@@ -1,30 +1,89 @@
 ---
 import { Icon } from "astro-icon/components";
+
+const year = new Date().getFullYear();
+
+const columns = [
+  {
+    title: "Appunti",
+    links: [
+      { title: "Informatica", href: "/informatica" },
+      { title: "Matematica", href: "/matematica" },
+      { title: "Video lezioni", href: "/videolezioni" },
+    ],
+  },
+  {
+    title: "Servizi",
+    links: [
+      { title: "Lezioni private", href: "/insegnanti" },
+      { title: "Contatti", href: "/contact" },
+      { title: "Segnala un errore", href: "https://github.com/DennisTurco/AppuntiFacili/issues/new", external: true },
+    ],
+  },
+  {
+    title: "Risorse",
+    links: [
+      { title: "Programmi delle lezioni", href: "https://github.com/DennisTurco/AppuntiLezioni", external: true },
+      { title: "Portfolio", href: "https://dennisturco.com/", external: true },
+      { title: "Sostieni il progetto", href: "https://www.paypal.com/donate/?hosted_button_id=M7CJXS929334U", external: true },
+    ],
+  },
+];
+
+const socials = [
+  { label: "Discord", href: "https://discord.com/invite/9Jb4Gt3HhB", icon: "fa6-brands:discord" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/dennis-turco-751239232/", icon: "fa6-brands:linkedin" },
+  { label: "GitHub", href: "https://github.com/DennisTurco", icon: "fa6-brands:github" },
+];
 ---
 
-<footer class="my-20">
-  <div class="flex flex-col items-center space-y-4">
-    <div class="flex space-x-4">
-      <a href="https://discordapp.com/invite/9Jb4Gt3HhB" target="_blank" aria-label="Discord"
-         class="flex items-center justify-center h-10 w-10 rounded-full bg-black dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600 transition">
-        <Icon name="fa6-brands:discord" class="h-6 w-6" />
+<footer class="mt-24 border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
+  <div class="mx-auto grid max-w-(--breakpoint-xl) gap-10 px-5 py-12 md:grid-cols-[1.5fr_repeat(3,1fr)]">
+    <div>
+      <a href="/" class="font-display text-lg">
+        <span class="font-bold text-slate-900 dark:text-white">Appunti</span><span class="text-slate-500 dark:text-slate-400">Facili</span>
       </a>
-      <a href="https://www.linkedin.com/in/dennis-turco-751239232/" target="_blank" aria-label="LinkedIn"
-         class="flex items-center justify-center h-10 w-10 rounded-full bg-black dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600 transition">
-        <Icon name="fa6-brands:linkedin" class="h-6 w-6" />
-      </a>
-      <a href="https://github.com/DennisTurco" target="_blank" aria-label="GitHub"
-         class="flex items-center justify-center h-10 w-10 rounded-full bg-black dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600 transition">
-        <Icon name="fa6-brands:github" class="h-6 w-6" />
-      </a>
-      <a href="/contact" aria-label="Email"
-         class="flex items-center justify-center h-10 w-10 rounded-full bg-black dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600 transition">
-        <Icon name="fa6-solid:envelope" class="h-6 w-6" />
-      </a>
+      <p class="mt-3 max-w-xs text-sm text-slate-600 dark:text-slate-400">
+        Appunti chiari e gratuiti di informatica e matematica, scritti da chi insegna ogni giorno.
+      </p>
+      <div class="mt-5 flex gap-2">
+        {socials.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.label}
+            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <Icon name={s.icon} class="h-4 w-4" />
+          </a>
+        ))}
+      </div>
     </div>
 
-    <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-      Copyright © 2022 - 2025 Dennis Turco
+    {columns.map((col) => (
+      <div>
+        <h2 class="font-sans text-sm font-semibold text-slate-900 dark:text-white">{col.title}</h2>
+        <ul class="mt-3 space-y-2">
+          {col.links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                class="text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+              >
+                {link.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <div class="border-t border-slate-200 dark:border-slate-800">
+    <p class="mx-auto max-w-(--breakpoint-xl) px-5 py-5 text-sm text-slate-500 dark:text-slate-500">
+      © 2022 – {year} Dennis Turco · Fidenza (PR)
     </p>
   </div>
 </footer>

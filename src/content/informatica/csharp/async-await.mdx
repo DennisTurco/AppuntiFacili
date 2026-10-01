@@ -2,7 +2,7 @@
 title: "Async / Await"
 order: 2
 draft: false
-lastUpdateDate: "2026-06-10"
+lastUpdateDate: "2026-10-01"
 subject: "C#"
 category: "Informatica"
 difficulty: "complesso"
@@ -13,29 +13,19 @@ videoLesson: false
 
 ## 1. Introduzione
 
-La programmazione **asincrona** in C# serve a gestire operazioni con latenza significativa senza occupare inutilmente il thread chiamante. Il caso tipico è l'I/O: rete, file system, database, chiamate HTTP, attese temporali, stream. In questi scenari il costo principale non è il calcolo, ma il tempo di attesa.
-
-Una scomposizione utile è:
+La programmazione **asincrona** in C# serve a gestire operazioni con latenza significativa senza occupare inutilmente il thread chiamante. Il caso tipico è l'I/O: rete, file system, database, chiamate HTTP. In questi scenari il costo principale non è il calcolo, ma il tempo di attesa:
 
 $$
 T_{totale} = T_{cpu} + T_{attesa}
 $$
 
-Se $T_{attesa} \gg T_{cpu}$, usare `await` migliora la **reattività** dell'applicazione perché il thread può tornare al chiamante e fare altro durante l'attesa.
+Se $T_{attesa} \gg T_{cpu}$, usare `await` migliora la **reattività**: durante l'attesa il thread torna al chiamante e può fare altro (in una UI evita finestre bloccate, in un server permette di servire più richieste con meno thread).
 
 I tre pilastri sono:
 
-- `async`: dichiara che un metodo può sospendersi e riprendere.
-- `await`: sospende logicamente il metodo finché l'operazione non termina, senza bloccare il thread.
+- `async`: dichiara che un metodo può sospendersi e riprendere;
+- `await`: sospende logicamente il metodo finché l'operazione non termina, senza bloccare il thread;
 - `Task` / `Task<T>`: rappresentano il risultato futuro di un'operazione.
-
-È importante distinguere:
-
-- **asincronia**: non bloccare mentre si aspetta;
-- **concorrenza**: più operazioni in avanzamento nello stesso intervallo di tempo;
-- **parallelismo**: più operazioni eseguite davvero insieme su più core/thread.
-
-Un'operazione async non crea automaticamente un nuovo thread. Spesso non usa alcun thread mentre aspetta il completamento di I/O.
 
 ```mermaid
 sequenceDiagram
@@ -51,245 +41,88 @@ sequenceDiagram
     Metodo-->>Caller: continuazione e risultato
 ```
 
-### Perché async/await è utile
-
-- In una UI (WPF, WinForms, MAUI) evita interfacce bloccate.
-- In un server aumenta la scalabilità: meno thread bloccati per richiesta.
-- In pipeline di dati permette di comporre operazioni che arrivano nel tempo.
-
-Se hai $N$ richieste indipendenti con latenze $L_1, L_2, \dots, L_N$:
-
-- esecuzione sequenziale: $$T_{seq} \approx \sum_{i=1}^{N} L_i$$
-- esecuzione concorrente con `Task.WhenAll`: $$T_{conc} \approx \max(L_1, L_2, \dots, L_N)$$
-
-Questo vantaggio vale soprattutto per carichi **I/O-bound**.
+<Aside variant="info">
+Asincronia, concorrenza e parallelismo non sono sinonimi: **asincronia** significa non bloccare mentre si aspetta, **concorrenza** avere più operazioni in corso nello stesso intervallo, **parallelismo** eseguirle davvero insieme su più core. Un metodo async non crea automaticamente un nuovo thread: durante un'attesa di I/O spesso non usa alcun thread.
+</Aside>
 
 ## 2. Task e Task\<T\>
 
-`Task` è l'astrazione centrale dell'asincronia moderna in .NET:
-
-- `Task`: operazione asincrona senza valore finale;
-- `Task<T>`: operazione asincrona che restituisce un valore di tipo `T`.
+`Task` è l'astrazione centrale dell'asincronia in .NET: `Task` rappresenta un'operazione senza valore finale, `Task<T>` un'operazione che restituisce un valore di tipo `T`. Un task termina in uno di tre modi: **completato**, **fallito** con eccezione oppure **cancellato**.
 
 ```cs
 Task task = Task.Run(() => Console.WriteLine("Eseguito nel thread pool"));
 
 Task<int> taskConRitorno = Task.Run(() => 42);
-int valore = await taskConRitorno;
+int valore = await taskConRitorno; // 42
 ```
 
-### Stato logico di un Task
-
-Un `Task` può essere visto come una promessa di completamento con tre esiti possibili:
-
-- completato con successo;
-- fallito con eccezione;
-- cancellato.
-
-```mermaid
-stateDiagram-v2
-    [*] --> Created
-    Created --> WaitingForActivation : metodo async / scheduler
-    WaitingForActivation --> Running : esecuzione
-    Running --> RanToCompletion : successo
-    Running --> Faulted : eccezione
-    Running --> Canceled : cancellazione
-```
-
-### Task caldo e Task freddo
-
-Nella pratica, la maggior parte dei task creati da metodi `async` è già "in movimento": il metodo parte subito fino al primo `await` incompleto. Non sono come enumerazioni lazy che aspettano di essere avviate manualmente.
+I task restituiti dai metodi `async` sono "caldi": il corpo parte subito e viene eseguito in modo sincrono fino al primo `await` che non è già completato.
 
 ```cs
 public async Task<int> CalcolaAsync()
 {
     Console.WriteLine("Parte subito");
     await Task.Delay(1000);
+    Console.WriteLine("Ripreso dopo 1 secondo");
     return 10;
 }
-```
 
-La riga `CalcolaAsync()` esegue immediatamente il corpo fino al primo `await` che non può completare in modo sincrono.
-
-### Il thread pool
-
-Molti task che eseguono codice CPU-bound usano il **thread pool** di .NET, un insieme gestito di thread worker riutilizzabili. Il thread pool:
-
-- evita il costo di creare e distruggere thread di continuo;
-- regola dinamicamente il numero di worker thread;
-- supporta il completamento di callback e continuazioni;
-- collabora con l'infrastruttura I/O del runtime.
-
-`Task.Run` accoda lavoro CPU-bound al thread pool:
-
-```cs
-int risultato = await Task.Run(() =>
-{
-    int somma = 0;
-    for (int i = 0; i < 1_000_000; i++)
-        somma += i;
-    return somma;
-});
-```
-
-### Task.Run vs async I/O diretto
-
-Qui c'è una distinzione fondamentale:
-
-| Scenario | Soluzione corretta |
-|---|---|
-| Chiamata HTTP, DB, file async disponibili | usa direttamente API async |
-| Compressione, parsing pesante, hashing, trasformazioni CPU | valuta `Task.Run` |
-| Wrappare `Thread.Sleep`, `.Result`, API sincrone lente | spesso è un anti-pattern |
-
-Esempio corretto per I/O:
-
-```cs
-public async Task<string> ScaricaHtmlAsync(HttpClient httpClient, string url)
-{
-    return await httpClient.GetStringAsync(url);
-}
-```
-
-Qui `Task.Run` sarebbe inutile: l'I/O è già asincrono.
-
-Esempio corretto per CPU-bound:
-
-```cs
-public async Task<byte[]> ComprimiAsync(byte[] dati)
-{
-    return await Task.Run(() => Comprimi(dati));
-}
+Task<int> t = CalcolaAsync();  // stampa subito "Parte subito"
+Console.WriteLine("Faccio altro...");
+int r = await t;               // poi "Ripreso dopo 1 secondo"
 ```
 
 ### CPU-bound vs I/O-bound
 
-- **CPU-bound**: il tempo è speso in calcolo. Formula dominante: $$T \approx T_{cpu}$$
-- **I/O-bound**: il tempo è speso in attesa. Formula dominante: $$T \approx T_{attesa}$$
+`Task.Run` accoda lavoro al **thread pool**, un insieme di thread worker riutilizzabili gestito da .NET. Ha senso per lavoro **CPU-bound** (calcolo); per lavoro **I/O-bound** (attesa) si usano direttamente le API async native.
 
-Regola pratica:
+| Scenario | Soluzione corretta |
+|---|---|
+| Chiamata HTTP, DB, file con API async disponibili | usa direttamente l'API async |
+| Compressione, parsing pesante, hashing | valuta `Task.Run` |
+| Wrappare `Thread.Sleep`, `.Result`, API sincrone lente | spesso è un anti-pattern |
 
-- per I/O-bound: usa API async native;
-- per CPU-bound: usa `Task.Run` solo quando serve non bloccare il thread corrente.
+```cs
+// I/O-bound: l'API è già asincrona, Task.Run sarebbe inutile
+public async Task<string> ScaricaHtmlAsync(HttpClient http, string url)
+    => await http.GetStringAsync(url);
+
+// CPU-bound: sposto il calcolo fuori dal thread corrente (es. UI)
+public Task<long> SommaAsync(int n) => Task.Run(() =>
+{
+    long somma = 0;
+    for (int i = 0; i < n; i++) somma += i;
+    return somma;
+});
+```
+
+Non "fingere" asincronia: `Task.Run(() => File.ReadAllText(path))` occupa comunque un thread del pool in attesa. Se esiste `File.ReadAllTextAsync`, usa quella.
 
 ## 3. Sintassi async / await
 
-Un metodo `async` restituisce tipicamente:
-
-- `Task`
-- `Task<T>`
-- `ValueTask`
-- `ValueTask<T>`
-- `void` solo per event handler
+Un metodo `async` restituisce tipicamente `Task`, `Task<T>`, `ValueTask` o `ValueTask<T>`; `void` solo per gli event handler. Per convenzione il nome termina con `Async`.
 
 ```cs
 public string LeggiDati()
 {
-    Thread.Sleep(2000);
+    Thread.Sleep(2000);      // blocca il thread per 2 secondi
     return "Dati letti";
 }
 
 public async Task<string> LeggiDatiAsync()
 {
-    await Task.Delay(2000);
+    await Task.Delay(2000);  // il thread resta libero
     return "Dati letti";
 }
 ```
 
 ### Cosa fa davvero `await`
 
-Quando esegui:
+Quando esegui `string risultato = await LeggiDatiAsync();`:
 
-```cs
-string risultato = await LeggiDatiAsync();
-```
-
-accade questo:
-
-1. ottieni un awaiter dal task;
-2. se il task è già completato, prosegui subito;
-3. altrimenti il metodo salva il proprio stato;
-4. registra una continuazione;
-5. restituisce il controllo al chiamante;
-6. quando il task termina, il metodo riparte dal punto successivo all'`await`.
-
-### Trasformazione del compilatore: la state machine
-
-Il compilatore non esegue magia: trasforma il metodo `async` in una **macchina a stati**. Ogni `await` diventa un possibile punto di sospensione.
-
-Metodo sorgente:
-
-```cs
-public async Task<int> SommaDopoAttesaAsync()
-{
-    int a = 10;
-    await Task.Delay(1000);
-    int b = 32;
-    return a + b;
-}
-```
-
-Struttura concettuale generata dal compilatore:
-
-```cs
-private struct SommaDopoAttesaAsyncStateMachine : IAsyncStateMachine
-{
-    public int _state;
-    public AsyncTaskMethodBuilder<int> _builder;
-
-    private int _a;
-    private int _b;
-    private TaskAwaiter _awaiter;
-
-    public void MoveNext()
-    {
-        int result;
-
-        try
-        {
-            if (_state == -1)
-            {
-                _a = 10;
-                var delayTask = Task.Delay(1000);
-                _awaiter = delayTask.GetAwaiter();
-
-                if (!_awaiter.IsCompleted)
-                {
-                    _state = 0;
-                    _builder.AwaitUnsafeOnCompleted(ref _awaiter, ref this);
-                    return;
-                }
-            }
-
-            if (_state == 0)
-            {
-                _awaiter.GetResult();
-            }
-
-            _b = 32;
-            result = _a + _b;
-        }
-        catch (Exception ex)
-        {
-            _state = -2;
-            _builder.SetException(ex);
-            return;
-        }
-
-        _state = -2;
-        _builder.SetResult(result);
-    }
-
-    public void SetStateMachine(IAsyncStateMachine stateMachine) { }
-}
-```
-
-Da capire bene:
-
-- `_state` indica il punto di ripresa;
-- `_builder` costruisce il `Task<int>` restituito al chiamante;
-- le variabili locali che devono sopravvivere all'`await` diventano campi;
-- l'awaiter conserva il collegamento con l'operazione attesa.
+1. se il task è già completato, il metodo prosegue subito;
+2. altrimenti salva il proprio stato, registra una **continuazione** e restituisce il controllo al chiamante;
+3. quando il task termina, il metodo riparte dalla riga successiva all'`await`.
 
 ```mermaid
 flowchart TD
@@ -298,145 +131,90 @@ flowchart TD
     C -- Sì --> D[Continua subito]
     C -- No --> E[Salva stato e registra continuazione]
     E --> F[Restituisce Task al chiamante]
-    F --> G[Task completato in futuro]
-    G --> H[Ripristina stato]
-    H --> I[Resume da dopo await]
+    F --> G[Task completato]
+    G --> H[Riprende da dopo await]
 ```
 
-### Complessità mentale del codice async
+<Aside variant="info">
+Il compilatore trasforma ogni metodo `async` in una **state machine**: ogni `await` diventa un punto di ripresa, le variabili locali che devono sopravvivere all'attesa diventano campi e un builder costruisce il `Task` restituito. Questo ha un piccolo costo di memoria e scheduling, trascurabile per l'I/O ma non per operazioni brevissime e sempre sincrone (vedi `ValueTask`).
+</Aside>
 
-Dal punto di vista del chiamante:
+### Await sequenziale vs concorrente
 
-- costo di memoria: cresce con lo stato che deve essere conservato;
-- costo di scheduling: c'è overhead per awaiter, continuazioni e possibili allocazioni;
-- vantaggio: il thread non resta bloccato.
-
-Per operazioni brevissime e sempre sincrone, l'overhead di `Task` può essere rilevante rispetto al lavoro reale. Da qui nasce l'utilità di `ValueTask` in casi speciali.
-
-### Gotcha: closure in lambda async
-
-Le lambda async catturano variabili esterne. Se la variabile cambia dopo la cattura, tutte le lambda possono vedere lo stesso valore finale.
+Dove metti l'`await` decide se le operazioni si sovrappongono o no:
 
 ```cs
-var tasks = new List<Task>();
+// Sequenziale: ~2 secondi
+await Task.Delay(1000);
+await Task.Delay(1000);
 
-for (int i = 0; i < 3; i++)
-{
-    tasks.Add(Task.Run(async () =>
-    {
-        await Task.Delay(100);
-        Console.WriteLine(i); // rischio: stampa 3, 3, 3
-    }));
-}
-
-await Task.WhenAll(tasks);
+// Concorrente: ~1 secondo, i due task partono insieme
+Task a = Task.Delay(1000);
+Task b = Task.Delay(1000);
+await Task.WhenAll(a, b);
 ```
 
-Versione corretta:
+Con $N$ richieste indipendenti di latenza $L_i$, il tempo passa da $\sum L_i$ a circa $\max(L_i)$.
 
-```cs
-var tasks = new List<Task>();
-
-for (int i = 0; i < 3; i++)
-{
-    int copia = i;
-    tasks.Add(Task.Run(async () =>
-    {
-        await Task.Delay(100);
-        Console.WriteLine(copia);
-    }));
-}
-
-await Task.WhenAll(tasks);
-```
-
-## 4. async void vs async Task
-
-`async void` e `async Task` non sono equivalenti.
+## 4. async void, fire-and-forget e `await` dimenticati
 
 | Aspetto | `async void` | `async Task` |
 |---|---|---|
-| Tipo di ritorno | `void` | `Task` |
 | Può essere atteso | No | Sì |
-| Propagazione eccezioni | difficile da gestire dal chiamante | naturale con `await` |
-| Composizione con `WhenAll`, `WhenAny` | No | Sì |
+| Eccezioni | non catturabili dal chiamante | rilanciate da `await` |
+| Composizione con `WhenAll` / `WhenAny` | No | Sì |
 | Uso corretto | event handler | quasi sempre |
 
 ```cs
 public async void MetodoSbagliato()
 {
     await Task.Delay(1000);
-    throw new Exception("Eccezione fuori controllo del chiamante");
+    throw new Exception("Nessun try/catch del chiamante la vedrà");
+}
+
+// Unico uso legittimo: event handler (la firma impone void)
+private async void Button_Click(object sender, EventArgs e)
+{
+    try { await SalvaAsync(); }
+    catch (Exception ex) { MessageBox.Show(ex.Message); }
+}
+```
+
+<Aside variant="danger">
+Un'eccezione non gestita in un metodo `async void` viene rilanciata sul contesto di sincronizzazione e può far terminare l'intera applicazione. Negli event handler async metti sempre un `try/catch` attorno al corpo.
+</Aside>
+
+Un errore molto comune è dimenticare `await`: il task parte, ma nessuno ne controlla esito o errori.
+
+```cs
+public void Metodo()
+{
+    SalvaAsync();       // warning CS4014: errori persi
 }
 
 public async Task MetodoCorretto()
 {
-    await Task.Delay(1000);
-    throw new Exception("Eccezione osservabile con await");
+    await SalvaAsync(); // eventuali eccezioni arrivano qui
 }
 ```
 
-### Fire-and-forget
-
-A volte si vede questo pattern:
+Se invece vuoi davvero avviare un'operazione senza attenderla (**fire-and-forget**), rendilo esplicito con il discard `_ =` e registra gli errori:
 
 ```cs
-_ = SalvaLogAsync();
-```
+_ = EseguiConLogAsync(SalvaLogAsync(), logger);
 
-Questo è un **fire-and-forget**: avvii un task e non lo attendi. È lecito solo se:
-
-- sai dove finiranno le eccezioni;
-- la vita dell'operazione non deve essere sincronizzata col chiamante;
-- la cancellazione e lo shutdown dell'app sono gestiti;
-- non stai usando risorse scoped che potrebbero essere già distrutte.
-
-Pericoli:
-
-- eccezioni non osservate;
-- perdita di errori in produzione;
-- race condition su oggetti già disposed;
-- uscita dell'app prima del completamento.
-
-Versione più sicura:
-
-```cs
-public static void AvviaInBackground(Task task, ILogger logger)
+static async Task EseguiConLogAsync(Task task, ILogger logger)
 {
-    _ = task.ContinueWith(
-        t => logger.LogError(t.Exception, "Errore in task fire-and-forget"),
-        CancellationToken.None,
-        TaskContinuationOptions.OnlyOnFaulted,
-        TaskScheduler.Default);
+    try { await task; }
+    catch (Exception ex) { logger.LogError(ex, "Errore in background"); }
 }
 ```
 
-Ancora meglio, in ASP.NET Core o servizi worker, conviene delegare il lavoro a:
-
-- `BackgroundService`
-- code interne
-- sistemi di job scheduling
-
-invece di lanciare task scollegati dal ciclo di vita dell'app.
-
-### Dimenticare `await`
-
-Questo anti-pattern è molto comune:
-
-```cs
-public Task SalvaAsync() => Task.Delay(1000);
-
-public void Metodo()
-{
-    SalvaAsync(); // il task parte, ma nessuno controlla esito o errori
-}
-```
-
-Se il risultato ti serve o se l'operazione può fallire, `await` non è opzionale.
+In ASP.NET Core o nei worker service, invece di lanciare task scollegati, è meglio usare `BackgroundService` o una coda interna, così il lavoro rispetta il ciclo di vita dell'app.
 
 ## 5. Gestione delle eccezioni
 
-Le eccezioni dei metodi async vengono memorizzate nel `Task` e rilanciate quando fai `await`.
+Le eccezioni dei metodi async vengono memorizzate nel `Task` e rilanciate quando fai `await`, quindi `try/catch/finally` funziona come nel codice sincrono.
 
 ```cs
 public async Task<int> DividiAsync(int a, int b)
@@ -447,45 +225,21 @@ public async Task<int> DividiAsync(int a, int b)
     return a / b;
 }
 
-public async Task EsempioDiGestioneEccezioni()
-{
-    try
-    {
-        int risultato = await DividiAsync(10, 0);
-    }
-    catch (DivideByZeroException ex)
-    {
-        Console.WriteLine($"Errore catturato: {ex.Message}");
-    }
-    finally
-    {
-        Console.WriteLine("Finally eseguito sempre");
-    }
-}
-```
-
-### `await` vs `.Result` e `.Wait()`
-
-Con `await` l'eccezione originale viene rilanciata in modo naturale. Con `.Result` e `.Wait()` si entra nel mondo delle attese bloccanti e spesso delle `AggregateException`.
-
-```cs
 try
 {
-    var valore = MetodoAsync().Result;
+    int risultato = await DividiAsync(10, 0);
 }
-catch (AggregateException ex)
+catch (DivideByZeroException ex)
 {
-    Console.WriteLine(ex.InnerException?.Message);
+    Console.WriteLine($"Errore catturato: {ex.Message}");
 }
 ```
 
-### Task.WhenAll ed eccezioni
+Con `.Result` o `.Wait()`, invece, l'eccezione arriva avvolta in una `AggregateException` (da leggere tramite `InnerException`) e il thread resta bloccato.
 
-Se più task falliscono:
+### Eccezioni con Task.WhenAll
 
-- `Task.WhenAll` produce un task faulted;
-- tutte le eccezioni finiscono nella `Exception` aggregata del task finale;
-- con `await`, il runtime rilancia l'errore, ma le eccezioni complete sono comunque consultabili.
+Se più task falliscono, `await Task.WhenAll(...)` rilancia **solo la prima** eccezione; l'elenco completo resta nella proprietà `Exception` del task aggregato.
 
 ```cs
 Task t1 = Task.Run(() => throw new InvalidOperationException("Errore 1"));
@@ -497,220 +251,135 @@ try
 {
     await all;
 }
-catch
+catch (Exception ex)
 {
-    foreach (var ex in all.Exception!.InnerExceptions)
-        Console.WriteLine(ex.Message);
+    Console.WriteLine($"Primo: {ex.Message}");
+    foreach (var inner in all.Exception!.InnerExceptions)
+        Console.WriteLine($"- {inner.Message}"); // Errore 1, Errore 2
 }
 ```
-
-### Async over sync e sync over async
-
-Due anti-pattern classici:
-
-1. **async over sync**: fingi asincronia spostando codice sincrono su thread pool.
-2. **sync over async**: chiami codice async e poi lo blocchi con `.Wait()` o `.Result`.
-
-Esempio di async over sync discutibile:
-
-```cs
-public Task<string> LeggiFileMaleAsync(string path)
-{
-    return Task.Run(() => File.ReadAllText(path));
-}
-```
-
-Se esiste `File.ReadAllTextAsync`, va preferita.
-
-Esempio di sync over async pericoloso:
-
-```cs
-public string OttieniConfigurazione()
-{
-    return CaricaConfigurazioneAsync().Result;
-}
-```
-
-Regola: **async all the way**, cioè mantieni asincrona l'intera catena finché possibile.
 
 ## 6. Task.WhenAll e Task.WhenAny
 
-### Task.WhenAll: concorrenza per operazioni indipendenti
+`Task.WhenAll` attende che **tutti** i task terminino e, per `Task<T>`, restituisce un array con i risultati nello stesso ordine dei task.
 
 ```cs
-public async Task EsempiWhenAll()
-{
-    Task<string> task1 = FetchDaApiAsync("https://api1.example.com");
-    Task<string> task2 = FetchDaApiAsync("https://api2.example.com");
-    Task<string> task3 = FetchDaApiAsync("https://api3.example.com");
+Task<string> t1 = http.GetStringAsync("https://api1.example.com");
+Task<string> t2 = http.GetStringAsync("https://api2.example.com");
+Task<string> t3 = http.GetStringAsync("https://api3.example.com");
 
-    string[] risultati = await Task.WhenAll(task1, task2, task3);
-
-    foreach (var r in risultati)
-        Console.WriteLine(r);
-}
+string[] risultati = await Task.WhenAll(t1, t2, t3);
+Console.WriteLine($"Ricevute {risultati.Length} risposte");
 ```
 
-`WhenAll` non rende magico il codice: funziona bene se i task sono **indipendenti**. Se ogni task dipende dal precedente, l'ordine logico resta sequenziale.
+`WhenAll` porta vantaggio solo se i task sono **indipendenti**: se ognuno dipende dal risultato del precedente, l'ordine resta sequenziale.
 
-### Task.WhenAny: reagire al primo completamento
+`Task.WhenAny` restituisce il **primo** task completato (non il suo risultato: va atteso a sua volta). È utile per timeout, fallback su più endpoint o per processare i risultati in ordine di arrivo.
 
 ```cs
-public async Task EsempiWhenAny()
+async Task<string> Simula(string nome, int ms)
 {
-    Task<string> task1 = Task.Delay(3000).ContinueWith(_ => "Lento");
-    Task<string> task2 = Task.Delay(500).ContinueWith(_ => "Veloce");
-
-    Task<string> primoCompletato = await Task.WhenAny(task1, task2);
-    string risultato = await primoCompletato;
-
-    Console.WriteLine($"Primo completato: {risultato}");
+    await Task.Delay(ms);
+    return nome;
 }
+
+Task<string> lento = Simula("Lento", 3000);
+Task<string> veloce = Simula("Veloce", 500);
+
+Task<string> primo = await Task.WhenAny(lento, veloce);
+Console.WriteLine($"Primo completato: {await primo}"); // Veloce
 ```
 
-È utile per:
-
-- timeout manuali;
-- strategie di fallback;
-- replica su più endpoint;
-- processare i risultati nell'ordine di arrivo.
-
-### ContinueWith: esiste, ma `await` è migliore
-
-Le continuazioni esplicite erano comuni prima di `await`:
+Esempio pratico: un timeout manuale con `WhenAny`.
 
 ```cs
-Task<int> t = Task.Run(() => 10);
+Task<string> richiesta = http.GetStringAsync(url);
+Task timeout = Task.Delay(TimeSpan.FromSeconds(2));
 
-Task continuazione = t.ContinueWith(antecedent =>
+if (await Task.WhenAny(richiesta, timeout) == timeout)
+    Console.WriteLine("Timeout!");
+else
+    Console.WriteLine(await richiesta);
+```
+
+<Aside variant="info">
+Prima di `await` si componevano i task con `ContinueWith`. Esiste ancora, ma richiede di gestire a mano scheduler, errori e cancellazione: preferisci `await`, che preserva `try/catch`, `using` e debugging. Da .NET 6 è disponibile anche `WaitAsync(timeout)`, che semplifica l'esempio sopra.
+</Aside>
+
+### Parallelismo controllato: Parallel.ForEachAsync
+
+Con molti elementi, avviare tutti i task insieme può saturare rete o server. Da .NET 6 `Parallel.ForEachAsync` limita quante iterazioni girano in contemporanea.
+
+```cs
+var options = new ParallelOptions
 {
-    Console.WriteLine(antecedent.Result * 2);
+    MaxDegreeOfParallelism = 4,
+    CancellationToken = ct
+};
+
+await Parallel.ForEachAsync(urls, options, async (url, token) =>
+{
+    string html = await http.GetStringAsync(url, token);
+    Console.WriteLine($"{url}: {html.Length} caratteri");
 });
-
-await continuazione;
 ```
 
-Problemi di `ContinueWith`:
+## 7. Cancellazione, progresso e async streams
 
-- codice più difficile da leggere;
-- bisogna gestire manualmente scheduler, fault, cancellation;
-- facile sbagliare con `TaskScheduler.Current` o `TaskScheduler.Default`;
-- composizione meno naturale delle eccezioni.
+### CancellationToken
 
-Versione preferita:
+Il `CancellationToken` è il modo **cooperativo** per interrompere un'operazione: chi la esegue controlla il token e si ferma da solo.
 
 ```cs
-int valore = await Task.Run(() => 10);
-Console.WriteLine(valore * 2);
-```
-
-`await` preserva meglio il flusso logico, il `try/catch`, il `using` e il debugging.
-
-### Parallel.ForEachAsync (.NET 6+)
-
-Quando hai una collezione e vuoi eseguire lavoro concorrente controllato, `.NET 6+` offre `Parallel.ForEachAsync`.
-
-```cs
-public async Task ScaricaTuttiAsync(IEnumerable<string> urls, HttpClient httpClient, CancellationToken ct)
-{
-    var options = new ParallelOptions
-    {
-        MaxDegreeOfParallelism = 4,
-        CancellationToken = ct
-    };
-
-    await Parallel.ForEachAsync(urls, options, async (url, token) =>
-    {
-        string html = await httpClient.GetStringAsync(url, token);
-        Console.WriteLine($"{url}: {html.Length} caratteri");
-    });
-}
-```
-
-È utile quando:
-
-- vuoi limitare il parallelismo;
-- hai molti elementi;
-- ogni iterazione è indipendente;
-- vuoi integrare anche la cancellazione.
-
-### Limite teorico del parallelismo: legge di Amdahl
-
-Se una frazione $P$ del lavoro è parallelizzabile, il miglior speedup teorico con $N$ worker è:
-
-$$
-S(N) = \frac{1}{(1 - P) + \frac{P}{N}}
-$$
-
-Quindi:
-
-- se una parte importante resta seriale, il guadagno massimo è limitato;
-- aumentare i thread oltre un certo punto non porta benefici proporzionali;
-- per I/O-bound, la latenza esterna può dominare il tempo totale.
-
-## 7. CancellationToken
-
-Il `CancellationToken` è il modo cooperativo per interrompere operazioni asincrone.
-
-```cs
-public async Task OperazioneLungaAsync(CancellationToken cancellationToken)
+public async Task OperazioneLungaAsync(CancellationToken ct)
 {
     for (int i = 0; i < 100; i++)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        await Task.Delay(100, cancellationToken);
+        ct.ThrowIfCancellationRequested();
+        await Task.Delay(100, ct);
         Console.WriteLine($"Step {i}");
     }
 }
 
-public async Task EsempioCancellazione()
-{
-    var cts = new CancellationTokenSource();
-    cts.CancelAfter(TimeSpan.FromMilliseconds(500));
+using var cts = new CancellationTokenSource();
+cts.CancelAfter(TimeSpan.FromMilliseconds(500));
 
-    try
-    {
-        await OperazioneLungaAsync(cts.Token);
-    }
-    catch (OperationCanceledException)
-    {
-        Console.WriteLine("Operazione cancellata!");
-    }
+try
+{
+    await OperazioneLungaAsync(cts.Token);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("Operazione cancellata!"); // dopo circa 5 step
 }
 ```
 
-### IProgress\<T\>: riportare avanzamento
+<Aside variant="tip">
+Propaga il `CancellationToken` fino ai livelli più bassi (HTTP, database, `Task.Delay`): un token accettato ma non passato alle chiamate interne non cancella niente. Cattura `OperationCanceledException`, che include anche `TaskCanceledException`.
+</Aside>
 
-Per notificare progressi in modo pulito, usa `IProgress<T>`.
+### IProgress\<T\>
+
+Per notificare l'avanzamento usa `IProgress<T>`. `Progress<T>` invoca il callback sul contesto in cui è stato creato, quindi in una UI può aggiornare i controlli in sicurezza.
 
 ```cs
-public async Task DownloadConProgressoAsync(IProgress<int> progress, CancellationToken ct)
+public async Task DownloadAsync(IProgress<int> progress, CancellationToken ct)
 {
-    for (int percentuale = 0; percentuale <= 100; percentuale += 10)
+    for (int p = 0; p <= 100; p += 25)
     {
-        ct.ThrowIfCancellationRequested();
         await Task.Delay(100, ct);
-        progress.Report(percentuale);
+        progress.Report(p);
     }
 }
 
-public async Task EsempioProgressoAsync()
-{
-    IProgress<int> progress = new Progress<int>(p =>
-    {
-        Console.WriteLine($"Completamento: {p}%");
-    });
-
-    await DownloadConProgressoAsync(progress, CancellationToken.None);
-}
+var progress = new Progress<int>(p => Console.WriteLine($"Completamento: {p}%"));
+await DownloadAsync(progress, CancellationToken.None);
+// Completamento: 0%, 25%, 50%, 75%, 100%
 ```
 
-`Progress<T>` invoca il callback sul contesto catturato al momento della creazione, quindi in una UI è utile per aggiornare controlli in sicurezza.
+### Async streams: `IAsyncEnumerable<T>`
 
-### Async streams: `IAsyncEnumerable<T>` e `await foreach`
-
-Quando i dati arrivano nel tempo, non vuoi aspettare l'intera collezione finale. Gli **async streams** permettono di produrre elementi uno alla volta.
+Quando i dati arrivano nel tempo (paging, eventi, lettura di file o rete) puoi produrli uno alla volta con `yield return` e consumarli con `await foreach`, senza materializzare l'intera collezione.
 
 ```cs
 public async IAsyncEnumerable<int> GeneraValoriAsync(
@@ -718,148 +387,57 @@ public async IAsyncEnumerable<int> GeneraValoriAsync(
 {
     for (int i = 1; i <= 5; i++)
     {
-        ct.ThrowIfCancellationRequested();
         await Task.Delay(200, ct);
         yield return i;
     }
 }
 
-public async Task ConsumaAsync()
+await foreach (int valore in GeneraValoriAsync())
+    Console.WriteLine(valore); // 1, 2, 3, 4, 5 (uno ogni 200 ms)
+```
+
+Un async stream non implica parallelismo: ogni elemento arriva in modo asincrono, ma uno dopo l'altro.
+
+## 8. ConfigureAwait e SynchronizationContext
+
+Il `SynchronizationContext` decide **dove** riprende un metodo dopo `await`. Per default, `await` cattura il contesto corrente e vi ritorna:
+
+- **WPF / WinForms / MAUI**: il contesto è il thread UI, quindi dopo `await` puoi toccare i controlli;
+- **ASP.NET Core e console app**: non c'è un contesto speciale, la continuazione riprende su un thread qualsiasi del pool.
+
+```cs
+private async void Carica_Click(object sender, RoutedEventArgs e)
 {
-    await foreach (int valore in GeneraValoriAsync())
-    {
-        Console.WriteLine(valore);
-    }
+    string testo = await http.GetStringAsync("https://example.com");
+    MiaLabel.Content = testo; // ok: siamo tornati sul thread UI
 }
 ```
 
-Vantaggi:
-
-- consumo progressivo;
-- memoria ridotta: non devi materializzare tutto;
-- pipeline naturali per stream di eventi, paging, lettura file/rete.
-
-Se una sorgente produce $n$ elementi:
-
-- lista completa: memoria fino a $$O(n)$$
-- stream consumato progressivamente: memoria addizionale spesso vicina a $$O(1)$$
-
-### Concorrenza e stream non sono la stessa cosa
-
-`IAsyncEnumerable<T>` non implica parallelismo. Significa solo che:
-
-- ogni elemento può arrivare in modo asincrono;
-- il consumer può attendere il prossimo elemento;
-- il produttore controlla il ritmo di emissione.
-
-## 8. ConfigureAwait
-
-`ConfigureAwait(false)` dice che la continuazione dopo un `await` non deve tentare di rientrare nel contesto originale.
+`ConfigureAwait(false)` dice di **non** tornare sul contesto originale. È utile nel codice di libreria, che non ha bisogno della UI e così evita un salto di thread.
 
 ```cs
 public async Task<string> MetodoDiLibreriaAsync()
 {
-    var dati = await FetchAsync()
-        .ConfigureAwait(false);
-
-    return dati.ToUpper();
+    var dati = await FetchAsync().ConfigureAwait(false);
+    return dati.ToUpper(); // può girare su un thread del pool
 }
 ```
 
-### SynchronizationContext in profondità
+Nel codice UI, invece, evitalo se dopo l'`await` accedi ai controlli: la continuazione potrebbe girare fuori dal thread UI e lanciare `InvalidOperationException`.
 
-`SynchronizationContext` è un'astrazione che decide **dove** eseguire una continuazione.
+<Aside variant="info">
+`ExecutionContext` è un concetto diverso: non decide dove riprendere, ma quali dati ambientali (valori `AsyncLocal<T>`, cultura, identità) fluiscono attraverso gli `await`. `ConfigureAwait(false)` non lo interrompe: un `AsyncLocal<string>` impostato prima dell'`await` resta leggibile dopo.
+</Aside>
 
-Esempi:
+## 9. Deadlock e sync over async
 
-- WPF / WinForms: c'è un context legato al thread UI;
-- ASP.NET classico: c'era un context per la richiesta;
-- ASP.NET Core: in generale **non** usa un `SynchronizationContext` custom per riprendere sul thread originale;
-- Console app: di solito non c'è un context speciale.
-
-Quando fai `await` senza `ConfigureAwait(false)`:
-
-1. il runtime osserva il contesto corrente;
-2. registra la continuazione;
-3. quando il task termina, prova a rieseguire la continuazione in quel contesto.
-
-In WPF questo è cruciale: dopo l'`await`, puoi toccare i controlli UI perché la ripresa torna sul thread giusto.
+Un deadlock async tipico nasce quando blocchi sincronicamente (con `.Result` o `.Wait()`) il thread che serve anche alla continuazione.
 
 ```cs
-public async Task AggiornaLabelAsync()
+// Event handler WPF
+private void Button_Click(object sender, RoutedEventArgs e)
 {
-    string testo = await httpClient.GetStringAsync("https://example.com");
-    MiaLabel.Content = testo; // valido in WPF se il contesto UI è stato catturato
-}
-```
-
-In ASP.NET Core invece non hai quel vincolo di thread UI. La continuazione può proseguire su un thread pool qualunque, e normalmente questo va bene.
-
-### ExecutionContext in profondità
-
-`ExecutionContext` è diverso da `SynchronizationContext`. Non decide **su quale thread logico riprendere**, ma **quale contesto ambientale fluisce** attraverso chiamate async e thread pool.
-
-Tipicamente include:
-
-- valori `AsyncLocal<T>`;
-- identità e principal;
-- cultura corrente;
-- altri dati contestuali del runtime.
-
-Esempio con `AsyncLocal<T>`:
-
-```cs
-private static readonly AsyncLocal<string> CorrelationId = new();
-
-public async Task EsempioExecutionContextAsync()
-{
-    CorrelationId.Value = "REQ-123";
-
-    await Task.Delay(100);
-
-    Console.WriteLine(CorrelationId.Value); // "REQ-123"
-}
-```
-
-Questo valore fluisce anche se la continuazione avviene su un thread fisico diverso.
-
-### Come `await` cattura i contesti
-
-Schema semplificato:
-
-```mermaid
-flowchart LR
-    A[Codice corrente] --> B[Legge SynchronizationContext / TaskScheduler]
-    B --> C[Legge ExecutionContext]
-    C --> D[Registra continuazione]
-    D --> E[Operazione completa]
-    E --> F[Esegue continuazione nel contesto opportuno]
-```
-
-Punti chiave:
-
-- `SynchronizationContext` riguarda il **luogo di esecuzione** della continuazione;
-- `ExecutionContext` riguarda i **dati ambientali** che fluiscono;
-- `ConfigureAwait(false)` evita la cattura del context/scheduler di sincronizzazione;
-- `ConfigureAwait(false)` **non** annulla automaticamente il flusso di `ExecutionContext`.
-
-### WPF vs ASP.NET Core
-
-| Aspetto | WPF | ASP.NET Core |
-|---|---|---|
-| UI thread dedicato | Sì | No |
-| `SynchronizationContext` significativo | Sì | In genere no |
-| Rientrare sul contesto dopo `await` | spesso necessario | spesso irrilevante |
-| `ConfigureAwait(false)` | da usare con cautela nel codice UI | di solito non necessario, ma possibile in librerie |
-
-## 9. Deadlock
-
-Un deadlock async tipico nasce quando blocchi sincronicamente un thread che serve anche per la continuazione.
-
-```cs
-public void MetodoSincrono()
-{
-    var risultato = MetodoAsincrono().Result;
+    var risultato = MetodoAsincrono().Result; // deadlock!
 }
 
 public async Task<string> MetodoAsincrono()
@@ -869,13 +447,7 @@ public async Task<string> MetodoAsincrono()
 }
 ```
 
-Scenario classico in WPF:
-
-1. il thread UI chiama `.Result`;
-2. il thread UI resta bloccato;
-3. `MetodoAsincrono` completa il delay e vuole riprendere sul contesto UI catturato;
-4. il thread UI però è occupato ad aspettare `.Result`;
-5. nessuno può avanzare.
+Cosa succede: il thread UI si blocca su `.Result`; al termine del delay `MetodoAsincrono` vuole riprendere sul thread UI (contesto catturato), che però sta aspettando. Nessuno dei due può avanzare.
 
 ```mermaid
 sequenceDiagram
@@ -889,48 +461,31 @@ sequenceDiagram
     UI--x Async: deadlock
 ```
 
-### Perché in ASP.NET Core è diverso
+La soluzione è **async all the way**: rendere asincrona l'intera catena di chiamate.
 
-ASP.NET Core non ha il classico `SynchronizationContext` della UI, quindi questo deadlock specifico è meno frequente. Tuttavia bloccare thread con `.Result` o `.Wait()` resta una cattiva idea perché:
+```cs
+private async void Button_Click(object sender, RoutedEventArgs e)
+{
+    var risultato = await MetodoAsincrono(); // nessun blocco
+    MiaLabel.Content = risultato;
+}
+```
 
-- riduce la scalabilità;
-- può causare starvation del thread pool;
-- peggiora la latenza;
-- rende il codice fragile.
-
-### Anti-pattern principali
-
-- usare `.Result` o `.Wait()` su task async;
-- wrappare API sincrone dentro `Task.Run` senza motivo;
-- lanciare task senza `await`;
-- mischiare `lock` lunghi, attese bloccanti e chiamate async;
-- usare lambda async con cattura errata di variabili;
-- avviare troppo lavoro concorrente senza limiti.
-
-### Checklist di buone pratiche
-
-- preferisci API async native per I/O;
-- usa `Task.Run` soprattutto per CPU-bound o per non bloccare la UI;
-- propaga `CancellationToken` fino ai livelli bassi;
-- usa `await` invece di `ContinueWith`, salvo casi speciali;
-- evita `async void` tranne negli event handler;
-- non usare `.Result` / `.Wait()` se puoi evitarlo;
-- valuta `ConfigureAwait(false)` nelle librerie;
-- limita il parallelismo con semafori o `Parallel.ForEachAsync`;
-- osserva sempre le eccezioni dei task;
-- usa `IProgress<T>` per feedback di avanzamento;
-- usa `IAsyncEnumerable<T>` quando i dati arrivano nel tempo;
-- fai attenzione alle closure nelle lambda async.
+<Aside variant="danger">
+In ASP.NET Core questo deadlock specifico è raro (non c'è contesto UI), ma `.Result` e `.Wait()` restano dannosi: ogni richiesta bloccata occupa un thread del pool e sotto carico si arriva alla **thread pool starvation**, con latenze che esplodono.
+</Aside>
 
 ## 10. ValueTask
 
-`ValueTask<T>` è utile quando un metodo completa spesso **in modo sincrono** e vuoi ridurre allocazioni inutili di `Task<T>`.
+`ValueTask<T>` è utile quando un metodo completa spesso **in modo sincrono**: evita di allocare un `Task<T>` a ogni chiamata.
 
 ```cs
-public async ValueTask<int> LeggiDaCache(string chiave)
+private readonly Dictionary<string, int> _cache = new();
+
+public async ValueTask<int> LeggiDaCacheAsync(string chiave)
 {
     if (_cache.TryGetValue(chiave, out int valore))
-        return valore;
+        return valore;                     // cache hit: nessuna allocazione
 
     int daDb = await _db.LeggiAsync(chiave);
     _cache[chiave] = daDb;
@@ -938,52 +493,25 @@ public async ValueTask<int> LeggiDaCache(string chiave)
 }
 ```
 
-### Quando ha senso
+Ha senso per cache hit frequenti o API ad altissima frequenza; se il metodo è quasi sempre davvero asincrono, `Task<T>` resta la scelta più semplice.
 
-- cache hit frequenti;
-- parser o reader con disponibilità immediata del dato;
-- API ad altissima frequenza dove anche piccole allocazioni contano.
+<Aside variant="warning">
+Un `ValueTask` va atteso **una sola volta**. Se ti serve attenderlo più volte o conservarlo, convertilo con `.AsTask()`.
+</Aside>
 
-### Quando evitarlo
-
-- se il metodo quasi sempre è realmente asincrono;
-- se la semplicità di `Task<T>` è preferibile;
-- se il consumer potrebbe attendere più volte lo stesso risultato.
-
-Infatti un `ValueTask<T>` ha regole più delicate:
-
-- non dovrebbe essere atteso più volte;
-- non dovrebbe essere memorizzato indiscriminatamente;
-- spesso è bene convertirlo a `Task<T>` se serve riuso.
-
-```cs
-ValueTask<int> vt = LeggiDaCache("x");
-int valore = await vt;
-```
-
-### Sintesi finale
-
-Puoi leggere `async/await` così:
-
-- `Task` descrive il lavoro futuro;
-- `await` spezza il metodo in stati;
-- il compilatore genera una state machine;
-- il runtime orchestra continuazioni, contesti e scheduler;
-- il thread pool esegue lavoro CPU-bound e callback;
-- il vero guadagno arriva soprattutto quando elimini attese bloccanti.
-
-Se vuoi un criterio rapido:
+### Riepilogo rapido
 
 | Problema | Strumento principale |
 |---|---|
 | Attesa rete/file/database | API async native + `await` |
 | Calcolo pesante che non deve bloccare | `Task.Run` |
 | Molti task indipendenti | `Task.WhenAll` |
-| Primo risultato utile | `Task.WhenAny` |
+| Primo risultato utile / timeout | `Task.WhenAny` |
+| Interruzione | `CancellationToken` |
 | Progressi | `IProgress<T>` |
 | Flusso graduale di dati | `IAsyncEnumerable<T>` |
-| Parallelismo controllato su collezioni | `Parallel.ForEachAsync` |
-| Libreria senza bisogno del contesto chiamante | `ConfigureAwait(false)` |
+| Parallelismo limitato su collezioni | `Parallel.ForEachAsync` |
+| Libreria senza bisogno del contesto | `ConfigureAwait(false)` |
 
 ## 11. Quiz
 
@@ -1029,6 +557,16 @@ c:"Attende il primo task completato",
 d:"Cancella tutti i task"
 },
 correctAnswer:"b"
+},
+{
+question:"Task.WhenAny fa:",
+answers:{
+a:"Lancia un'eccezione se un task fallisce",
+b:"Attende che TUTTI i task finiscano",
+c:"Restituisce il primo task completato",
+d:"Cancella i task in eccesso"
+},
+correctAnswer:"c"
 },
 {
 question:"Cosa lancia ThrowIfCancellationRequested()?",
@@ -1079,16 +617,6 @@ c:"_ = task (con discard)",
 d:"Task.WhenAny(task)"
 },
 correctAnswer:"c"
-},
-{
-question:"Task.WhenAny fa:",
-answers:{
-a:"Lancia un'eccezione se un task fallisce",
-b:"Attende che TUTTI i task finiscano",
-c:"Restituisce il primo task completato",
-d:"Cancella i task in eccesso"
-},
-correctAnswer:"c"
 }
 ]} />
 
@@ -1101,9 +629,9 @@ correctAnswer:"c"
 **Consegna**:
 1. Crea un metodo `async Task<string> DownloadFileAsync(string url)` che simula un download con `Task.Delay` (delay casuale tra 500ms e 2000ms) e restituisce il nome del file.
 2. Nel `Main`, avvia 5 download in parallelo con `Task.WhenAll`.
-3. Stampa i risultati nell'ordine in cui arrivano.
+3. Confronta il tempo totale con quello di 5 `await` in sequenza (usa `Stopwatch`).
 
-*Obiettivo: comprendere il parallelismo con Task.WhenAll e i benefici dell'async.*
+*Obiettivo: comprendere la concorrenza con Task.WhenAll e i benefici dell'async.*
 
 ### 12.2 Timeout con CancellationToken
 
@@ -1123,9 +651,9 @@ correctAnswer:"c"
 **Consegna**:
 1. Crea un metodo `async Task<int> ChiamaApiAsync(int id)` che lancia un'eccezione se `id % 3 == 0`.
 2. Chiama 6 API con `Task.WhenAll`.
-3. Gestisci le eccezioni aggregate con `AggregateException`.
+3. Cattura l'eccezione e stampa **tutti** gli errori leggendo `Exception.InnerExceptions` del task aggregato.
 
-*Obiettivo: capire come le eccezioni si propagano in contesti di task paralleli.*
+*Obiettivo: capire come le eccezioni si propagano in contesti di task concorrenti.*
 
 ### 12.4 Pipeline asincrona
 

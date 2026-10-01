@@ -6,41 +6,93 @@ interface Props {
   title?: string;
 }
 
-const { variant, title} = Astro.props as Props;
+const { variant, title } = Astro.props as Props;
 
-
-const iconName = {
-  tip: "fa6-solid:lightbulb",
-  warning: "fa6-solid:triangle-exclamation",
-  danger: "fa6-solid:fire",
-  info: "fa6-solid:circle-info",
+const variants = {
+  tip: {
+    icon: "fa6-solid:lightbulb",
+    label: "Suggerimento",
+    box: "border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-400 dark:bg-emerald-400/10 dark:text-emerald-50",
+    accent: "text-emerald-700 dark:text-emerald-300",
+  },
+  warning: {
+    icon: "fa6-solid:triangle-exclamation",
+    label: "Attenzione",
+    box: "border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-400 dark:bg-amber-400/10 dark:text-amber-50",
+    accent: "text-amber-700 dark:text-amber-300",
+  },
+  danger: {
+    icon: "fa6-solid:fire",
+    label: "Pericolo",
+    box: "border-rose-500 bg-rose-50 text-rose-950 dark:border-rose-400 dark:bg-rose-400/10 dark:text-rose-50",
+    accent: "text-rose-700 dark:text-rose-300",
+  },
+  info: {
+    icon: "fa6-solid:circle-info",
+    label: "Nota",
+    box: "border-sky-500 bg-sky-50 text-sky-950 dark:border-sky-400 dark:bg-sky-400/10 dark:text-sky-50",
+    accent: "text-sky-700 dark:text-sky-300",
+  },
 }[variant];
 
-const ariaLabel = title || variant.charAt(0).toUpperCase() + variant.slice(1);
+const heading = title || variants.label;
 ---
 
 <div
   role="note"
-  aria-label={ariaLabel}
-  class:list={[
-    "aside prose-p:my-0 my-3 rounded-md border-l-4 px-4 py-3",
-    {
-      " [&>p>code]:prose-code:bg-green-400/20 border-green-400 bg-green-400/10 text-green-950":
-        variant === "tip",
-      " [&>p>code]:prose-code:bg-yellow-400/20 border-yellow-400 bg-yellow-400/10 text-yellow-950":
-        variant === "warning",
-      " [&>p>code]:prose-code:bg-red-400/20 border-red-400 bg-red-400/10 text-red-950":
-        variant === "danger",
-      " [&>p>code]:bg-sky-400/20 border-sky-400 bg-sky-400/10 text-sky-950":
-        variant === "info",
-    },
-  ]}
+  aria-label={heading}
+  class:list={["aside not-prose my-6 rounded-r-xl border-l-4 px-5 py-4", variants.box]}
 >
-  <div class="flex items-center gap-2 pb-2">
-    <Icon name={iconName} class="h-6 w-6" aria-hidden="true" />
-    <p class="text-sm font-bold uppercase tracking-wide">
-      {title || variant.toUpperCase()}
-    </p>
+  <p class:list={["mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-wide", variants.accent]}>
+    <Icon name={variants.icon} class="h-4 w-4" aria-hidden="true" />
+    {heading}
+  </p>
+  <div class="aside-body">
+    <slot />
   </div>
-  <slot />
 </div>
+
+<style>
+  @reference "../styles/global.css";
+
+  /* Il contenuto è fuori da .prose: ricreiamo una tipografia minima che erediti il colore */
+  .aside-body {
+    @apply text-[0.95rem] leading-relaxed;
+  }
+  .aside-body :global(p) {
+    @apply my-2 first:mt-0 last:mb-0;
+  }
+  .aside-body :global(ul),
+  .aside-body :global(ol) {
+    @apply my-2 pl-5;
+  }
+  .aside-body :global(ul) {
+    @apply list-disc;
+  }
+  .aside-body :global(ol) {
+    @apply list-decimal;
+  }
+  .aside-body :global(li) {
+    @apply my-1;
+  }
+  .aside-body :global(strong) {
+    @apply font-semibold;
+    color: inherit;
+  }
+  .aside-body :global(a) {
+    @apply font-medium underline underline-offset-2;
+    color: inherit;
+  }
+  .aside-body :global(code) {
+    @apply rounded px-1.5 py-0.5 font-mono text-[0.85em];
+    background-color: color-mix(in oklab, currentColor 10%, transparent);
+    color: inherit;
+  }
+  .aside-body :global(pre) {
+    @apply my-3 overflow-x-auto rounded-lg p-3 text-sm;
+  }
+  .aside-body :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+</style>

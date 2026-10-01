@@ -5,20 +5,10 @@ import Navbar from "@/components/navbar/navbar.astro";
 import Donation from "@/components/donation.astro";
 import "@fontsource-variable/inter/index.css";
 import "@fontsource-variable/bricolage-grotesque";
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from "astro:transitions";
 import ToasterProvider from "@/components/ToasterProvider.jsx";
 import "../styles/global.css";
-import CopyToClipboard from "../components/CopyToClipboard";
-
-const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
-
-const resolvedImageWithDomain = "https://appuntifacili.it/_astro/logo.C8GkM4Tb_Z2tB72M.webp";
-
-const { title, description, url, image } = Astro.props as Props;
-
-const makeTitle = title
-  ? title + " | " + "AppuntiFacili"
-  : "AppuntiFacili";
+import logo from "@/assets/logo/logo.webp";
 
 export interface Props {
   title?: string;
@@ -26,19 +16,32 @@ export interface Props {
   url?: string;
   image?: string;
 }
+
+const DEFAULT_DESCRIPTION =
+  "Appunti chiari e pratici di matematica e programmazione: riassunti, esercizi e videolezioni per studenti di superiori e università, aggiornati su richiesta.";
+
+const { title, description, image } = Astro.props as Props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = new URL(image ?? logo.src, Astro.site).toString();
+const makeTitle = title ? `${title} | AppuntiFacili` : "AppuntiFacili";
+const metaDescription = description || DEFAULT_DESCRIPTION;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/png" href="/favicon.webp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/webp" href="/favicon.webp" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
     <!-- Anti-FOUC: apply theme before first paint -->
     <script is:inline>
       (function() {
-        var theme = localStorage.getItem('theme');
+        var theme = null;
+        try { theme = localStorage.getItem('theme'); } catch (e) {}
         if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.documentElement.classList.add('dark');
         } else {
@@ -59,26 +62,28 @@ export interface Props {
         }
       });
     </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"/>
     <link rel="sitemap" href="/sitemap-index.xml" />
     <SEO
       title={makeTitle}
-      description="Appunti chiari e pratici di matematica e programmazione: riassunti, esercizi e videolezioni per studenti di superiori e università, aggiornati su richiesta.";
+      description={metaDescription}
       canonical={canonicalURL}
       twitter={{
-        creator: "@surjithctly",
-        site: "@web3templates",
         card: "summary_large_image",
       }}
       openGraph={{
         basic: {
           url: canonicalURL,
           type: "website",
-          title: `AppuntiFacili`,
-          image: resolvedImageWithDomain,
+          title: makeTitle,
+          image: ogImage,
+        },
+        optional: {
+          description: metaDescription,
+          locale: "it_IT",
+          siteName: "AppuntiFacili",
         },
         image: {
-          alt: "AppuntiFacili Homepage Screenshot",
+          alt: "AppuntiFacili",
         },
       }}
     />
@@ -93,16 +98,61 @@ export interface Props {
       gtag('config', 'G-GSE1MKHYSG');
     </script>
 
+    <ClientRouter />
+
     <!-- Copy code to clipboard -->
-    <CopyToClipboard client:load />
+    <script>
+      const COPY_LABEL = "Copia";
+      const COPIED_LABEL = "Copiato!";
+
+      document.addEventListener('astro:page-load', () => {
+        const codeBlocks = document.querySelectorAll<HTMLPreElement>('pre:not(.mermaid)');
+
+        for (const codeBlock of codeBlocks) {
+          const codeEl = codeBlock.querySelector('code');
+          if (!codeEl || !codeBlock.parentNode) continue;
+          if (codeBlock.parentElement?.classList.contains('code-wrapper')) continue;
+          if (codeEl.className.toLowerCase().includes('mermaid')) continue;
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'code-wrapper';
+          wrapper.style.position = 'relative';
+
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'copy-code';
+          button.textContent = COPY_LABEL;
+          button.setAttribute('aria-label', 'Copia il codice');
+
+          codeBlock.setAttribute('tabindex', '0');
+          codeBlock.parentNode.insertBefore(wrapper, codeBlock);
+          wrapper.appendChild(codeBlock);
+          wrapper.appendChild(button);
+
+          button.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(codeEl.textContent ?? '');
+              button.textContent = COPIED_LABEL;
+              button.dataset.copied = '';
+              setTimeout(() => {
+                button.textContent = COPY_LABEL;
+                delete button.dataset.copied;
+              }, 1500);
+            } catch (err) {
+              console.error('Failed to copy:', err);
+            }
+          });
+        }
+      });
+    </script>
 
     <!-- Mermaid diagram renderer -->
     <script>
       // astro:page-load fires on the initial page load AND after every
       // View Transition swap, so we never miss diagrams regardless of
       // which page the user lands on first.
-      document.addEventListener('astro:page-load', async () => {
-        const diagrams = document.querySelectorAll('pre.mermaid:not([data-processed])');
+      async function renderMermaid() {
+        const diagrams = document.querySelectorAll<HTMLElement>('pre.mermaid:not([data-processed])');
         if (diagrams.length === 0) return;
 
         const { default: mermaid } = await import('mermaid');
@@ -163,7 +213,9 @@ export interface Props {
         });
 
         for (const diagram of diagrams) {
-          const definition = diagram.textContent ?? '';
+          // Conserva il sorgente per poter ridisegnare al cambio tema
+          diagram.dataset.source ??= diagram.textContent ?? '';
+          const definition = diagram.dataset.source;
           const id = 'mermaid-' + Math.random().toString(36).slice(2, 11);
           try {
             const { svg } = await mermaid.render(id, definition);
@@ -176,17 +228,34 @@ export interface Props {
             diagram.setAttribute('data-processed', 'true');
           }
         }
+      }
+
+      document.addEventListener('astro:page-load', renderMermaid);
+
+      // Ridisegna i diagrammi con i colori del nuovo tema
+      document.addEventListener('themechange', () => {
+        document.querySelectorAll<HTMLElement>('pre.mermaid[data-source]').forEach((diagram) => {
+          diagram.removeAttribute('data-processed');
+          diagram.textContent = diagram.dataset.source ?? '';
+        });
+        renderMermaid();
       });
     </script>
 
   </head>
-  <body class="bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 transition-colors duration-200">
+  <body class="flex min-h-screen flex-col bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white"
+    >
+      Vai al contenuto
+    </a>
     <Donation />
     <Navbar />
-    <ToasterProvider client:load>
-    <slot />
-    </ToasterProvider>
-    <ViewTransitions />
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+    <ToasterProvider client:idle />
     <Footer />
     <style is:global>
       /* Improve Page speed */
