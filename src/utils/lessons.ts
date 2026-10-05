@@ -9,6 +9,7 @@ type CategoryMeta = { label: string; icon: string };
 export const CATEGORY_META: Record<string, CategoryMeta> = {
   // Informatica
   varie: { label: "Varie", icon: "fa6-solid:shapes" },
+  office: { label: "Office", icon: "fa6-solid:file-word" },
   python: { label: "Python", icon: "fa6-brands:python" },
   c: { label: "C", icon: "simple-icons:c" },
   cpp: { label: "C++", icon: "simple-icons:cplusplus" },
