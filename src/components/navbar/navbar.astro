@@ -10,6 +10,7 @@ const menuitems = [
   { title: "Informatica", path: "/informatica", icon: "fa6-solid:code" },
   { title: "Matematica", path: "/matematica", icon: "fa6-solid:square-root-variable" },
   { title: "Lezioni private", path: "/insegnanti", icon: "fa6-solid:chalkboard-user" },
+  { title: "Servizi", path: "/servizi", icon: "fa6-solid:briefcase" },
   { title: "Video lezioni", path: "/videolezioni", icon: "fa6-solid:video" },
   { title: "Contatti", path: "/contact", icon: "fa6-solid:envelope" },
 ];
@@ -37,7 +38,7 @@ const isActive = (path: string) => pathname === path || pathname.startsWith(path
             href={item.path}
             aria-current={isActive(item.path) ? "page" : undefined}
             class:list={[
-              "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "whitespace-nowrap rounded-lg px-2 py-2 text-sm xl:px-3 font-medium transition-colors",
               isActive(item.path)
                 ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",

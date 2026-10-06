@@ -1,0 +1,128 @@
+---
+import Container from "@/components/container.astro";
+import Layout from "@/layouts/Layout.astro";
+import { Icon } from "astro-icon/components";
+
+const dailyPillUrl = "https://dennis-turco.itch.io/daily-pill";
+---
+
+<Layout
+  title="Servizi"
+  description="Lezioni private, trascrizioni delle lezioni, esercizi con DailyPill e siti web su richiesta."
+>
+  <Container>
+    <div class="mx-auto max-w-5xl py-12 md:py-16">
+      <header class="max-w-2xl">
+        <p class="eyebrow">Servizi</p>
+        <h1 class="page-title mt-2">Cosa posso fare per te</h1>
+        <p class="page-subtitle">
+          Oltre agli appunti gratuiti del sito offro lezioni private, strumenti per ripassare dopo la lezione e la
+          realizzazione di siti web su misura.
+        </p>
+      </header>
+
+      <!-- Lezioni private -->
+      <section class="card mt-10 flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-start gap-4">
+          <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <Icon name="fa6-solid:chalkboard-user" class="h-5 w-5" />
+          </span>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lezioni private</h2>
+            <p class="mt-1 text-slate-600 dark:text-slate-400">
+              Informatica, matematica e fisica, in presenza a Fidenza (PR) oppure a distanza su Discord.
+            </p>
+          </div>
+        </div>
+        <a href="/insegnanti" class="btn btn-lg btn-primary shrink-0">
+          <Icon name="fa6-solid:calendar" class="h-4 w-4" />
+          Prenota una lezione
+        </a>
+      </section>
+
+      <!-- Extra per le lezioni -->
+      <section class="mt-14">
+        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Extra per le lezioni</h2>
+        <p class="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">
+          Strumenti per ripassare quello che abbiamo fatto a lezione, disponibili con tutti gli insegnanti.
+        </p>
+
+        <div class="mt-6 grid gap-6 md:grid-cols-2">
+          <!-- Trascrizione -->
+          <article class="card flex flex-col p-6">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+              <Icon name="fa6-solid:file-lines" class="h-5 w-5" />
+            </span>
+            <h3 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Trascrizione della lezione</h3>
+            <p class="mt-2 flex-1 text-slate-600 dark:text-slate-400">
+              Ricevi dopo la lezione il testo completo di quello che abbiamo spiegato, da rileggere quando vuoi.
+              Basta richiederla al momento della prenotazione.
+            </p>
+            <a href="/contact" class="btn mt-6 self-start border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+              <Icon name="fa6-solid:envelope" class="h-4 w-4" />
+              Richiedi informazioni
+            </a>
+          </article>
+
+          <!-- DailyPill -->
+          <article class="card flex flex-col p-6">
+            <div class="flex items-center justify-between gap-3">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                <Icon name="fa6-solid:capsules" class="h-5 w-5" />
+              </span>
+              <span class="badge bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-950/60 dark:text-green-300 dark:ring-green-400/20">
+                App gratuita
+              </span>
+            </div>
+            <h3 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">DailyPill</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-400">
+              Un programma per Windows che ti propone ogni giorno brevi quiz sugli argomenti che stai studiando, per
+              tenerli sempre freschi. L'app è gratuita; sono disponibili anche pacchetti di domande già pronte.
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href={dailyPillUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                <Icon name="fa6-solid:download" class="h-4 w-4" />
+                Scarica DailyPill
+              </a>
+              <a href="/contact" class="btn border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+                <Icon name="fa6-solid:envelope" class="h-4 w-4" />
+                Richiedi informazioni
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Siti web -->
+      <section class="mt-14 overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 sm:px-12 dark:ring-1 dark:ring-slate-800">
+        <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div class="max-w-xl">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white">
+              <Icon name="fa6-solid:globe" class="h-5 w-5" />
+            </span>
+            <h2 class="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl">Siti web su richiesta</h2>
+            <p class="mt-3 text-slate-300">
+              Realizzo siti web su misura: pagine di presentazione, portfolio, siti per attività e piccoli progetti.
+              Raccontami cosa ti serve e ne parliamo.
+            </p>
+          </div>
+          <div class="flex shrink-0 flex-wrap gap-3">
+            <a href="/contact" class="btn btn-lg bg-white text-slate-900 hover:bg-slate-100">
+              <Icon name="fa6-solid:envelope" class="h-4 w-4" />
+              Richiedi informazioni
+            </a>
+            <a
+              href="https://dennisturco.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-lg border border-slate-600 text-white hover:bg-slate-800"
+            >
+              Portfolio
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </Container>
+</Layout>

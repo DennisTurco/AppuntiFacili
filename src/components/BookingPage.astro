@@ -11,11 +11,42 @@ interface Props {
 const { teacher, calendarUrl, showGithub = false } = Astro.props;
 
 const resources = [
-  { title: "Lezioni a distanza su Discord", href: "https://discord.com/invite/9Jb4Gt3HhB", icon: "fa6-brands:discord", external: true },
+  {
+    title: "Lezioni a distanza su Discord",
+    description: "Entra nel server per seguire le lezioni online.",
+    href: "https://discord.com/invite/9Jb4Gt3HhB",
+    icon: "fa6-brands:discord",
+    color: "bg-[#5865F2]/10 text-[#5865F2] dark:bg-[#5865F2]/20 dark:text-[#8b93ff]",
+    external: true,
+  },
   ...(showGithub
-    ? [{ title: "Programmi ed esercizi di informatica", href: "https://github.com/DennisTurco/AppuntiLezioni", icon: "fa6-brands:github", external: true }]
+    ? [
+        {
+          title: "Programmi ed esercizi",
+          description: "Il codice e gli esercizi di informatica fatti a lezione.",
+          href: "https://github.com/DennisTurco/AppuntiLezioni",
+          icon: "fa6-brands:github",
+          color: "bg-slate-900/10 text-slate-900 dark:bg-white/10 dark:text-white",
+          external: true,
+        },
+      ]
     : []),
-  { title: "Appunti del sito", href: "/", icon: "fa6-solid:book-open", external: false },
+  {
+    title: "Trascrizioni e DailyPill",
+    description: "Il testo della lezione e quiz quotidiani per ripassare.",
+    href: "/servizi",
+    icon: "fa6-solid:capsules",
+    color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400",
+    external: false,
+  },
+  {
+    title: "Appunti del sito",
+    description: "Tutte le lezioni scritte, gratuite, per studiare da solo.",
+    href: "/",
+    icon: "fa6-solid:book-open",
+    color: "bg-blue-500/10 text-blue-600 dark:bg-blue-400/15 dark:text-blue-400",
+    external: false,
+  },
 ];
 ---
 
@@ -30,28 +61,44 @@ const resources = [
       Scegli un orario libero dal calendario: l'appuntamento verrà sincronizzato con il tuo Google Calendar.
     </p>
 
-    <div class="mt-8 grid gap-4 md:grid-cols-[1fr_auto]">
-      <div class="callout flex items-start gap-3">
-        <Icon name="fa6-solid:circle-info" class="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
-        <p>
-          Non trovi un orario e hai urgenza? <a href="/contact" class="link">Contattami</a> e cercherò di aggiungere
-          un momento adatto.
-        </p>
+    <!-- Risorse per le lezioni -->
+    <section class="mt-8 rounded-3xl bg-linear-to-br from-blue-100 via-sky-50 to-emerald-100 p-6 shadow-xl shadow-blue-600/10 ring-2 ring-blue-500/30 sm:p-8 dark:from-blue-900/50 dark:via-slate-900 dark:to-emerald-900/30 dark:shadow-blue-500/10 dark:ring-blue-400/30">
+      <div class="flex items-center gap-2">
+        <Icon name="fa6-solid:star" class="h-4 w-4 text-amber-500" />
+        <p class="eyebrow">Da non perdere</p>
       </div>
-      <ul class="card flex flex-col justify-center gap-2 p-5 text-sm">
+      <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Tutto quello che ti serve per le lezioni</h2>
+      <p class="mt-1 text-slate-600 dark:text-slate-400">Dai un'occhiata prima di prenotare: ti aiuteranno a sfruttare al meglio ogni lezione.</p>
+
+      <ul class:list={["mt-6 grid gap-4 sm:grid-cols-2", resources.length === 4 && "lg:grid-cols-4", resources.length === 3 && "lg:grid-cols-3"]}>
         {resources.map((r) => (
           <li>
             <a
               href={r.href}
               {...(r.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              class="inline-flex items-center gap-2 font-medium text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
+              class="group flex h-full flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-lg hover:ring-blue-500/50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:ring-blue-400/50"
             >
-              <Icon name={r.icon} class="h-4 w-4 opacity-70" />
-              {r.title}
+              <span class:list={["inline-flex h-12 w-12 items-center justify-center rounded-xl", r.color]}>
+                <Icon name={r.icon} class="h-6 w-6" />
+              </span>
+              <span class="mt-4 font-semibold text-slate-900 dark:text-white">{r.title}</span>
+              <span class="mt-1 flex-1 text-sm text-slate-600 dark:text-slate-400">{r.description}</span>
+              <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+                {r.external ? "Apri" : "Scopri"}
+                <Icon name={r.external ? "fa6-solid:arrow-up-right-from-square" : "fa6-solid:arrow-right"} class="h-3 w-3 transition-transform group-hover:translate-x-1" />
+              </span>
             </a>
           </li>
         ))}
       </ul>
+    </section>
+
+    <div class="callout mt-6 flex items-start gap-3">
+      <Icon name="fa6-solid:circle-info" class="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+      <p>
+        Non trovi un orario e hai urgenza? <a href="/contact" class="link">Contattami</a> e cercherò di aggiungere
+        un momento adatto.
+      </p>
     </div>
 
     <!-- Calendario (desktop) -->

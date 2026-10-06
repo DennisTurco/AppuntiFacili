@@ -2,7 +2,7 @@
 title: "Funzioni"
 order: 7
 draft: false
-lastUpdateDate: "2025-09-14"
+lastUpdateDate: "2026-10-06"
 subject: "C++"
 category: "Informatica"
 difficulty: "medio"
@@ -11,67 +11,234 @@ author: "Dennis Turco"
 videoLesson: false
 ---
 
-## 1. Descrizione
+## 1. Introduzione
 
-Le **funzioni** in **C++**, e in generale in tutti i linguaggi di programmazione, sono sostanzialmente dei blocchi di codice riutilizzabili; possono essere pensate come dei “sottoprogrammi” richiamabili da altri programmi.
+Le **funzioni** in **C++**, e in generale in tutti i linguaggi di programmazione, sono **blocchi di codice riutilizzabili** a cui si dà un nome: possono essere pensate come dei "sottoprogrammi" che vengono richiamati da altre parti del programma.
 
-Lo scopo principale dell'uso delle funzioni è quello di poter **riutilizzare il codice** che si scrive (senza doverlo quindi riscrivere più volte!), inoltre l'utilizzo delle funzioni aumenta la **leggibilità** dei programmi che le richiamano snellendone il codice e aiuta a dividere la risoluzione di un problema in  **sottoproblemi**.
+Usare le funzioni permette di:
+
+- **riutilizzare il codice**, senza doverlo riscrivere più volte;
+- aumentare la **leggibilità** del programma, rendendo il `main` più corto e chiaro;
+- dividere la risoluzione di un problema complesso in **sottoproblemi** più semplici.
+
+<Aside variant="info">
+Anche `main` è una funzione: è quella speciale da cui parte l'esecuzione di ogni programma C++.
+</Aside>
 
 ## 2. Sintassi
 
-La sintassi di una funzione in in generale è:
+La sintassi generale di una funzione è:
 
-<Aside variant="info">
-```
-tipo_ritorno nome_funzione (elenco_parametri) {
-   istruzioni;
-   return valore_restituito;
+```text
+tipo_ritorno nome_funzione(elenco_parametri) {
+    istruzioni;
+    return valore_restituito;
 }
 ```
-</Aside>
 
 Dove:
 
-- **tipo_ritorno** è il valore di ritorno specificato come abbiamo detto prima.
-- **nome_funzione**  è il nome dato alla funzione, si raccomanda di seguire le stesse regole sintattiche per le variabili.
-- **elenco_parametri** può anche essere una lista vuota, oppure si elencano gli argomenti passati alla funzione detti anche parametri.
+- **tipo_ritorno**: il tipo del valore che la funzione restituisce (`int`, `double`, `bool`, `std::string`, ...), oppure `void` se non restituisce nulla;
+- **nome_funzione**: il nome della funzione, che segue le stesse regole dei nomi delle variabili;
+- **elenco_parametri**: i dati che la funzione riceve in ingresso, ognuno preceduto dal suo tipo e separati da virgola. La lista può anche essere vuota.
 
-## 3. Valore di ritorno
-
-- Ogni funzione presenta un valore di ritorno che puo' essere di qualsiasi tipo predefinito o definito dell'utente.
-- Se nella dichiarazione viene omesso il tipo di ritorno, esso viene considerato automaticamente un intero.
-- Nel caso di funzione che compie un azione, ovvio non deve ritornare nessun valore, si usa il tipo predefinito `void` come valore di ritorno.
-- Una funzione puo' avere o meno una lista di argomenti.
-
-## 4. Parametri per Valore vs per Riferimento
-
-### 4.1 funzioni con parametri per valore
-
-**Parametri per valore**: i parametri passati per valore vanno specificati all'interno delle parentesi tonde dopo il nome della funzione specificando per ogni parametro il nome preceduto dalla sua tipologia; quando sono presenti più parametri vanno separati da virgola. Quando si passa un parametro in questo modo all'inizio dell'esecuzione della funzione il valore memorizzato all'interno della variabile passata come parametro viene copiato in una nuova variabile della funzione. I parametri passati per valore possono essere anche opzionali, ovvero si possono creare funzioni che possono ricevere un numero diverso di parametri; questo si fa assegnando ad alcuni parametri dei valori di default.
-
-### 4.2 Funzioni con parametri per riferimento
-
-**Parametri per riferimento**: affinché una funzione riceva un parametro in questo modo è necessario anteporre una & prima del nome del parametro. I parametri passati in questo modo fanno sì che i cambiamenti che all'interno del codice della funzione su un parametro avvengano anche sulle variabili del programma chiamante. I parametri passati per riferimento non possono né essere opzionali né essere valori numerici. 
-
-*Ad esempio:*
+Esempio:
 
 ```cpp
-void funzione (int valore,int &riferimento) {
-   valore++;
-   riferimento++;
+#include <iostream>
+using namespace std;
+
+int somma(int a, int b) {
+    return a + b;
 }
 
 int main() {
-   int x=0;
-   int y=0;
-
-   funzione(x,y);
-
-   cout << x << endl; // -> 0 poiche' x e' passato per valore;
-   cout << y << endl; // -> 1 poiche' y e' passato per riferimento;
+    int risultato = somma(3, 5);
+    cout << risultato << endl; // Output: 8
 }
 ```
 
-## 5. Esercizi
+Nella chiamata `somma(3, 5)` i valori `3` e `5` sono gli **argomenti**, che vengono assegnati ai **parametri** `a` e `b`.
+
+## 3. Valore di ritorno
+
+- L'istruzione `return` **termina** la funzione e restituisce un valore al chiamante.
+- Il valore restituito deve essere compatibile con il **tipo di ritorno** dichiarato.
+- In C++ il tipo di ritorno è **obbligatorio**: non può essere omesso.
+- Se la funzione compie solo un'azione e non deve restituire nulla, si usa il tipo `void`. In questo caso `return;` (senza valore) è facoltativo e serve solo per uscire in anticipo.
+
+```cpp
+void saluta(string nome) {
+    cout << "Ciao " << nome << "!" << endl;
+}
+
+bool isPari(int n) {
+    return n % 2 == 0;
+}
+```
+
+<Aside variant="warning">
+Se una funzione non `void` arriva alla fine senza eseguire un `return`, il comportamento è **indefinito**: il compilatore spesso dà solo un warning, ma il programma può restituire valori casuali. Assicurati che ogni percorso del codice restituisca un valore.
+</Aside>
+
+## 4. Dichiarazione (prototipo) e definizione
+
+Il compilatore legge il codice dall'alto verso il basso: una funzione deve essere **dichiarata prima** di essere usata. Se vogliamo scrivere le funzioni dopo il `main`, dobbiamo prima dichiararne il **prototipo**, cioè la sola intestazione seguita da `;`.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int quadrato(int n); // prototipo (dichiarazione)
+
+int main() {
+    cout << quadrato(4) << endl; // Output: 16
+}
+
+int quadrato(int n) { // definizione
+    return n * n;
+}
+```
+
+## 5. Parametri per valore vs per riferimento
+
+### 5.1 Passaggio per valore
+
+Quando un parametro è passato **per valore**, la funzione riceve una **copia** della variabile: le modifiche fatte all'interno della funzione **non** si riflettono sulla variabile originale del chiamante.
+
+### 5.2 Passaggio per riferimento
+
+Per passare un parametro **per riferimento** si antepone `&` al nome del parametro. In questo caso la funzione lavora **direttamente sulla variabile originale**: ogni modifica fatta dentro la funzione è visibile anche al chiamante.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+void funzione(int valore, int &riferimento) {
+    valore++;
+    riferimento++;
+}
+
+int main() {
+    int x = 0;
+    int y = 0;
+
+    funzione(x, y);
+
+    cout << x << endl; // 0: x è passato per valore
+    cout << y << endl; // 1: y è passato per riferimento
+}
+```
+
+<Aside variant="warning">
+Un parametro per riferimento non costante (`int &`) deve ricevere una **variabile**: una chiamata come `funzione(x, 5)` dà errore di compilazione, perché un valore letterale come `5` non può essere modificato.
+</Aside>
+
+Un esempio classico in cui il passaggio per riferimento è indispensabile è lo **scambio** di due variabili:
+
+```cpp
+void scambia(int &a, int &b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+```
+
+### 5.3 Riferimenti costanti
+
+Quando un parametro è "pesante" da copiare (ad esempio una `string` o un `vector`) ma la funzione non deve modificarlo, si usa un **riferimento costante** `const &`: si evita la copia e il compilatore impedisce modifiche accidentali.
+
+```cpp
+void stampa(const string &testo) {
+    cout << testo << endl;
+    // testo = "altro"; // errore: testo è const
+}
+```
+
+A differenza di `int &`, un `const int &` può ricevere anche valori letterali, ad esempio `stampa("ciao")`.
+
+## 6. Parametri con valori di default
+
+Ai parametri si possono assegnare dei **valori di default**: se nella chiamata l'argomento viene omesso, si usa il valore predefinito. I parametri con default devono stare **in fondo** alla lista.
+
+```cpp
+double potenza(double base, int esponente = 2) {
+    double risultato = 1;
+    for (int i = 0; i < esponente; i++) {
+        risultato *= base;
+    }
+    return risultato;
+}
+
+int main() {
+    cout << potenza(3) << endl;    // 9  (esponente = 2)
+    cout << potenza(2, 3) << endl; // 8
+}
+```
+
+<Aside variant="info">
+Se usi un prototipo, il valore di default va scritto **solo nel prototipo** e non anche nella definizione.
+</Aside>
+
+## 7. Overloading
+
+In C++ si possono definire **più funzioni con lo stesso nome**, purché abbiano una lista di parametri diversa (per numero o per tipo). Il compilatore sceglie quale chiamare in base agli argomenti passati.
+
+```cpp
+int massimo(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+double massimo(double a, double b) {
+    return (a > b) ? a : b;
+}
+
+int massimo(int a, int b, int c) {
+    return massimo(massimo(a, b), c);
+}
+```
+
+<Aside variant="warning">
+Non basta cambiare solo il **tipo di ritorno**: due funzioni con gli stessi parametri e tipo di ritorno diverso generano un errore di compilazione.
+</Aside>
+
+## 8. Passare un array a una funzione
+
+Un array passato a una funzione **non viene copiato**: la funzione lavora sull'array originale. Poiché la funzione non conosce la dimensione dell'array, questa va passata come parametro separato.
+
+```cpp
+int sommaArray(const int arr[], int dim) {
+    int somma = 0;
+    for (int i = 0; i < dim; i++) {
+        somma += arr[i];
+    }
+    return somma;
+}
+
+int main() {
+    int numeri[] = {1, 2, 3, 4};
+    cout << sommaArray(numeri, 4) << endl; // Output: 10
+}
+```
+
+Anche qui `const` indica che la funzione non modificherà gli elementi dell'array.
+
+## 9. Visibilità delle variabili (scope)
+
+- Le variabili dichiarate dentro una funzione (parametri compresi) sono **locali**: esistono solo durante l'esecuzione della funzione e non sono visibili dall'esterno.
+- Due funzioni diverse possono avere variabili locali con lo stesso nome senza interferire tra loro.
+
+```cpp
+void f() {
+    int x = 10; // x esiste solo dentro f
+}
+
+int main() {
+    f();
+    // cout << x; // errore: x non è visibile qui
+}
+```
+
+## 10. Esercizi
 
 [Esercizi con le funzioni in C++](https://ticoprof.wordpress.com/2020/09/24/esercizi-con-le-funzioni-in-cpp/)
