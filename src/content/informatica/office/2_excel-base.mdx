@@ -2,7 +2,7 @@
 title: "Excel: funzionalità base"
 order: 2
 draft: false
-lastUpdateDate: "2026-10-24"
+lastUpdateDate: "2026-11-17"
 subject: "Office"
 category: "Informatica"
 difficulty: "facile"
@@ -469,6 +469,57 @@ Una regola vale per tutti gli esercizi: **ogni risultato deve essere una formula
 - crea un **grafico a linee** con le temperature minime e massime, con titolo e titoli degli assi;
 - crea un **istogramma** con la pioggia di ogni mese;
 - domanda: quale dei due tipi di grafico useresti per mostrare la pioggia? E perché le temperature stanno meglio su un grafico a linee?
+
+### Esercizio 6 — Il mio budget del mese
+
+<a href="/files/informatica/excel/esercizio-6-budget.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-6-budget-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** `SOMMA`, sottrazione tra celle, percentuali con riferimento assoluto, `SE`, formato valuta e percentuale, grafico a torta.
+
+**Richieste:**
+
+- sotto ciascuna tabella aggiungi la riga **Totale entrate** e **Totale uscite**;
+- nella tabella delle uscite aggiungi la colonna **% sul totale**: ogni spesa divisa per il totale delle uscite (usa `$B$18`) e formattata come percentuale;
+- sotto le tabelle calcola il **Saldo** (entrate − uscite) e nella cella **Situazione** scrivi con `SE` *Risparmio* se il saldo è almeno 0, altrimenti *In rosso*;
+- crea un **grafico a torta** delle uscite con le percentuali come etichette.
+
+**Controllo:** le uscite sono **107,90 €** e il saldo è **27,10 €**; le percentuali devono sommare 100%.
+
+### Esercizio 7 — Classifica del torneo
+
+<a href="/files/informatica/excel/esercizio-7-classifica.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-7-classifica-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** formule con gli indirizzi, ordinamento su **due livelli**, barre dei dati, `MAX`, `CONTA.SE`.
+
+**Richieste:**
+
+- aggiungi le colonne **Giocate** (vinte + pareggiate + perse), **Punti** (3 per ogni vittoria, 1 per ogni pareggio) e **Diff. reti** (gol fatti − gol subiti);
+- **ordina** la classifica per punti decrescenti; a parità di punti deve stare più in alto la squadra con la differenza reti migliore (*Dati* → *Ordina* → *Aggiungi livello*);
+- applica le **barre dei dati** alla colonna dei punti (*Formattazione condizionale* → *Barre dei dati*);
+- sotto la tabella calcola i **gol totali** del torneo, il **punteggio più alto** e quante squadre hanno la differenza reti positiva.
+
+**Controllo:** vincono le *Tigri* con **23 punti**; *Delfini* e *Lupi* hanno entrambi 14 punti, ma i *Delfini* stanno sopra.
+
+### Esercizio 8 — I prestiti della biblioteca
+
+<a href="/files/informatica/excel/esercizio-8-biblioteca.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-8-biblioteca-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** calcoli con le **date**, formato data, riferimenti assoluti, `SE`, `CONTA.SE`, formattazione condizionale.
+
+**Richieste:**
+
+- aggiungi la colonna **Scadenza**: data del prestito + giorni di prestito (cella `$B$4`), con formato data;
+- nella colonna **Giorni di ritardo** usa `SE`: se la data di oggi (`$B$3`) è dopo la scadenza, calcola la differenza, altrimenti scrivi 0;
+- aggiungi la **Multa** (giorni di ritardo × multa al giorno in `$B$5`) e lo **Stato**: *In ritardo* oppure *In regola*;
+- colora di rosso gli stati *In ritardo* e crea un riepilogo con il numero di libri in ritardo, il totale delle multe e il ritardo più lungo.
+
+**Controllo:** i libri in ritardo sono **4** e le multe in tutto fanno **9,60 €**.
+
+<Aside variant="info" title="Le date sono numeri">
+Per Excel una data è un numero (i giorni passati dal 1° gennaio 1900) mostrato con un formato speciale.
+Per questo puoi scrivere `=C8+30` per ottenere la data 30 giorni dopo, o sottrarre due date per sapere quanti giorni ci sono in mezzo.
+Se una sottrazione ti mostra una data strana invece di un numero, cambia il formato della cella in *Numero*.
+</Aside>
 
 <Aside variant="tip" title="Hai finito tutti gli esercizi?">
 Prova a usare Excel per qualcosa di tuo: le spese del mese, i tuoi voti con la media per materia o gli allenamenti della settimana con un grafico dei progressi.
