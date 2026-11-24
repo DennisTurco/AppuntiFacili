@@ -2,7 +2,7 @@
 title: "Progetti"
 order: 1
 draft: false
-lastUpdateDate: "2025-11-11"
+lastUpdateDate: "2026-11-24"
 subject: "Progetti"
 category: "Informatica"
 difficulty: ""
@@ -42,6 +42,7 @@ Se scegliete di lavorare in gruppo, è consigliabile utilizzare un sistema come 
 | Discord Knowledge Bot | Python (`discord.py` + SQLite) | 🟢 2 | ✅ | Bot Discord che invia periodicamente messaggi con pillole di nozioni tecniche o matematico-scientifiche. | Stimola la community, diffonde conoscenza, facile da aggiornare con nuovi contenuti. |
 | Progress Tracker personalizzato | Python (Dash/Streamlit + SQLite) | 🟠 3 | ✅ | Monitora gli esercizi svolti dagli studenti, mostra grafici di miglioramento e assegna badge/livelli. | Permette analisi dei progressi, gamification, facile integrazione con esercizi generati. |
 | Visualizzatore di soluzioni passo-passo | Python (Sympy + Streamlit) | 🟢 2 | ✅ | Mostra la risoluzione dettagliata di esercizi matematici/fisici e grafici interattivi. | Utile per studenti di analisi e fisica, aiuta a comprendere i passaggi intermedi e verifica le soluzioni. |
+| Diario dei Film | Python (SQLite + Flask) | 🟢 1 | ✅ | Salva i film visti con genere e voto, li mostra in una pagina web con media e film migliore. | Primo progetto completo per principianti: classi, liste, cicli e funzioni applicati a database e web. HTML già pronto. |
 | Installer Automatico con Chocolatey | C++ (o C#) | 🟢 2 | ✅ | App che installa/rimuove software leggendo un file, integrando Chocolatey e il sistema. | Ottimo per imparare automazione, scripting, gestione file e chiamate a processo. |
 | Gestione Password con generatore sicuro | Java / C# | 🟠 3 |  | Generatore e archivio sicuro di password con GUI, salvataggio criptato. | Utile per esercitarsi su GUI, file JSON e crittografia base. |
 | Gestione Finanze Personali | Java / C# | 🟠 3 | ✅ | CRUD di entrate/uscite con categorizzazione e statistiche mensili in grafico. |  |
@@ -493,6 +494,202 @@ Mostra la risoluzione dettagliata di esercizi matematici/fisici con grafici inte
         - Possibilità di salvare grafici o risultati.
 
 - **Suggerimenti:** Iniziare con integrali/derivate semplici, poi aggiungere equazioni, limiti e funzioni più complesse.
+
+### 4.7 🐣 Progetto guidato per principianti
+
+#### 4.7.1 Diario dei Film
+
+- **Difficoltà:** 🟢 **1/5**
+- Motivo: Pensato per chi ha appena iniziato. Non servono dizionari né librerie complicate, e la parte grafica (HTML) è già pronta.
+
+**Prerequisiti e competenze necessarie**: condizionali, cicli, funzioni, liste, classi e oggetti.
+
+**Descrizione:**
+Un piccolo diario in cui salvare i film visti (titolo, genere e voto da 1 a 10). I dati vengono salvati in un database **SQLite** e mostrati in una semplice pagina web con **Flask**, insieme ad alcune statistiche: numero di film, voto medio e film migliore.
+
+Al posto dei film si può scegliere qualsiasi altra cosa: videogiochi, libri, serie TV, album musicali... l'importante è che vi piaccia! 😄
+
+**Cosa si ripassa:**
+
+| Concetto | Dove si usa |
+| --- | --- |
+| Classi | `class Film` con titolo, genere e voto |
+| Liste | i film letti dal database diventano una lista di oggetti `Film` |
+| Cicli | stampa dei film, calcolo della media, ricerca del film migliore |
+| Condizionali | controllo che il voto sia tra 1 e 10, colore del voto nella pagina |
+| Funzioni | `aggiungi_film()`, `leggi_film()`, `calcola_media()`, ... |
+
+**Struttura finale del progetto:**
+
+```
+diario_film/
+├── film.py          # classe Film
+├── database.py      # funzioni per SQLite
+├── menu.py          # versione da terminale (fase 3)
+├── app.py           # sito web con Flask (fase 4)
+└── templates/
+    └── index.html   # pagina web (già pronta, da scaricare)
+```
+
+##### Fase 1: solo Python (niente database, niente web)
+
+Nel file `film.py` creare la classe `Film` e una lista di film scritti a mano nel codice (solo per fare le prove). Poi, sempre in `film.py`, scrivere le funzioni:
+
+- `stampa_film(lista_film)` → stampa tutti i film, uno per riga;
+- `calcola_media(lista_film)` → restituisce la media dei voti (attenzione: se la lista è vuota deve restituire `0`!);
+- `film_migliore(lista_film)` → restituisce il film con il voto più alto (oppure `None` se la lista è vuota).
+
+```python
+class Film:
+    def __init__(self, id, titolo, genere, voto):
+        self.id = id
+        self.titolo = titolo
+        self.genere = genere
+        self.voto = voto
+
+def calcola_media(lista_film):
+    if len(lista_film) == 0:
+        return 0
+    totale = 0
+    for f in lista_film:
+        totale += f.voto
+    return totale / len(lista_film)
+```
+
+##### Fase 2: il database SQLite (`database.py`)
+
+Python ha già SQLite incluso: basta scrivere `import sqlite3`, non serve installare nulla. Servono solo 4 comandi SQL: `CREATE TABLE`, `INSERT`, `SELECT` e `DELETE`.
+
+Funzioni da scrivere:
+
+- `crea_tabella()` → crea la tabella `film` (se non esiste già);
+- `aggiungi_film(titolo, genere, voto)`;
+- `leggi_film()` → restituisce una **lista di oggetti `Film`**;
+- `elimina_film(id)`.
+
+SQLite restituisce ogni riga come una **tupla**, quindi si leggono i valori con la posizione (`riga[0]`, `riga[1]`, ...), proprio come con le liste:
+
+```python
+import sqlite3
+from film import Film
+
+def crea_tabella():
+    conn = sqlite3.connect("film.db")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS film (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titolo TEXT,
+            genere TEXT,
+            voto INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def leggi_film():
+    conn = sqlite3.connect("film.db")
+    righe = conn.execute("SELECT id, titolo, genere, voto FROM film").fetchall()
+    conn.close()
+    lista = []
+    for r in righe:
+        lista.append(Film(r[0], r[1], r[2], r[3]))
+    return lista
+```
+
+<Aside variant="info">
+**Importante:** quando inserite dei valori nella query usate sempre i punti di domanda `?` e **mai** il `+` o le f-string per "incollare" i valori nel testo SQL:
+
+`conn.execute("INSERT INTO film (titolo, genere, voto) VALUES (?, ?, ?)", (titolo, genere, voto))`
+
+Così si evitano errori con titoli che contengono apostrofi (es. *L'era glaciale*) e problemi di sicurezza (SQL injection). Ricordatevi anche di chiamare `conn.commit()` dopo `INSERT` e `DELETE`, altrimenti le modifiche non vengono salvate!
+</Aside>
+
+##### Fase 3: menu da terminale (`menu.py`)
+
+Un ciclo `while True` con `input()` che mostra un menu:
+
+```
+1. Aggiungi un film
+2. Mostra tutti i film
+3. Elimina un film
+4. Statistiche (media e film migliore)
+0. Esci
+```
+
+Controllate con un `if` che il voto inserito sia tra 1 e 10 prima di salvarlo. Alla fine di questa fase **l'applicazione è già completa e funzionante**: il sito web sarà solo un altro modo di usare le stesse funzioni di `database.py`.
+
+##### Fase 4: il sito web con Flask (`app.py`)
+
+Installare Flask dal terminale:
+
+```bash
+pip install flask
+```
+
+Scaricare la pagina HTML già pronta e metterla nella cartella `templates/`:
+
+<a href="/files/informatica/python/diario-film/index.html" download>📥 Scarica index.html</a> · <a href="/files/informatica/python/diario-film/index.html" target="_blank">Anteprima</a>
+
+La pagina si aspetta che Flask le passi 3 variabili:
+
+- `film` → la lista di oggetti `Film`;
+- `media` → il voto medio (un numero);
+- `migliore` → il film con il voto più alto (oppure `None`).
+
+E invia i dati a 2 indirizzi:
+
+- `POST /aggiungi` → con i campi `titolo`, `genere` e `voto`;
+- `POST /elimina/<id>` → per eliminare il film con quell'id.
+
+Ecco lo scheletro di `app.py`:
+
+```python
+from flask import Flask, render_template, request, redirect
+from database import crea_tabella, leggi_film, aggiungi_film, elimina_film
+from film import calcola_media, film_migliore
+
+app = Flask(__name__)
+crea_tabella()
+
+@app.route("/")
+def home():
+    lista = leggi_film()
+    return render_template(
+        "index.html",
+        film=lista,
+        media=calcola_media(lista),
+        migliore=film_migliore(lista),
+    )
+
+@app.route("/aggiungi", methods=["POST"])
+def aggiungi():
+    titolo = request.form["titolo"]
+    genere = request.form["genere"]
+    voto = int(request.form["voto"])
+    # TODO: controllare che il voto sia tra 1 e 10
+    aggiungi_film(titolo, genere, voto)
+    return redirect("/")
+
+@app.route("/elimina/<int:id>", methods=["POST"])
+def elimina(id):
+    elimina_film(id)
+    return redirect("/")
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+Avviate il programma con `python app.py` e aprite il browser su [http://127.0.0.1:5000](http://127.0.0.1:5000). 🎉
+
+##### Fase 5: extra (se avanza tempo)
+
+- Filtrare i film per genere (es. un campo di ricerca e un ciclo con `if`);
+- Ordinare i film dal voto più alto al più basso;
+- Aggiungere l'anno di uscita del film;
+- Mostrare quanti film ci sono per ogni voto;
+- Personalizzare colori ed emoji della pagina HTML.
+
+- **Suggerimenti:** Non saltate le fasi! Fare prima tutto in Python "puro" e da terminale aiuta a capire che il sito web è solo un'interfaccia: la logica vera sta nelle funzioni che avete scritto voi.
 
 ## 5. 🟩 Java / C#
 
