@@ -1,0 +1,614 @@
+---
+title: "Excel: funzionalità base"
+order: 2
+draft: false
+lastUpdateDate: "2026-11-17"
+subject: "Office"
+category: "Informatica"
+difficulty: "facile"
+tags: ["excel", "office", "fogli di calcolo", "formule", "funzioni", "grafici", "onlyoffice", "esercizi"]
+author: "Dennis Turco"
+videoLesson: false
+---
+
+## 1. Quale programma usare
+
+Per seguire questa lezione ti consiglio di usare **Microsoft Excel**: è il foglio di calcolo più diffuso, lo trovi a scuola e in quasi tutti gli uffici, e il suo formato (`.xlsx`) è lo standard con cui si scambiano le tabelle di dati.
+Excel fa parte del pacchetto **Microsoft 365** (a pagamento); molte scuole e università lo offrono gratis a studenti e docenti, quindi prima di acquistarlo chiedi alla tua segreteria.
+
+Se non hai Excel, un'ottima **alternativa gratuita** è **[ONLYOFFICE Desktop Editors](https://www.onlyoffice.com/it/desktop.aspx)** (lo stesso programma consigliato nella lezione su Word):
+
+- è gratuito e open source, per Windows, macOS e Linux;
+- apre e salva direttamente i file `.xlsx`, senza conversioni;
+- ha un'interfaccia a schede molto simile a quella di Excel e usa gli stessi nomi di funzione.
+
+<Aside variant="info" title="Nomi dei menu e delle funzioni">
+In questa lezione uso i nomi della versione **italiana** di Excel (ad esempio scheda *Home*, *Inserisci*, *Formule* e funzioni come `SOMMA` e `MEDIA`).
+Nella versione inglese le funzioni hanno nomi inglesi (`SUM`, `AVERAGE`, ...) e gli argomenti si separano con la **virgola** invece che con il **punto e virgola**.
+</Aside>
+
+## 2. L'interfaccia di Excel
+
+Un file di Excel si chiama **cartella di lavoro** ed è formato da uno o più **fogli** (le linguette in basso: *Foglio1*, *Foglio2*...).
+Ogni foglio è una griglia di **celle**:
+
+- le **colonne** sono indicate da **lettere** (A, B, C, ... Z, AA, AB, ...);
+- le **righe** sono indicate da **numeri** (1, 2, 3, ...);
+- ogni cella ha un **indirizzo** formato da colonna + riga: `B3` è la cella nella colonna B, riga 3.
+
+Un gruppo rettangolare di celle si chiama **intervallo** e si scrive con i due angoli separati da due punti: `A1:C4` comprende tutte le celle da A1 a C4 (3 colonne × 4 righe = 12 celle).
+
+| Zona | A cosa serve |
+|---|---|
+| **Barra multifunzione** (*ribbon*) | La fascia con tutti i comandi, divisa in **schede**, come in Word. |
+| **Casella Nome** | A sinistra, sopra la colonna A: mostra l'indirizzo della cella selezionata. Puoi anche scriverci un indirizzo per saltarci. |
+| **Barra della formula** | Accanto alla Casella Nome: mostra il **vero contenuto** della cella (ad esempio la formula, mentre nella cella vedi il risultato). |
+| **Intestazioni di riga e colonna** | Le lettere e i numeri: cliccandoci selezioni tutta la colonna o tutta la riga. |
+| **Linguette dei fogli** | In basso: per passare da un foglio all'altro, rinominarli (doppio clic) o aggiungerne uno (pulsante **+**). |
+| **Barra di stato** | In basso: quando selezioni dei numeri mostra subito **somma, media e conteggio**. |
+
+Le schede più importanti sono:
+
+| Scheda | Cosa contiene |
+|---|---|
+| **File** | Nuovo, Apri, Salva, Salva con nome, Esporta in PDF, Stampa. |
+| **Home** | Appunti, Carattere, Allineamento, **Numeri** (formato delle celle), Stili (formattazione condizionale, formatta come tabella), Celle (inserisci/elimina), Somma automatica, Ordina e filtra. |
+| **Inserisci** | Tabelle, **grafici**, immagini, forme. |
+| **Layout di pagina** | Margini, orientamento, area di stampa, adatta alla pagina. |
+| **Formule** | Libreria di tutte le funzioni, Somma automatica, controllo degli errori. |
+| **Dati** | Ordina, filtra, convalida dati, rimuovi duplicati. |
+| **Revisione** | Controllo ortografia, commenti, protezione del foglio. |
+| **Visualizza** | Blocca riquadri, zoom, griglia, intestazioni. |
+
+## 3. Creare, salvare e aprire una cartella di lavoro
+
+- **Nuova cartella**: *File* → *Nuovo* → *Cartella di lavoro vuota*.
+- **Salvare**: *File* → *Salva con nome*. Il formato predefinito è **Cartella di lavoro di Excel (`.xlsx`)**.
+- **Esportare in PDF**: *File* → *Esporta* → *Crea documento PDF/XPS*. Prima controlla l'anteprima di stampa (vedi il [paragrafo 13](#13-stampa-e-pdf)): un foglio di calcolo non ha pagine, quindi Excel deve decidere come "tagliarlo".
+- **Aprire**: *File* → *Apri*, oppure doppio clic sul file.
+
+<Aside variant="warning">
+Salva **spesso** e dai ai file nomi chiari (ad esempio `spese-casa-2026.xlsx` invece di `Cartel1.xlsx`).
+Se usi OneDrive puoi attivare il **Salvataggio automatico** in alto a sinistra.
+</Aside>
+
+## 4. Inserire e modificare i dati
+
+Clicca una cella e scrivi: il contenuto viene confermato con `Invio` (il cursore scende) o con `Tab` (il cursore va a destra).
+
+| Per... | Fai così |
+|---|---|
+| Sostituire il contenuto | Seleziona la cella e scrivi direttamente. |
+| Modificare il contenuto senza cancellarlo | Doppio clic sulla cella, oppure `F2`, oppure clicca nella barra della formula. |
+| Annullare quello che stai scrivendo | `Esc`. |
+| Cancellare il contenuto | `Canc`. |
+| Andare a capo **dentro** la stessa cella | `Alt` + `Invio`. |
+
+### 4.1 Tipi di dati
+
+Excel riconosce da solo che cosa hai scritto:
+
+| Tipo | Esempio | Allineamento predefinito |
+|---|---|---|
+| **Testo** | `Mario Rossi`, `Totale` | A sinistra |
+| **Numero** | `42`, `3,5`, `-10` | A destra |
+| **Data** | `24/10/2026` | A destra (per Excel è un numero!) |
+| **Formula** | `=A1+B1` | Mostra il risultato |
+
+<Aside variant="danger" title="La virgola dei decimali">
+Nella versione italiana i decimali si scrivono con la **virgola** (`3,5`).
+Se scrivi `3.5` Excel potrebbe considerarlo **testo** (te ne accorgi perché resta allineato a sinistra) oppure una **data**, e i calcoli non funzionano.
+Non scrivere neanche le unità di misura nella cella (`5 kg`, `10 €`): scrivi solo il numero e usa il **formato** (paragrafo 6.2) o l'intestazione della colonna.
+</Aside>
+
+### 4.2 Il riempimento automatico
+
+Il quadratino in basso a destra della cella selezionata si chiama **quadratino di riempimento**. Trascinandolo verso il basso o verso destra:
+
+- un **testo** o un **numero** viene copiato;
+- una **serie** viene continuata: scrivi `Gennaio` e trascina per ottenere `Febbraio`, `Marzo`...; funziona anche con i giorni della settimana e le date;
+- per una **sequenza di numeri** (1, 2, 3...) scrivi i primi due valori, selezionali entrambi e trascina: Excel capisce il passo (1, 3 → 5, 7, 9...);
+- una **formula** viene copiata adattando gli indirizzi (vedi il [paragrafo 8](#8-riferimenti-relativi-e-assoluti)).
+
+Con un **doppio clic** sul quadratino Excel riempie automaticamente verso il basso fino all'ultima riga della tabella.
+
+## 5. Righe, colonne e fogli
+
+- **Larghezza della colonna**: trascina il bordo destro dell'intestazione (la lettera). Con un **doppio clic** sul bordo la colonna si adatta al contenuto più lungo.
+- **Inserire** una riga o una colonna: tasto destro sull'intestazione → *Inserisci*. La nuova riga compare **sopra**, la nuova colonna **a sinistra**.
+- **Eliminare**: tasto destro sull'intestazione → *Elimina* (diverso da `Canc`, che svuota solo le celle).
+- **Nascondere**: tasto destro → *Nascondi*. Per farle ricomparire seleziona le righe/colonne vicine → *Scopri*.
+- **Blocca riquadri**: *Visualizza* → *Blocca riquadri* → *Blocca riga superiore*. Così le intestazioni restano visibili mentre scorri una tabella lunga.
+- **Fogli**: tasto destro sulla linguetta per rinominare, eliminare, spostare, copiare o cambiare il colore.
+
+<Aside variant="tip" title="Che cosa significa ####?">
+Se in una cella vedi `#######` non è un errore: la colonna è **troppo stretta** per mostrare il numero o la data. Allargala con un doppio clic sul bordo dell'intestazione.
+</Aside>
+
+## 6. Formattare le celle
+
+### 6.1 Carattere, allineamento e bordi
+
+I comandi della scheda *Home* funzionano come in Word: tipo e dimensione del carattere, **grassetto**, *corsivo*, colore del testo e **colore di riempimento** (lo sfondo della cella).
+In più ci sono alcuni comandi tipici dei fogli di calcolo:
+
+| Comando | Dove | A cosa serve |
+|---|---|---|
+| **Bordi** | *Home* → *Carattere* | Le linee grigie della griglia **non si stampano**: per avere una tabella con le righe usa *Tutti i bordi*. |
+| **Allineamento** orizzontale e verticale | *Home* → *Allineamento* | Posizione del contenuto dentro la cella. |
+| **Testo a capo** | *Home* → *Allineamento* | Se il testo è più lungo della cella va a capo invece di uscire. |
+| **Orientamento** | *Home* → *Allineamento* | Scrive il testo in diagonale o in verticale (utile per intestazioni strette). |
+| **Unisci e allinea al centro** | *Home* → *Allineamento* | Unisce più celle in una sola: si usa per i **titoli** sopra una tabella. |
+| **Stili cella** | *Home* → *Stili* | Formattazioni già pronte (Titolo, Totale, Valuta...). |
+
+<Aside variant="warning" title="Unisci con moderazione">
+Le celle unite vanno bene per un titolo, ma **dentro** una tabella di dati creano problemi quando ordini, filtri o copi.
+Quando unisci, Excel tiene solo il contenuto della cella in alto a sinistra.
+</Aside>
+
+### 6.2 Il formato dei numeri
+
+Il **formato** cambia il modo in cui un numero viene **mostrato**, non il suo valore. Lo trovi in *Home* → *Numeri* (o tasto destro → *Formato celle...*, scorciatoia `Ctrl` + `1`).
+
+| Formato | Valore nella cella | Cosa vedi | Quando usarlo |
+|---|---|---|---|
+| **Generale** | `1234,5` | `1234,5` | Predefinito. |
+| **Numero** | `1234,5` | `1.234,50` | Per scegliere i decimali e il separatore delle migliaia. |
+| **Valuta** / **Contabilità** | `1234,5` | `€ 1.234,50` | Prezzi, spese, stipendi. |
+| **Percentuale** | `0,25` | `25%` | Sconti, IVA, percentuali di voto. |
+| **Data** | `46319` | `24/10/2026` | Date: per Excel una data è il numero di giorni passati dal 1° gennaio 1900. |
+| **Testo** | `0521` | `0521` | Codici che non sono numeri, come CAP o numeri di telefono che iniziano con 0. |
+
+I pulsanti **Aumenta decimali** e **Diminuisci decimali** cambiano quante cifre si vedono dopo la virgola, ma **non arrotondano il valore**: i calcoli usano sempre il numero completo.
+
+<Aside variant="info" title="Le percentuali">
+Per Excel `22%` e `0,22` sono **lo stesso numero**.
+Puoi scrivere direttamente `22%` nella cella: Excel memorizza `0,22` e applica il formato percentuale.
+</Aside>
+
+### 6.3 Formattazione condizionale
+
+La **formattazione condizionale** (*Home* → *Formattazione condizionale*) colora le celle **in base al loro valore**, e si aggiorna da sola quando i valori cambiano. Alcuni esempi:
+
+- *Regole evidenziazione celle* → *Minore di...* `6`: tutti i voti insufficienti diventano rossi;
+- *Regole primi/ultimi* → *Primi 10 elementi*: evidenzia i valori più alti;
+- *Barre dei dati* e *Scale di colori*: trasformano una colonna di numeri in un piccolo grafico dentro le celle.
+
+Per togliere le regole: *Formattazione condizionale* → *Cancella regole*.
+
+## 7. Le formule
+
+Una **formula** è un calcolo e **inizia sempre con il segno uguale** `=`.
+Nella cella vedi il **risultato**, nella barra della formula vedi la **formula**.
+
+| Operatore | Significato | Esempio | Risultato |
+|---|---|---|---|
+| `+` | Addizione | `=5+3` | 8 |
+| `-` | Sottrazione | `=5-3` | 2 |
+| `*` | Moltiplicazione | `=5*3` | 15 |
+| `/` | Divisione | `=6/3` | 2 |
+| `^` | Potenza | `=5^2` | 25 |
+| `&` | Unisce due testi | `="Ciao "&"Mario"` | Ciao Mario |
+
+L'ordine delle operazioni è quello della matematica: prima le potenze, poi moltiplicazioni e divisioni, poi addizioni e sottrazioni. Usa le **parentesi tonde** per cambiare l'ordine: `=2+3*4` fa 14, `=(2+3)*4` fa 20.
+
+### 7.1 Usare gli indirizzi delle celle
+
+La forza di Excel è che nelle formule non si scrivono i numeri, ma **gli indirizzi delle celle che li contengono**:
+
+|   | A | B | C | D |
+|---|---|---|---|---|
+| **1** | Prodotto | Quantità | Prezzo | Totale |
+| **2** | Pane | 2 | 1,80 | `=B2*C2` → **3,60** |
+
+Se cambi la quantità in B2, il totale in D2 si **ricalcola da solo**.
+
+<Aside variant="tip" title="Scrivere le formule cliccando">
+Invece di scrivere gli indirizzi a mano, digita `=` e poi **clicca** la cella: Excel scrive l'indirizzo al posto tuo e lo colora, così vedi subito quali celle stai usando.
+Digita l'operatore, clicca la cella successiva e conferma con `Invio`.
+</Aside>
+
+## 8. Riferimenti relativi e assoluti
+
+Quando copi una formula (con il riempimento automatico o con copia e incolla), Excel **sposta gli indirizzi** della stessa distanza: è un riferimento **relativo**.
+
+|   | A | B | C | D |
+|---|---|---|---|---|
+| **2** | Pane | 2 | 1,80 | `=B2*C2` |
+| **3** | Latte | 3 | 1,25 | `=B3*C3` |
+| **4** | Pasta | 4 | 0,95 | `=B4*C4` |
+
+Hai scritto solo la formula in D2 e l'hai trascinata in giù: Excel ha cambiato da solo `2` in `3` e `4`. È quasi sempre quello che vuoi.
+
+A volte invece una formula deve usare **sempre la stessa cella**, per esempio la percentuale dell'IVA scritta una volta sola in alto. In questo caso si usa un riferimento **assoluto**, bloccando colonna e riga con il simbolo del dollaro `$`:
+
+|   | A | B | C |
+|---|---|---|---|
+| **1** | IVA | 22% | |
+| **2** | | | |
+| **3** | Articolo | Prezzo | Prezzo con IVA |
+| **4** | Zaino | 35,00 | `=B4*(1+$B$1)` |
+| **5** | Astuccio | 8,50 | `=B5*(1+$B$1)` |
+
+Trascinando la formula, `B4` diventa `B5` (relativo), mentre `$B$1` resta **sempre** `$B$1` (assoluto).
+Se un giorno l'IVA cambia, modifichi **una sola cella** e tutti i prezzi si aggiornano.
+
+| Scrittura | Cosa resta bloccato |
+|---|---|
+| `B1` | Niente (relativo) |
+| `$B$1` | Colonna e riga (assoluto) |
+| `$B1` | Solo la colonna (misto) |
+| `B$1` | Solo la riga (misto) |
+
+<Aside variant="tip">
+Mentre scrivi una formula, metti il cursore su un indirizzo e premi **`F4`**: Excel aggiunge i `$` al posto tuo. Premendolo più volte passi da `$B$1` a `B$1`, `$B1` e di nuovo `B1`.
+</Aside>
+
+## 9. Le funzioni
+
+Una **funzione** è una formula già pronta. Si scrive con il **nome**, seguito dagli **argomenti** tra parentesi, separati da **punto e virgola**:
+
+```
+=NOME.FUNZIONE(argomento1; argomento2; ...)
+```
+
+### 9.1 Le funzioni da conoscere
+
+| Funzione | Cosa fa | Esempio |
+|---|---|---|
+| `SOMMA` | Somma i numeri | `=SOMMA(B2:B10)` |
+| `MEDIA` | Media aritmetica | `=MEDIA(B2:F2)` |
+| `MIN` / `MAX` | Valore più piccolo / più grande | `=MAX(C2:C30)` |
+| `CONTA.NUMERI` | Conta le celle che contengono numeri | `=CONTA.NUMERI(B2:B10)` |
+| `CONTA.VALORI` | Conta le celle non vuote (anche testo) | `=CONTA.VALORI(A2:A10)` |
+| `ARROTONDA` | Arrotonda a un certo numero di decimali | `=ARROTONDA(G2; 1)` |
+| `OGGI` | La data di oggi (si aggiorna da sola) | `=OGGI()` |
+| `SE` | Sceglie tra due risultati in base a una condizione | `=SE(G2>=6; "Promosso"; "Da recuperare")` |
+| `CONTA.SE` | Conta le celle che rispettano una condizione | `=CONTA.SE(B2:B21; "Anna")` |
+| `SOMMA.SE` | Somma solo le righe che rispettano una condizione | `=SOMMA.SE(B2:B21; "Anna"; F2:F21)` |
+
+Puoi anche **mettere una funzione dentro un'altra**: `=ARROTONDA(MEDIA(B2:F2); 1)` calcola la media e la arrotonda a un decimale.
+
+### 9.2 La funzione SE
+
+`SE` ha tre argomenti: **la condizione**, il risultato **se è vera**, il risultato **se è falsa**.
+
+```
+=SE(condizione; valore_se_vero; valore_se_falso)
+```
+
+Nella condizione puoi usare gli operatori di confronto `=`, `<>` (diverso), `<`, `>`, `<=`, `>=`.
+I **testi** vanno scritti tra **virgolette** (`"Promosso"`), i numeri e gli indirizzi no.
+
+### 9.3 Somma automatica e inserisci funzione
+
+- **Somma automatica** (`Σ`, in *Home* o *Formule*): seleziona la cella sotto una colonna di numeri, clicca `Σ` e conferma con `Invio`. La freccia accanto al pulsante offre anche *Media*, *Conta numeri*, *Max* e *Min*. Scorciatoia: `Alt` + `=`.
+- **Inserisci funzione** (il pulsante *fx* accanto alla barra della formula): apre una finestra dove cerchi la funzione e compili gli argomenti uno alla volta, con una spiegazione per ognuno.
+- Mentre scrivi `=SO...` Excel mostra un elenco di funzioni: premi `Tab` per scegliere quella evidenziata.
+
+<Aside variant="tip" title="Controllo veloce senza formule">
+Seleziona un gruppo di numeri e guarda la **barra di stato** in basso: Excel mostra già somma, media e conteggio.
+È utile per controllare che una tua formula dia il risultato giusto.
+</Aside>
+
+## 10. Gli errori più comuni
+
+Quando una formula non può essere calcolata, la cella mostra un **codice di errore**:
+
+| Errore | Significato | Come si risolve |
+|---|---|---|
+| `#DIV/0!` | Divisione per zero (o per una cella vuota). | Controlla il divisore. |
+| `#NOME?` | Excel non riconosce il nome di una funzione. | Controlla l'ortografia (`=SOMA(...)`) o le virgolette mancanti attorno a un testo. |
+| `#VALORE!` | Hai fatto un calcolo con un testo. | Controlla che le celle contengano numeri veri (allineati a destra). |
+| `#RIF!` | La formula usa una cella che è stata eliminata. | Riscrivi la formula. |
+| `#N/D` | Valore non disponibile (tipico delle funzioni di ricerca). | Controlla il valore cercato. |
+| `#####` | Non è un errore: la colonna è troppo stretta. | Allarga la colonna. |
+
+Se la cella mostra la **formula come testo** invece del risultato, probabilmente hai dimenticato il `=` iniziale o la cella è in formato *Testo*.
+
+## 11. Ordinare, filtrare e formattare come tabella
+
+### 11.1 Ordinare
+
+Clicca una cella della colonna da ordinare → *Dati* → **Ordina A-Z** (crescente) oppure **Ordina Z-A** (decrescente).
+Excel ordina **tutte le righe insieme**, così ogni riga resta intera.
+Per ordinare su più colonne (prima per venditore, poi per importo) usa *Dati* → *Ordina* e aggiungi i livelli.
+
+<Aside variant="danger" title="Non ordinare una colonna sola">
+Se selezioni **solo** una colonna e la ordini, Excel ti chiede se espandere la selezione: rispondi **sì**.
+Altrimenti i dati di quella colonna si mescolano rispetto al resto della riga e la tabella diventa sbagliata.
+</Aside>
+
+### 11.2 Filtrare
+
+*Dati* → **Filtro** aggiunge una freccia su ogni intestazione. Cliccandola puoi:
+
+- mostrare solo alcune voci (ad esempio solo le vendite di *Anna*);
+- usare i *Filtri per numeri* (maggiore di, primi 10...) o i *Filtri per data*.
+
+Le righe filtrate non vengono cancellate, vengono solo **nascoste**: i numeri di riga diventano blu per ricordartelo.
+
+### 11.3 Formatta come tabella
+
+Seleziona i dati con le intestazioni → *Home* → **Formatta come tabella** e scegli uno stile. Ottieni in un colpo solo:
+
+- righe a colori alterni;
+- i pulsanti del filtro già attivi;
+- la tabella che **si allarga da sola** quando aggiungi una riga sotto, copiando anche le formule;
+- la scheda *Struttura tabella*, con l'opzione **Riga totale**.
+
+## 12. I grafici
+
+Un grafico trasforma una tabella di numeri in un'immagine che si capisce al primo sguardo.
+
+1. Seleziona i dati **con le intestazioni** (ad esempio la colonna dei mesi e quella delle temperature);
+2. *Inserisci* → *Grafici* → scegli il tipo (oppure *Grafici consigliati*);
+3. con il grafico selezionato compaiono le schede **Progettazione grafico** e **Formato**.
+
+| Tipo di grafico | Quando usarlo |
+|---|---|
+| **Istogramma** (colonne) / **Barre** | Confrontare valori di categorie diverse: vendite per venditore, pioggia per mese. |
+| **Linee** | Mostrare come un valore **cambia nel tempo**: temperature, andamento dei voti. |
+| **Torta** | Mostrare le **parti di un intero** (le fette sommano al 100%). Funziona solo con pochi valori. |
+| **Dispersione** | Vedere se due grandezze numeriche sono collegate (altezza e peso). |
+
+Per completare il grafico:
+
+- clicca il **titolo** per modificarlo;
+- usa il pulsante **+** accanto al grafico (*Elementi grafico*) per aggiungere **titoli degli assi**, **etichette dati** e **legenda**;
+- con *Progettazione grafico* → *Cambia tipo di grafico* o *Seleziona dati* modifichi il grafico senza rifarlo;
+- trascina il grafico per spostarlo e le maniglie sugli angoli per ridimensionarlo.
+
+Il grafico è **collegato ai dati**: se cambi un numero nella tabella, il grafico si aggiorna da solo.
+
+## 13. Stampa e PDF
+
+Un foglio di calcolo non è diviso in pagine, quindi prima di stampare o esportare in PDF controlla sempre l'**anteprima** (*File* → *Stampa*, `Ctrl` + `P`).
+
+- **Orientamento**: *Layout di pagina* → *Orientamento* → *Orizzontale* per le tabelle larghe.
+- **Adatta alla pagina**: nell'anteprima, in fondo alle impostazioni, scegli *Adatta foglio a una pagina* o *Adatta tutte le colonne a una pagina*.
+- **Area di stampa**: seleziona solo la parte da stampare → *Layout di pagina* → *Area di stampa* → *Imposta area di stampa*.
+- **Stampa titoli**: *Layout di pagina* → *Stampa titoli* → *Righe da ripetere in alto*, per ripetere le intestazioni su ogni pagina.
+- **Griglia**: le linee grigie non si stampano; se le vuoi, usa i **bordi** oppure *Layout di pagina* → *Griglia* → *Stampa*.
+
+## 14. Scorciatoie da tastiera
+
+Queste scorciatoie funzionano in Excel e in ONLYOFFICE:
+
+| Scorciatoia | Azione |
+|---|---|
+| `Ctrl` + `C` / `Ctrl` + `X` / `Ctrl` + `V` | Copia / Taglia / Incolla |
+| `Ctrl` + `Z` / `Ctrl` + `Y` | Annulla / Ripeti |
+| `F2` | Modifica la cella selezionata |
+| `F4` | Mentre scrivi una formula: aggiunge o toglie i `$` |
+| `Alt` + `=` | Somma automatica |
+| `Alt` + `Invio` | A capo dentro la cella |
+| `Ctrl` + `1` | Formato celle |
+| `Ctrl` + `Frecce` | Salta all'ultima cella piena in quella direzione |
+| `Ctrl` + `Maiusc` + `Frecce` | Seleziona fino all'ultima cella piena |
+| `Ctrl` + `Home` | Torna alla cella A1 |
+| `Ctrl` + `;` | Inserisce la data di oggi (come valore fisso) |
+| `Ctrl` + `P` | Stampa |
+| `F12` | Salva con nome |
+
+## 15. Esercizi
+
+Per ogni esercizio scarica il **file di partenza**, che contiene solo i dati, e completalo seguendo le richieste.
+Quando hai finito, confronta il tuo lavoro con il **file di soluzione**: clicca nelle celle colorate e guarda la formula nella barra della formula.
+
+Una regola vale per tutti gli esercizi: **ogni risultato deve essere una formula**. Prova a cambiare un numero nei dati: se i totali non si aggiornano, hai scritto un valore a mano.
+
+### Esercizio 1 — Lista della spesa
+
+<a href="/files/informatica/excel/esercizio-1-lista-spesa.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-1-lista-spesa-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** formule con gli indirizzi, riempimento automatico, `SOMMA`, formato valuta, bordi, unisci e centra.
+
+**Richieste:**
+
+- nella colonna *Totale* calcola quantità × prezzo unitario: scrivi la formula solo nella prima riga e trascinala in giù;
+- in fondo aggiungi la riga **TOTALE** con la somma delle quantità e della spesa (usa la **Somma automatica**);
+- applica il formato **Valuta** ai prezzi, aggiungi i bordi a tutta la tabella e colora la riga delle intestazioni;
+- unisci e centra il titolo sopra la tabella.
+
+**Controllo:** la spesa totale è **31,35 €**.
+
+### Esercizio 2 — Registro dei voti
+
+<a href="/files/informatica/excel/esercizio-2-registro-voti.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-2-registro-voti-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** `MEDIA`, `MAX`, `MIN`, `ARROTONDA`, `SE`, formattazione condizionale, blocca riquadri.
+
+**Richieste:**
+
+- aggiungi le colonne **Media** (arrotondata a un decimale), **Voto max** e **Voto min** di ogni studente;
+- nella colonna **Esito** scrivi *Promosso* se la media è almeno 6, altrimenti *Da recuperare*;
+- nell'ultima riga calcola la **media della classe** per ogni materia;
+- con la **formattazione condizionale** colora di rosso i voti minori di 6 e gli esiti *Da recuperare*;
+- blocca la prima colonna e la riga delle intestazioni (*Visualizza* → *Blocca riquadri*, dopo aver selezionato la cella B4).
+
+### Esercizio 3 — Listino con IVA e sconto
+
+<a href="/files/informatica/excel/esercizio-3-listino-iva.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-3-listino-iva-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** riferimenti **assoluti**, formato percentuale e valuta.
+
+**Richieste:**
+
+- aggiungi le colonne **Prezzo con IVA**, **Prezzo scontato** (sconto applicato al prezzo con IVA) e **Risparmio**;
+- le percentuali di IVA e sconto sono scritte **una sola volta** nelle celle B3 e B4: le formule devono usare `$B$3` e `$B$4`;
+- verifica: cambia lo sconto da 10% a 20% e controlla che **tutti** i prezzi scontati si aggiornino.
+
+**Controllo:** lo zaino costa **42,70 €** con IVA e **38,43 €** scontato.
+
+### Esercizio 4 — Vendite del mese
+
+<a href="/files/informatica/excel/esercizio-4-vendite.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-4-vendite-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** formatta come tabella, ordinamento, filtri, `CONTA.SE`, `SOMMA.SE`, `MAX`.
+
+**Richieste:**
+
+- completa la colonna **Importo** (quantità × prezzo unitario);
+- trasforma i dati in una tabella con **Formatta come tabella**;
+- accanto alla tabella crea un riepilogo con, per ogni venditore, il **numero di vendite** (`CONTA.SE`) e il **totale incassato** (`SOMMA.SE`), più la riga dei totali e la **vendita più alta**;
+- prova a **ordinare** la tabella per importo decrescente e a **filtrare** solo le vendite di *Notebook*: il riepilogo deve restare uguale.
+
+**Controllo:** il totale di tutte le vendite è **12.729,10 €**.
+
+### Esercizio 5 — Il clima della città
+
+<a href="/files/informatica/excel/esercizio-5-clima-grafici.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-5-clima-grafici-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** grafici a linee e istogrammi, titoli e assi, funzioni di riepilogo.
+
+**Richieste:**
+
+- aggiungi la colonna **Temp. media** (media tra minima e massima di ogni mese, con un decimale);
+- nella riga *Anno* calcola la temperatura minima e massima dell'anno, la pioggia totale e la media annuale;
+- crea un **grafico a linee** con le temperature minime e massime, con titolo e titoli degli assi;
+- crea un **istogramma** con la pioggia di ogni mese;
+- domanda: quale dei due tipi di grafico useresti per mostrare la pioggia? E perché le temperature stanno meglio su un grafico a linee?
+
+### Esercizio 6 — Il mio budget del mese
+
+<a href="/files/informatica/excel/esercizio-6-budget.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-6-budget-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** `SOMMA`, sottrazione tra celle, percentuali con riferimento assoluto, `SE`, formato valuta e percentuale, grafico a torta.
+
+**Richieste:**
+
+- sotto ciascuna tabella aggiungi la riga **Totale entrate** e **Totale uscite**;
+- nella tabella delle uscite aggiungi la colonna **% sul totale**: ogni spesa divisa per il totale delle uscite (usa `$B$18`) e formattata come percentuale;
+- sotto le tabelle calcola il **Saldo** (entrate − uscite) e nella cella **Situazione** scrivi con `SE` *Risparmio* se il saldo è almeno 0, altrimenti *In rosso*;
+- crea un **grafico a torta** delle uscite con le percentuali come etichette.
+
+**Controllo:** le uscite sono **107,90 €** e il saldo è **27,10 €**; le percentuali devono sommare 100%.
+
+### Esercizio 7 — Classifica del torneo
+
+<a href="/files/informatica/excel/esercizio-7-classifica.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-7-classifica-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** formule con gli indirizzi, ordinamento su **due livelli**, barre dei dati, `MAX`, `CONTA.SE`.
+
+**Richieste:**
+
+- aggiungi le colonne **Giocate** (vinte + pareggiate + perse), **Punti** (3 per ogni vittoria, 1 per ogni pareggio) e **Diff. reti** (gol fatti − gol subiti);
+- **ordina** la classifica per punti decrescenti; a parità di punti deve stare più in alto la squadra con la differenza reti migliore (*Dati* → *Ordina* → *Aggiungi livello*);
+- applica le **barre dei dati** alla colonna dei punti (*Formattazione condizionale* → *Barre dei dati*);
+- sotto la tabella calcola i **gol totali** del torneo, il **punteggio più alto** e quante squadre hanno la differenza reti positiva.
+
+**Controllo:** vincono le *Tigri* con **23 punti**; *Delfini* e *Lupi* hanno entrambi 14 punti, ma i *Delfini* stanno sopra.
+
+### Esercizio 8 — I prestiti della biblioteca
+
+<a href="/files/informatica/excel/esercizio-8-biblioteca.xlsx" download>Scarica il file di partenza</a> · <a href="/files/informatica/excel/esercizio-8-biblioteca-soluzione.xlsx" download>Scarica la soluzione</a>
+
+**Cosa allena:** calcoli con le **date**, formato data, riferimenti assoluti, `SE`, `CONTA.SE`, formattazione condizionale.
+
+**Richieste:**
+
+- aggiungi la colonna **Scadenza**: data del prestito + giorni di prestito (cella `$B$4`), con formato data;
+- nella colonna **Giorni di ritardo** usa `SE`: se la data di oggi (`$B$3`) è dopo la scadenza, calcola la differenza, altrimenti scrivi 0;
+- aggiungi la **Multa** (giorni di ritardo × multa al giorno in `$B$5`) e lo **Stato**: *In ritardo* oppure *In regola*;
+- colora di rosso gli stati *In ritardo* e crea un riepilogo con il numero di libri in ritardo, il totale delle multe e il ritardo più lungo.
+
+**Controllo:** i libri in ritardo sono **4** e le multe in tutto fanno **9,60 €**.
+
+<Aside variant="info" title="Le date sono numeri">
+Per Excel una data è un numero (i giorni passati dal 1° gennaio 1900) mostrato con un formato speciale.
+Per questo puoi scrivere `=C8+30` per ottenere la data 30 giorni dopo, o sottrarre due date per sapere quanti giorni ci sono in mezzo.
+Se una sottrazione ti mostra una data strana invece di un numero, cambia il formato della cella in *Numero*.
+</Aside>
+
+<Aside variant="tip" title="Hai finito tutti gli esercizi?">
+Prova a usare Excel per qualcosa di tuo: le spese del mese, i tuoi voti con la media per materia o gli allenamenti della settimana con un grafico dei progressi.
+Ricordati le regole: dati puliti senza unità di misura, solo formule per i risultati e riferimenti assoluti per i valori fissi.
+</Aside>
+
+## 16. Quiz
+
+import Quiz from '../../../components/Quiz.jsx';
+
+<Quiz client:load questions={[
+  {
+    question: "1) Qual è il formato predefinito dei file di Excel?",
+    answers: {
+      a: '.docx',
+      b: '.xlsx',
+      c: '.csv',
+      d: '.pdf'
+    },
+    correctAnswer: 'b'
+  },
+  {
+    question: "2) Che cosa indica l'indirizzo C5?",
+    answers: {
+      a: 'La cella nella riga C e colonna 5',
+      b: 'La cella nella colonna C e riga 5',
+      c: 'Le celle da C1 a C5',
+      d: 'Il quinto foglio della cartella'
+    },
+    correctAnswer: 'b'
+  },
+  {
+    question: "3) Con quale carattere deve iniziare una formula?",
+    answers: {
+      a: '#',
+      b: '$',
+      c: '=',
+      d: '+'
+    },
+    correctAnswer: 'c'
+  },
+  {
+    question: "4) Quanto fa la formula =2+3*4?",
+    answers: {
+      a: '20',
+      b: '14',
+      c: '24',
+      d: '9'
+    },
+    correctAnswer: 'b'
+  },
+  {
+    question: "5) Copi la formula =B4*(1+$B$1) dalla riga 4 alla riga 5. Che cosa diventa?",
+    answers: {
+      a: '=B5*(1+$B$1)',
+      b: '=B5*(1+$B$2)',
+      c: '=B4*(1+$B$1)',
+      d: '=C4*(1+$C$1)'
+    },
+    correctAnswer: 'a'
+  },
+  {
+    question: "6) Quale formula restituisce \"Promosso\" se la media in G2 è almeno 6?",
+    answers: {
+      a: '=SE(G2>6; Promosso; Bocciato)',
+      b: '=SE(G2>=6; "Promosso"; "Da recuperare")',
+      c: '=SOMMA(G2>=6; "Promosso")',
+      d: '=SE("Promosso"; G2>=6)'
+    },
+    correctAnswer: 'b'
+  },
+  {
+    question: "7) Una cella mostra #######. Che cosa significa?",
+    answers: {
+      a: 'La formula contiene un errore',
+      b: 'Si sta dividendo per zero',
+      c: 'La colonna è troppo stretta per mostrare il valore',
+      d: 'La cella è protetta'
+    },
+    correctAnswer: 'c'
+  },
+  {
+    question: "8) Quale tipo di grafico è più adatto per mostrare come cambia la temperatura durante l'anno?",
+    answers: {
+      a: 'Torta',
+      b: 'Linee',
+      c: 'Dispersione',
+      d: 'Nessuno, servono solo tabelle'
+    },
+    correctAnswer: 'b'
+  }
+]} />

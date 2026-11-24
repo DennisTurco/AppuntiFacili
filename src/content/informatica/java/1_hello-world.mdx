@@ -2,7 +2,7 @@
 title: "Hello World"
 order: 1
 draft: false
-lastUpdateDate: "2025-08-28"
+lastUpdateDate: "2026-11-20"
 subject: "Java"
 category: "Informatica"
 difficulty: "facile"
@@ -77,7 +77,7 @@ Ci sono 2 categorie di tipi da dato:
 
 - Stessi insiemi di valori e operazioni del c++;
 - `boolean` distinti da `int` (NO boolean → int);
-- In generale no conversione da tipo più grande a tipo più piccolo (es: NO double → float);
+- In generale no conversione automatica da tipo più grande a tipo più piccolo (es: NO double → float), vedi la lezione [Casting implicito ed esplicito](/informatica/java/3_casting-implicito-esplicito);
 - Dichiarazione variabili come in c++;
 - Operazioni simili al c++:
   - NO: operatore `sizeof`, `*`;
@@ -120,6 +120,143 @@ public class Main {
 ## 3. Esercizi
 
 [Primi Esercizi in Java](https://www.ilprofdinformatica.it/le-mie-lezioni/programmazione-java/primi-esercizi-in-java)
+
+### 3.1 Esercizio - Presentati
+
+Scrivere un programma che stampa su tre righe diverse il proprio nome, la propria età e la propria città, usando una variabile per ciascun dato.
+
+> Esempio Output:
+Nome: Anna
+Eta': 16
+Citta': Roma
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String nome = "Anna";
+        int eta = 16;
+        String citta = "Roma";
+
+        System.out.println("Nome: " + nome);
+        System.out.println("Eta': " + eta);
+        System.out.println("Citta': " + citta);
+    }
+}
+```
+
+</details>
+
+### 3.2 Esercizio - Operazioni tra due numeri
+
+Chiedere all'utente due numeri interi e stampare somma, differenza, prodotto, quoziente e resto della divisione.
+
+> Esempio Output:
+inserisci il primo numero: 17
+inserisci il secondo numero: 5
+somma: 22
+differenza: 12
+prodotto: 85
+quoziente: 3
+resto: 2
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        System.out.print("inserisci il primo numero: ");
+        int a = input.nextInt();
+        System.out.print("inserisci il secondo numero: ");
+        int b = input.nextInt();
+
+        System.out.println("somma: " + (a + b));
+        System.out.println("differenza: " + (a - b));
+        System.out.println("prodotto: " + (a * b));
+        System.out.println("quoziente: " + (a / b)); // divisione intera
+        System.out.println("resto: " + (a % b));
+
+        input.close();
+    }
+}
+```
+
+<Aside variant="warning">
+Le parentesi in `"somma: " + (a + b)` sono importanti: senza, Java unirebbe prima la stringa con `a` e poi con `b`, stampando ad esempio `somma: 175` invece di `somma: 22`.
+</Aside>
+
+</details>
+
+### 3.3 Esercizio - Area del rettangolo
+
+Chiedere all'utente base e altezza di un rettangolo (numeri decimali) e stamparne area e perimetro.
+
+> Esempio Output:
+base: 4.5
+altezza: 2
+area: 9.0
+perimetro: 13.0
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        System.out.print("base: ");
+        double base = input.nextDouble();
+        System.out.print("altezza: ");
+        double altezza = input.nextDouble();
+
+        double area = base * altezza;
+        double perimetro = 2 * (base + altezza);
+
+        System.out.println("area: " + area);
+        System.out.println("perimetro: " + perimetro);
+
+        input.close();
+    }
+}
+```
+
+</details>
+
+### 3.4 Esercizio - Scambio di variabili
+
+Dichiarare due variabili `int x = 3` e `int y = 8`, scambiarne il contenuto usando una terza variabile e stamparle prima e dopo lo scambio.
+
+> Esempio Output:
+prima: x = 3, y = 8
+dopo: x = 8, y = 3
+<details>
+<summary>💡 Mostra soluzione</summary>
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int x = 3;
+        int y = 8;
+
+        System.out.println("prima: x = " + x + ", y = " + y);
+
+        int temp = x;
+        x = y;
+        y = temp;
+
+        System.out.println("dopo: x = " + x + ", y = " + y);
+    }
+}
+```
+
+</details>
 
 ## 4. Quiz a risposta multipla
 
